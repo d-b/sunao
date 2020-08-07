@@ -273,7 +273,6 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			}
 
 			Cull [_Culling]
-			Blend SrcAlpha OneMinusSrcAlpha
 			ZWrite [_EnableZWrite]
 
 			CGPROGRAM
@@ -298,7 +297,6 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			}
 
 			Cull Front
-			Blend SrcAlpha OneMinusSrcAlpha
 			ZWrite [_EnableZWrite]
 
 			CGPROGRAM
@@ -323,7 +321,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			}
 
 			Cull Front
-			Blend SrcAlpha One
+			Blend One One
 			ZWrite Off
 
 			CGPROGRAM
@@ -348,7 +346,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			}
 
 			Cull [_Culling]
-			Blend SrcAlpha One
+			Blend One One
 			ZWrite Off
 
 			CGPROGRAM
@@ -374,6 +372,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 
 			ZWrite On
 			ZTest LEqual
+			AlphaToMask Off
 
 			CGPROGRAM
 			#pragma vertex vert

@@ -193,7 +193,7 @@ namespace SunaoShader {
 			var mat = (Material)ME.target;
 
 			bool Shader_Opaque      = mat.shader.name.Contains("Opaque"           );
-			bool Shader_Transparent = mat.shader.name.Contains("Transparent"      );
+			bool Shader_Transparent = mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("AlphaToCoverage");
 			bool Shader_Cutout      = mat.shader.name.Contains("Cutout"           );
 			bool Shader_StencilOut  = mat.shader.name.Contains("[Stencil Outline]");
 			bool Shader_Stencil     = mat.shader.name.Contains("[Stencil]"        );
