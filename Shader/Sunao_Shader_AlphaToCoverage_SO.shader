@@ -87,6 +87,10 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 		[SToggle]
 		_MonochromeLit     ("Monochrome Lighting"       , int) = 0
 
+		[SToggle]
+		_StippleEnable     ("Enable Stippling"          , int) = 0
+		[SToggle]
+		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
 
 		[SToggle]
 		_OutLineEnable     ("Enable Outline"            , int) = 0
@@ -288,7 +292,7 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma target 4.5
-			
+
 			#define TRANSPARENT
 
 			#define PASS_FB
@@ -411,4 +415,3 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 
 	CustomEditor "SunaoShader.GUI"
 }
- 

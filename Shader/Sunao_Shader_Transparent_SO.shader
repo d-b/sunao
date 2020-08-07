@@ -93,6 +93,10 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[SToggle]
 		_MonochromeLit     ("Monochrome Lighting"       , int) = 0
 
+		[SToggle]
+		_StippleEnable     ("Enable Stippling"          , int) = 0
+		[SToggle]
+		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
 
 		[SToggle]
 		_OutLineEnable     ("Enable Outline"            , int) = 0
