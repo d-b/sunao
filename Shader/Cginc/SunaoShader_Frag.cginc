@@ -83,6 +83,20 @@ float4 frag (VOUT IN) : COLOR {
 		}
 	}
 
+//----Stippling & crosshatching
+	half dot_halftone = 1.0f;
+	half line_halftone = 1.0f;
+
+	if (_StippleEnable) {
+		dot_halftone = DotHalftone(IN.worldpos, lerp(1, 10, _StippleAmount), lerp(0, 0.015, _StippleSize));
+		Color = lerp(Color, UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex , SubUV).rgb, UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex , SubUV).rgb * dot_halftone);
+	}
+
+	if (_CrosshatchEnable) {
+		line_halftone = LineHalftone(IN.worldpos, lerp(500, 6000, _CrosshatchAmount));
+		Color = lerp(Color, UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex , SubUV).rgb, UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex , SubUV).rgb * line_halftone);
+	}
+
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
 
@@ -462,8 +476,13 @@ float4 frag (VOUT IN) : COLOR {
 //-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
 
+//----Stippling & halftone alpha
 	if (_StippleEnable) {
-		OUT.a = OUT.a * DotHalftone(IN.worldpos, 10, 0.0075);
+		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex , SubUV).a);
+	}
+
+	if (_CrosshatchEnable) {
+		OUT.a *= lerp(1.0f, line_halftone, 1.0f - UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex , SubUV).a);
 	}
 
 	return OUT;
