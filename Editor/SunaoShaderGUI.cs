@@ -70,7 +70,14 @@ namespace SunaoShader {
 		MaterialProperty MonochromeLit;
 
 		MaterialProperty StippleEnable;
+		MaterialProperty StippleMask;
+		MaterialProperty StippleTexture;
+		MaterialProperty StippleSize;
+		MaterialProperty StippleAmount;
 		MaterialProperty CrosshatchEnable;
+		MaterialProperty CrosshatchMask;
+		MaterialProperty CrosshatchTexture;
+		MaterialProperty CrosshatchAmount;
 
 		MaterialProperty OutLineEnable;
 		MaterialProperty OutLineMask;
@@ -285,7 +292,14 @@ namespace SunaoShader {
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
 
 			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
+			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
+			StippleTexture    = FindProperty("_StippleTexture"    , Prop , false);
+			StippleSize    		= FindProperty("_StippleSize"       , Prop , false);
+			StippleAmount     = FindProperty("_StippleAmount"     , Prop , false);
 			CrosshatchEnable  = FindProperty("_CrosshatchEnable"  , Prop , false);
+			CrosshatchMask    = FindProperty("_CrosshatchMask"    , Prop , false);
+			CrosshatchTexture = FindProperty("_CrosshatchTexture" , Prop , false);
+			CrosshatchAmount  = FindProperty("_CrosshatchAmount"  , Prop , false);
 
 			OutLineEnable     = FindProperty("_OutLineEnable"     , Prop , false);
 			OutLineMask       = FindProperty("_OutLineMask"       , Prop , false);
@@ -618,12 +632,29 @@ namespace SunaoShader {
 			}
 
 
-			GUILayout.Label("Stippling", EditorStyles.boldLabel);
+			GUILayout.Label("Stippling & Crosshatching", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
+				using (new EditorGUILayout.VerticalScope("box")) {
 
-				ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
-				ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
+					GUILayout.Label("Stippling", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
+					ME.TexturePropertySingleLine(new GUIContent("Stipple Mask"), StippleMask);
+					ME.TexturePropertySingleLine(new GUIContent("Stipple Texture"), StippleTexture);
+					ME.ShaderProperty(StippleSize, new GUIContent("Stipple Size"));
+					ME.ShaderProperty(StippleAmount, new GUIContent("Stipple Amount"));
+				}
+
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					GUILayout.Label("Crosshatching", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
+					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Mask"), CrosshatchMask);
+					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Texture"), CrosshatchTexture);
+					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
+				}
 			}
 
 

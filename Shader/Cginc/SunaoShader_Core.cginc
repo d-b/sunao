@@ -66,9 +66,16 @@
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
 
-//----Stippling
+//----Stippling & Crosshatching
 	uniform bool      _StippleEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleTexture);
+	uniform float 		_StippleSize;
+	uniform float 		_StippleAmount;
 	uniform bool      _CrosshatchEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchTexture);
+	uniform float 		_CrosshatchAmount;
 
 //----Emission
 	uniform bool      _EmissionEnable;

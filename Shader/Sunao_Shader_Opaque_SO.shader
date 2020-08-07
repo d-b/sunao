@@ -95,8 +95,15 @@ Shader "Sunao Shader/[Stencil Outline]/Opaque" {
 
 		[SToggle]
 		_StippleEnable     ("Enable Stippling"          , int) = 0
+		_StippleMask       ("Stipple Mask"              , 2D) = "white" {}
+		_StippleTexture    ("Stipple Texture"           , 2D) = "black" {}
+		_StippleSize  		 ("Stipple Size"              , Range( 0.0,  1.0)) = 0.5
+		_StippleAmount		 ("Stipple Amount"            , Range( 0.0,  1.0)) = 0.5
 		[SToggle]
 		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
+		_CrosshatchMask    ("Crosshatch Mask"           , 2D) = "white" {}
+		_CrosshatchTexture ("Crosshatch Texture"        , 2D) = "black" {}
+		_CrosshatchAmount  ("Crosshatch Amount"         , Range( 0.0,  1.0)) = 0.5
 
 		[SToggle]
 		_OutLineEnable     ("Enable Outline"            , int) = 0
