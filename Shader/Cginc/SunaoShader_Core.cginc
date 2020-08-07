@@ -67,6 +67,10 @@
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
 
+//----Stippling
+	uniform bool      _StippleEnable;
+	uniform bool      _CrosshatchEnable;
+
 //----Emission
 	uniform bool      _EmissionEnable;
 	uniform sampler2D _EmissionMap;

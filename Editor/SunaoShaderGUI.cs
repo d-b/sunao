@@ -69,6 +69,9 @@ namespace SunaoShader {
 		MaterialProperty Unlit;
 		MaterialProperty MonochromeLit;
 
+		MaterialProperty StippleEnable;
+		MaterialProperty CrosshatchEnable;
+
 		MaterialProperty OutLineEnable;
 		MaterialProperty OutLineMask;
 		MaterialProperty OutLineColor;
@@ -114,7 +117,7 @@ namespace SunaoShader {
 		MaterialProperty ParallaxAnimX;
 		MaterialProperty ParallaxAnimY;
 		MaterialProperty ParallaxLighting;
-		MaterialProperty IgnoreTexAlphaPE;	 
+		MaterialProperty IgnoreTexAlphaPE;
 		MaterialProperty ParallaxInTheDark;
 
 		MaterialProperty ReflectionEnable;
@@ -288,6 +291,9 @@ namespace SunaoShader {
 			LightBoost        = FindProperty("_LightBoost"        , Prop , false);
 			Unlit             = FindProperty("_Unlit"             , Prop , false);
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
+
+			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
+			CrosshatchEnable  = FindProperty("_CrosshatchEnable"  , Prop , false);
 
 			OutLineEnable     = FindProperty("_OutLineEnable"     , Prop , false);
 			OutLineMask       = FindProperty("_OutLineMask"       , Prop , false);
@@ -490,7 +496,7 @@ namespace SunaoShader {
 
 						ME.ShaderProperty(UVScrollX   , new GUIContent("Scroll X"          ));
 						ME.ShaderProperty(UVScrollY   , new GUIContent("Scroll Y"          ));
-						
+
 						ME.ShaderProperty(UVAnimation , new GUIContent("Animation Speed"   ));
 						if (UVAnimation.floatValue > 0.0f) {
 							ME.ShaderProperty(UVAnimX        , new GUIContent("Animation X Size"));
@@ -498,7 +504,7 @@ namespace SunaoShader {
 						}
 						if (UVAnimX.floatValue < 1.0f) mat.SetInt("_UVAnimX" , 1);
 						if (UVAnimY.floatValue < 1.0f) mat.SetInt("_UVAnimY" , 1);
-						
+
 						ME.ShaderProperty(UVAnimOtherTex , new GUIContent("Animation Other Texture Maps"));
 
 					} else {
@@ -628,6 +634,15 @@ namespace SunaoShader {
 					ME.ShaderProperty(MonochromeLit , new GUIContent("Monochrome Lighting"));
 
 				}
+			}
+
+
+			GUILayout.Label("Stippling", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+
+				ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
+				ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
 			}
 
 
@@ -1001,7 +1016,7 @@ namespace SunaoShader {
 						GUILayout.Label("Render Queue" , EditorStyles.boldLabel);
 
 						ME.RenderQueueField();
-					
+
 					}
 
 				} else {
