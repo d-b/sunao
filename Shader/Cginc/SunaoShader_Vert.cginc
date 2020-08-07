@@ -11,6 +11,7 @@ VOUT vert (VIN v) {
 //-------------------------------------頂点座標変換
 	o.pos     = UnityObjectToClipPos(v.vertex);
 	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
+	o.worldpos = mul(unity_ObjectToWorld, v.vertex);
 
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;

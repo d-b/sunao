@@ -175,28 +175,29 @@ struct VIN {
 
 struct VOUT {
 
-	float4 pos     : SV_POSITION;
-	float2 uv      : TEXCOORD0;
-	float4 uvanm   : TEXCOORD1;
-	float4 decal   : TEXCOORD2;
-	float4 decal2  : TEXCOORD3;
-	float4 decanm  : TEXCOORD4;
-	float3 normal  : NORMAL;
-	float3 color   : COLOR0;
-	float4 tangent : TANGENT;
-	float3 ldir    : LIGHTDIR0;
-	float3 view    : TEXCOORD5;
-	float4 toon    : TEXCOORD6;
-	float3 tanW    : TEXCOORD7;
-	float3 tanB    : TEXCOORD8;
-	float3 matcapv : TEXCOORD9;
-	float3 matcaph : TEXCOORD10;
-	float4 euv     : TEXCOORD11;
-	float3 eprm    : TEXCOORD12;
-	float4 peuv    : TEXCOORD13;
-	float2 pduv    : TEXCOORD14;
-	float3 peprm   : TEXCOORD15;
-	float3 pview   : TEXCOORD16;
+	float4 pos      : SV_POSITION;
+	float2 uv       : TEXCOORD0;
+	float4 uvanm    : TEXCOORD1;
+	float4 decal    : TEXCOORD2;
+	float4 decal2   : TEXCOORD3;
+	float4 decanm   : TEXCOORD4;
+	float3 normal   : NORMAL;
+	float3 color    : COLOR0;
+	float4 tangent  : TANGENT;
+	float3 ldir     : LIGHTDIR0;
+	float3 view     : TEXCOORD5;
+	float4 toon     : TEXCOORD6;
+	float3 tanW     : TEXCOORD7;
+	float3 tanB     : TEXCOORD8;
+	float3 matcapv  : TEXCOORD9;
+	float3 matcaph  : TEXCOORD10;
+	float4 euv      : TEXCOORD11;
+	float3 eprm     : TEXCOORD12;
+	float4 peuv     : TEXCOORD13;
+	float2 pduv     : TEXCOORD14;
+	float3 peprm    : TEXCOORD15;
+	float3 pview    : TEXCOORD16;
+	float4 worldpos : TEXCOORD17;
 
 	#ifdef PASS_FB
 		float3 shdir   : LIGHTDIR1;
@@ -205,8 +206,8 @@ struct VOUT {
 		float4 vldirX  : LIGHTDIR2;
 		float4 vldirY  : LIGHTDIR3;
 		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD17;
-		float4 vlatn   : TEXCOORD18;
+		float4 vlcorr  : TEXCOORD18;
+		float4 vlatn   : TEXCOORD19;
 	#endif
 
 	UNITY_FOG_COORDS(19)

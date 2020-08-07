@@ -430,6 +430,7 @@ float4 frag (VOUT IN) : COLOR {
 //-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
 
+	OUT.a = OUT.a * DotHalftone(IN.worldpos, 10, 0.0075);
 
 	return OUT;
 }
