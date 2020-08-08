@@ -84,18 +84,15 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //----Stippling & crosshatching
-	half dot_halftone = 1.0f;
-	half line_halftone = 1.0f;
+	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
+	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
+	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
+	float4 crosshatch_color = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchTexture));
+	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchMask));
 
-	if (_StippleEnable) {
-		dot_halftone = DotHalftone(IN.worldpos, lerp(1, 10, _StippleAmount), lerp(0, 0.015, _StippleSize));
-		Color = lerp(Color, UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex , SubUV).rgb, UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex , SubUV).rgb * dot_halftone);
-	}
-
-	if (_CrosshatchEnable) {
-		line_halftone = LineHalftone(IN.worldpos, lerp(500, 6000, _CrosshatchAmount));
-		Color = lerp(Color, UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex , SubUV).rgb, UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex , SubUV).rgb * line_halftone);
-	}
+	if (_StippleEnable) Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
+	if (_CrosshatchEnable) Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
 
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
@@ -446,11 +443,11 @@ float4 frag (VOUT IN) : COLOR {
 
 //----Stippling & halftone alpha
 	if (_StippleEnable) {
-		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex , SubUV).a);
+		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
 	}
 
 	if (_CrosshatchEnable) {
-		OUT.a *= lerp(1.0f, line_halftone, 1.0f - UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex , SubUV).a);
+		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
 	}
 
 	return OUT;

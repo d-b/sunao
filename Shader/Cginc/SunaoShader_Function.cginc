@@ -177,7 +177,6 @@ half2 rotateUV(half2 uv, half rotation)
 
 half DotHalftone(float4 worldPos, half halftoneDotAmount, half scalar)
 {
-	bool inMirror = IsInMirror();
 	half2 uv = SphereUV(calcViewDir(worldPos));
 	uv.xy *= halftoneDotAmount;
 	half2 nearest = 2 * frac(100 * uv) - 1;
@@ -190,7 +189,6 @@ half DotHalftone(float4 worldPos, half halftoneDotAmount, half scalar)
 
 half LineHalftone(float4 worldPos, half scalar)
 {
-	bool inMirror = IsInMirror();
 	half2 uv = SphereUV(calcViewDir(worldPos));
 	uv = rotateUV(uv, -0.785398);
 	uv.x = sin(uv.x * scalar);
