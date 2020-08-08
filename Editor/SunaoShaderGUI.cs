@@ -72,11 +72,13 @@ namespace SunaoShader {
 		MaterialProperty StippleEnable;
 		MaterialProperty StippleMask;
 		MaterialProperty StippleTexture;
+		MaterialProperty StippleEmissionMap;
 		MaterialProperty StippleSize;
 		MaterialProperty StippleAmount;
 		MaterialProperty CrosshatchEnable;
 		MaterialProperty CrosshatchMask;
 		MaterialProperty CrosshatchTexture;
+		MaterialProperty CrosshatchEmissionMap;
 		MaterialProperty CrosshatchAmount;
 
 		MaterialProperty OutLineEnable;
@@ -302,11 +304,13 @@ namespace SunaoShader {
 			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
 			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
 			StippleTexture    = FindProperty("_StippleTexture"    , Prop , false);
+			StippleEmissionMap = FindProperty("_StippleEmissionMap", Prop, false);
 			StippleSize    		= FindProperty("_StippleSize"       , Prop , false);
 			StippleAmount     = FindProperty("_StippleAmount"     , Prop , false);
 			CrosshatchEnable  = FindProperty("_CrosshatchEnable"  , Prop , false);
 			CrosshatchMask    = FindProperty("_CrosshatchMask"    , Prop , false);
 			CrosshatchTexture = FindProperty("_CrosshatchTexture" , Prop , false);
+			CrosshatchEmissionMap = FindProperty("_CrosshatchEmissionMap", Prop, false);
 			CrosshatchAmount  = FindProperty("_CrosshatchAmount"  , Prop , false);
 
 			OutLineEnable     = FindProperty("_OutLineEnable"     , Prop , false);
@@ -661,6 +665,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Mask"), StippleMask);
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Texture"), StippleTexture);
+					ME.TexturePropertySingleLine(new GUIContent("Stipple Emission Mask"), StippleEmissionMap);
 					ME.ShaderProperty(StippleSize, new GUIContent("Stipple Size"));
 					ME.ShaderProperty(StippleAmount, new GUIContent("Stipple Amount"));
 				}
@@ -672,6 +677,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Mask"), CrosshatchMask);
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Texture"), CrosshatchTexture);
+					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Emission Mask"), CrosshatchEmissionMap);
 					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
 				}
 			}

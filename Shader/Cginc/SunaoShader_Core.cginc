@@ -73,6 +73,8 @@
 	uniform float4 		_StippleMask_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleTexture);
 	uniform float4    _StippleTexture_ST;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleEmissionMap);
+	uniform float4    _StippleEmissionMap_ST;
 	uniform float 		_StippleSize;
 	uniform float 		_StippleAmount;
 	uniform bool      _CrosshatchEnable;
@@ -80,6 +82,8 @@
 	uniform float4 		_CrosshatchMask_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchTexture);
 	uniform float4 		_CrosshatchTexture_ST;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchEmissionMap);
+	uniform float4    _CrosshatchEmissionMap_ST;
 	uniform float 		_CrosshatchAmount;
 
 //----Emission
