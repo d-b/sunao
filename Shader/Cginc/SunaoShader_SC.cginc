@@ -43,15 +43,18 @@ VOUT vert (VIN v) {
 
 
 float4 frag (VOUT IN) : COLOR {
+	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
+	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+	float4 stipple_mask = UNITY_SAMPLE_TEX2D(_StippleMask, IN.uv);
+	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D(_CrosshatchMask, IN.uv);
+
 	if (_StippleEnable) {
-		half halftone = DotHalftone(IN.worldpos, lerp(1, 10, _StippleAmount), lerp(0, 0.015, _StippleSize));
-		float alpha = lerp(1.0f, halftone, 1.0f - UNITY_SAMPLE_TEX2D(_StippleMask, IN.uv).a);
+		float alpha = lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
 		clip(alpha * _Alpha - _Cutout);
 	}
 
 	if (_CrosshatchEnable) {
-		half halftone = LineHalftone(IN.worldpos, lerp(500, 6000, _CrosshatchAmount));
-		float alpha = lerp(1.0f, halftone, 1.0f - UNITY_SAMPLE_TEX2D(_CrosshatchMask, IN.uv).a);
+		float alpha = lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
 		clip(alpha * _Alpha - _Cutout);
 	}
 

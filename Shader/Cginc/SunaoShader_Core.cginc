@@ -70,12 +70,16 @@
 //----Stippling & Crosshatching
 	uniform bool      _StippleEnable;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
+	uniform float4 		_StippleMask_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleTexture);
+	uniform float4    _StippleTexture_ST;
 	uniform float 		_StippleSize;
 	uniform float 		_StippleAmount;
 	uniform bool      _CrosshatchEnable;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
+	uniform float4 		_CrosshatchMask_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchTexture);
+	uniform float4 		_CrosshatchTexture_ST;
 	uniform float 		_CrosshatchAmount;
 
 //----Emission
