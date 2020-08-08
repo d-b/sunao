@@ -88,8 +88,10 @@ float4 frag (VOUT IN) : COLOR {
 	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
 	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
+	float4 stipple_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleEmissionMap, _MainTex, TRANSFORM_TEX(SubUV, _StippleEmissionMap));
 	float4 crosshatch_color = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchTexture));
 	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchMask));
+	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchEmissionMap));
 
 	if (_StippleEnable) Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
 	if (_CrosshatchEnable) Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
@@ -205,6 +207,9 @@ float4 frag (VOUT IN) : COLOR {
 		       Emission    = _Emission * _EmissionColor.rgb;
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
+
+		if (_StippleEnable) Emission = lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
+		if (_CrosshatchEnable) Emission = lerp(Emission, crosshatch_emission_map.rgb, crosshatch_mask.rgb * line_halftone);
 
 		if (_EmissionLighting) {
 			#ifdef PASS_FB
