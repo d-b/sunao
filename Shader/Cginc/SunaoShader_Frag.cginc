@@ -216,8 +216,11 @@ float4 frag (VOUT IN) : COLOR {
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
 
-		if (_StippleEnable) Emission = lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
-		if (_CrosshatchEnable) Emission = lerp(Emission, crosshatch_emission_map.rgb, crosshatch_mask.rgb * line_halftone);
+		if (_StippleEnable)
+			Emission = _Emission * IN.eprm.x * lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
+
+		if (_CrosshatchEnable)
+			Emission = _Emission * IN.eprm.x * lerp(Emission, crosshatch_emission_map.rgb, crosshatch_mask.rgb * line_halftone);
 
 		if (_EmissionLighting) {
 			#ifdef PASS_FB
