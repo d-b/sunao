@@ -219,6 +219,7 @@ struct VOUT {
 	float3 peprm    : TEXCOORD15;
 	float3 pview    : TEXCOORD16;
 	float4 worldpos : TEXCOORD17;
+	float4 objpos 	: TEXCOORD18;
 
 	#ifdef PASS_FB
 		float3 shdir   : LIGHTDIR1;
@@ -227,8 +228,8 @@ struct VOUT {
 		float4 vldirX  : LIGHTDIR2;
 		float4 vldirY  : LIGHTDIR3;
 		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD18;
-		float4 vlatn   : TEXCOORD19;
+		float4 vlcorr  : TEXCOORD19;
+		float4 vlatn   : TEXCOORD20;
 	#endif
 
 	UNITY_FOG_COORDS(19)
