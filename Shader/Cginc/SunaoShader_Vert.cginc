@@ -12,6 +12,7 @@ VOUT vert (VIN v) {
 	o.pos     = UnityObjectToClipPos(v.vertex);
 	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
 	o.worldpos = mul(unity_ObjectToWorld, v.vertex);
+	o.objpos = normalize(v.vertex);
 
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
