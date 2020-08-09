@@ -100,6 +100,8 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		_StippleEmissionMap ("Stipple Emission Mask"    , 2D) = "black" {}
 		_StippleSize  		 ("Stipple Size"              , Range( 0.0,  1.0)) = 0.5
 		_StippleAmount		 ("Stipple Amount"            , Range( 0.0,  1.0)) = 0.5
+		_StippleAnimation  ("Stipple Animation"					, Range(0.0, 1.0)) = 0.0
+		_StippleFrequency  ("Stipple Frequency"         , Range(0.0, 10.0)) = 1.0
 		[SToggle]
 		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
 		_CrosshatchMask    ("Crosshatch Mask"           , 2D) = "white" {}
