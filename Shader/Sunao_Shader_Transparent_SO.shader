@@ -103,7 +103,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[Enum(Uniform , 0 , Wave , 1)]
 		_StippleMode       ("Stipple Mode"              , int) = 1
 		_StippleAnimation  ("Stipple Animation"         , Range(0.0, 1.0)) = 0.0
-		_StippleSpeed      ("Stipple Speed"             , Range(0.0, 10.0)) = 1.0
+		_StippleSpeed      ("Stipple Speed"             , Range(0.0, 50.0)) = 1.0
 		_StippleFrequency  ("Stipple Frequency"         , Range(0.0, 200.0)) = 30.0
 		[SToggle]
 		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
