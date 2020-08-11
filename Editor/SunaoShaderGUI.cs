@@ -75,7 +75,9 @@ namespace SunaoShader {
 		MaterialProperty StippleEmissionMap;
 		MaterialProperty StippleSize;
 		MaterialProperty StippleAmount;
+		MaterialProperty StippleMode;
 		MaterialProperty StippleAnimation;
+		MaterialProperty StippleSpeed;
 		MaterialProperty StippleFrequency;
 		MaterialProperty CrosshatchEnable;
 		MaterialProperty CrosshatchMask;
@@ -301,7 +303,9 @@ namespace SunaoShader {
 			StippleEmissionMap = FindProperty("_StippleEmissionMap", Prop, false);
 			StippleSize    		= FindProperty("_StippleSize"       , Prop , false);
 			StippleAmount     = FindProperty("_StippleAmount"     , Prop , false);
+			StippleMode       = FindProperty("_StippleMode"       , Prop , false);
 			StippleAnimation  = FindProperty("_StippleAnimation"  , Prop , false);
+			StippleSpeed      = FindProperty("_StippleSpeed"      , Prop , false);
 			StippleFrequency  = FindProperty("_StippleFrequency"  , Prop , false);
 			CrosshatchEnable  = FindProperty("_CrosshatchEnable"  , Prop , false);
 			CrosshatchMask    = FindProperty("_CrosshatchMask"    , Prop , false);
@@ -653,7 +657,9 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Emission Mask"), StippleEmissionMap);
 					ME.ShaderProperty(StippleSize, new GUIContent("Stipple Size"));
 					ME.ShaderProperty(StippleAmount, new GUIContent("Stipple Amount"));
+					ME.ShaderProperty(StippleMode, new GUIContent("Stipple Mode"));
 					ME.ShaderProperty(StippleAnimation, new GUIContent("Stipple Animation"));
+					ME.ShaderProperty(StippleSpeed, new GUIContent("Stipple Speed"));
 					ME.ShaderProperty(StippleFrequency, new GUIContent("Stipple Frequency"));
 				}
 

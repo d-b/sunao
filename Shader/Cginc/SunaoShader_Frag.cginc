@@ -84,7 +84,10 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //----Stippling & crosshatching
-	float stipple_size = clamp(_StippleSize + sin(IN.objpos.y * 30 + _Time.y * _StippleFrequency) * _StippleAnimation, 0.0f, 1.0f);
+	float stipple_size = 0.0f;
+	if(_StippleMode == 0) stipple_size = clamp(_StippleSize + sin(_Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
+	if(_StippleMode == 1) stipple_size = clamp(_StippleSize + sin(IN.objpos.y * _StippleFrequency + _Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
+
 	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, stipple_size));
 	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 	float2 emission_scroll = float2(_EmissionScrX , _EmissionScrY) * _Time.y;
