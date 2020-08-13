@@ -149,10 +149,34 @@ float  RimLightCalc(float3 normal , float3 view , float power , float gradient) 
 	return orim;
 }
 
+float4x4 rotationMatrix(float3 axis, float angle)
+{
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+
+    return float4x4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                    0.0,                                0.0,                                0.0,                                1.0);
+}
+
 half3 calcViewDir(half3 worldPos)
 {
-	half3 viewDir = _WorldSpaceCameraPos - worldPos;
-	return normalize(viewDir);
+	half3 camDir = normalize(mul(UNITY_MATRIX_V, float4(0, 1, 0, 0)).xyz);
+	half3 viewDir = normalize(_WorldSpaceCameraPos - worldPos);
+	if (dot(camDir, float3(0.0f, 0.0f, 1.0f)) >= 0.8f) {
+		float val = (dot(camDir, float3(0.0f, 0.0f, 1.0f)) - 0.8f)/0.2f;
+		float3 target = mul(rotationMatrix(float3(1.0f, 0.0, 0), UNITY_PI * 0.5), viewDir);
+		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
+	}
+	if (dot(camDir, float3(0.0f, 0.0f, -1.0f)) >= 0.8f) {
+		float val = (dot(camDir, float3(0.0f, 0.0f, -1.0f)) - 0.8f)/0.2f;
+		float3 target = mul(rotationMatrix(float3(1.0f, 0.0, 0), -UNITY_PI * 0.5), viewDir);
+		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
+	}
+	return viewDir;
 }
 
 bool IsInMirror()
