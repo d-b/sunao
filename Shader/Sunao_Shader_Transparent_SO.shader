@@ -95,8 +95,16 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 		[SToggle]
 		_HueShiftEnable    ("Enable Hue Shift"          , int) = 0
-		_HueShiftMask      ("Hue Shift Mask"            , 2D) = "black" {}
+		_HueShiftMask      ("Hue Shift Mask"            , 2D) = "white" {}
 		_HueShiftAmount		 ("Hue Shift Amount"          , Range( 0.0,  1.0)) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftShadeMode	("Shade Mode"   						, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftEmissionMode	("Emission Mode" 					, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftOutlineMode ("Outline Mode"        		, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftRimMode ("Rim Mode"        						, int) = 0
 
 		[SToggle]
 		_StippleEnable     ("Enable Stippling"          , int) = 0
