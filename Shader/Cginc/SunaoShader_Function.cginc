@@ -145,6 +145,14 @@ float  RimLightCalc(float3 normal , float3 view , float power , float gradient) 
 	return orim;
 }
 
+float3 HueShift(float3 color, float hue)
+{
+	hue *= 2 * UNITY_PI;
+	float3 k = float3(0.57735, 0.57735, 0.57735);
+	float cosAngle = cos(hue);
+	return float3(color * cosAngle + cross(k, color) * sin(hue) + k * dot(k, color) * (1.0 - cosAngle));
+}
+
 float4x4 rotationMatrix(float3 axis, float angle)
 {
     axis = normalize(axis);

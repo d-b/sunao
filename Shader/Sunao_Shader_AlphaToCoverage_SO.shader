@@ -88,6 +88,11 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 		_MonochromeLit     ("Monochrome Lighting"       , int) = 0
 
 		[SToggle]
+		_HueShiftEnable    ("Enable Hue Shift"          , int) = 0
+		_HueShiftMask      ("Hue Shift Mask"            , 2D) = "black" {}
+		_HueShiftAmount		 ("Hue Shift Amount"          , Range( 0.0,  1.0)) = 0
+
+		[SToggle]
 		_StippleEnable     ("Enable Stippling"          , int) = 0
 		_StippleMask       ("Stipple Mask"              , 2D) = "white" {}
 		_StippleTexture    ("Stipple Texture"           , 2D) = "black" {}

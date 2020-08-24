@@ -66,6 +66,12 @@
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
 
+//----Hue Shift
+	uniform bool      _HueShiftEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_HueShiftMask);
+	uniform float4 		_HueShiftMask_ST;
+	uniform float 		_HueShiftAmount;
+
 //----Stippling & Crosshatching
 	uniform bool      _StippleEnable;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
