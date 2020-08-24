@@ -83,6 +83,10 @@ float4 frag (VOUT IN) : COLOR {
 		}
 	}
 
+//----Hue adjustments
+	float4 hueshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HueShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HueShiftMask));
+	if(_HueShiftEnable) Color.rgb = lerp(Color.rgb, HueShift(Color.rgb, _HueShiftAmount), hueshift_mask.r);
+
 //----Stippling & crosshatching
 	float stipple_size = 0.0f;
 	if(_StippleMode == 0) stipple_size = clamp(_StippleSize + sin(_Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);

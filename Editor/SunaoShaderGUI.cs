@@ -69,6 +69,10 @@ namespace SunaoShader {
 		MaterialProperty Unlit;
 		MaterialProperty MonochromeLit;
 
+		MaterialProperty HueShiftEnable;
+		MaterialProperty HueShiftMask;
+		MaterialProperty HueShiftAmount;
+
 		MaterialProperty StippleEnable;
 		MaterialProperty StippleMask;
 		MaterialProperty StippleTexture;
@@ -304,6 +308,10 @@ namespace SunaoShader {
 			LightBoost        = FindProperty("_LightBoost"        , Prop , false);
 			Unlit             = FindProperty("_Unlit"             , Prop , false);
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
+
+			HueShiftEnable    = FindProperty("_HueShiftEnable"    , Prop , false);
+			HueShiftMask      = FindProperty("_HueShiftMask"      , Prop , false);
+			HueShiftAmount    = FindProperty("_HueShiftAmount"    , Prop , false);
 
 			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
 			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
@@ -697,6 +705,21 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Emission Mask"), CrosshatchEmissionMap);
 					ME.TextureScaleOffsetProperty(CrosshatchEmissionMap);
 					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
+				}
+			}
+
+
+			GUILayout.Label("Hue Adjustment", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					GUILayout.Label("Hue Shift", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(HueShiftEnable, new GUIContent("Enable Hue Shift"));
+					ME.TexturePropertySingleLine(new GUIContent("Hue Shift Mask"), HueShiftMask);
+					ME.TextureScaleOffsetProperty(HueShiftMask);
+					ME.ShaderProperty(HueShiftAmount, new GUIContent("Hue Shift Amount"));
 				}
 			}
 
