@@ -672,8 +672,11 @@ namespace SunaoShader {
 
 					ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Mask"), StippleMask);
+					ME.TextureScaleOffsetProperty(StippleMask);
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Texture"), StippleTexture);
+					ME.TextureScaleOffsetProperty(StippleTexture);
 					ME.TexturePropertySingleLine(new GUIContent("Stipple Emission Mask"), StippleEmissionMap);
+					ME.TextureScaleOffsetProperty(StippleEmissionMap);
 					ME.ShaderProperty(StippleSize, new GUIContent("Stipple Size"));
 					ME.ShaderProperty(StippleAmount, new GUIContent("Stipple Amount"));
 					ME.ShaderProperty(StippleMode, new GUIContent("Stipple Mode"));
@@ -688,8 +691,11 @@ namespace SunaoShader {
 
 					ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Mask"), CrosshatchMask);
+					ME.TextureScaleOffsetProperty(CrosshatchMask);
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Texture"), CrosshatchTexture);
+					ME.TextureScaleOffsetProperty(CrosshatchTexture);
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Emission Mask"), CrosshatchEmissionMap);
+					ME.TextureScaleOffsetProperty(CrosshatchEmissionMap);
 					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
 				}
 			}

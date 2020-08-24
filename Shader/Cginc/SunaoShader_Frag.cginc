@@ -92,8 +92,8 @@ float4 frag (VOUT IN) : COLOR {
 	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 	float2 emission_scroll = float2(_EmissionScrX , _EmissionScrY) * _Time.y;
 	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
-	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
-	float4 stipple_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _StippleEmissionMap));
+	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleMask));
+	float4 stipple_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleEmissionMap, _MainTex, TRANSFORM_TEX((SubUV + emission_scroll), _StippleEmissionMap));
 	float4 crosshatch_color = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchTexture));
 	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchMask));
 	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _CrosshatchEmissionMap));
