@@ -152,6 +152,14 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //----影の色
+	if (_HueShiftEnable) {
+		if (_HueShiftShadeMode == 1)
+			_CustomShadeColor.rgb = lerp(_CustomShadeColor.rgb, HueShift(_CustomShadeColor.rgb, _HueShiftAmount), hueshift_mask.r);
+
+		if (_HueShiftShadeMode == 2)
+			_CustomShadeColor.rgb = HueShift(_CustomShadeColor.rgb, _HueShiftAmount);
+	}
+
 	float3 ShadeColor   = saturate(Color * 3.0f - 1.5f) * _ShadeColor;
 	       ShadeColor   = lerp(ShadeColor , _CustomShadeColor.rgb , _CustomShadeColor.a);
 
@@ -224,6 +232,14 @@ float4 frag (VOUT IN) : COLOR {
 		       Emission    = _Emission * _EmissionColor.rgb;
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
+
+		if(_HueShiftEnable) {
+			if (_HueShiftEmissionMode == 1)
+				Emission.rgb = lerp(Emission.rgb, HueShift(Emission.rgb, _HueShiftAmount), hueshift_mask.r);
+
+			if (_HueShiftEmissionMode == 2)
+				Emission.rgb = HueShift(Emission.rgb, _HueShiftAmount);
+		}
 
 		if (_StippleEnable)
 			Emission = _Emission * IN.eprm.x * lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
@@ -351,6 +367,14 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //-------------------------------------リムライティング
+	if (_RimLitEnable && _HueShiftEnable) {
+		if (_HueShiftRimMode == 1)
+			_RimLitColor.rgb = lerp(_RimLitColor.rgb, HueShift(_RimLitColor.rgb, _HueShiftAmount), hueshift_mask.r);
+
+		if (_HueShiftRimMode == 2)
+			_RimLitColor.rgb = HueShift(_RimLitColor.rgb, _HueShiftAmount);
+	}
+
 	float3 RimLight = (float3)0.0f;
 	#ifdef PASS_FB
 		if (_RimLitEnable) {
