@@ -77,6 +77,7 @@ namespace SunaoShader {
 		MaterialProperty HueShiftEmissionMode;
 		MaterialProperty HueShiftOutlineMode;
 		MaterialProperty HueShiftRimMode;
+		MaterialProperty HueShiftParallaxMode;
 		MaterialProperty HueShiftStippleMode;
 		MaterialProperty HueShiftCrosshatchMode;
 
@@ -324,6 +325,7 @@ namespace SunaoShader {
 			HueShiftEmissionMode = FindProperty("_HueShiftEmissionMode" , Prop , false);
 			HueShiftOutlineMode = FindProperty("_HueShiftOutlineMode" , Prop , false);
 			HueShiftRimMode	= FindProperty("_HueShiftRimMode" , Prop , false);
+			HueShiftParallaxMode	= FindProperty("_HueShiftParallaxMode" , Prop , false);
 			HueShiftStippleMode	= FindProperty("_HueShiftStippleMode" , Prop , false);
 			HueShiftCrosshatchMode	= FindProperty("_HueShiftCrosshatchMode" , Prop , false);
 
@@ -701,6 +703,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(HueShiftEmissionMode, new GUIContent("Emission Mode"));
 					ME.ShaderProperty(HueShiftOutlineMode, new GUIContent("Outline Mode"));
 					ME.ShaderProperty(HueShiftRimMode, new GUIContent("Rim Mode"));
+					ME.ShaderProperty(HueShiftParallaxMode, new GUIContent("Parallax Mode"));
 					ME.ShaderProperty(HueShiftStippleMode, new GUIContent("Stipple Mode"));
 					ME.ShaderProperty(HueShiftCrosshatchMode, new GUIContent("Crosshatch Mode"));
 				}

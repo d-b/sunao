@@ -300,6 +300,14 @@ float4 frag (VOUT IN) : COLOR {
 		       Parallax   *= tex2D(_ParallaxMap  , ParallaxUV).rgb * tex2D(_ParallaxMap  , ParallaxUV).a * IN.peprm.x;
 		       Parallax   *= tex2D(_ParallaxMap2 , IN.peuv.zw).rgb * tex2D(_ParallaxMap2 , IN.peuv.zw).a;
 
+		if (_HueShiftEnable) {
+			if (_HueShiftParallaxMode == 1)
+				Parallax.rgb = lerp(Parallax.rgb, HueShift(Parallax.rgb, _HueShiftAmount), hueshift_mask.r);
+
+			if (_HueShiftParallaxMode == 2)
+				Parallax.rgb = HueShift(Parallax.rgb, _HueShiftAmount);
+		}
+
 		if (_ParallaxLighting) {
 			#ifdef PASS_FB
 				Parallax   *= saturate(MonoColor(LightBase) + MonoColor(IN.shmax) + MonoColor(VLightBase));
