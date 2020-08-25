@@ -98,6 +98,8 @@ Shader "Sunao Shader/[Stencil Outline]/Opaque" {
 		_HueShiftMask      ("Hue Shift Mask"            , 2D) = "white" {}
 		_HueShiftAmount		 ("Hue Shift Amount"          , Range( 0.0,  1.0)) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftBaseMode	("Base Mode"   								, int) = 1
+		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftShadeMode	("Shade Mode"   						, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftEmissionMode	("Emission Mode" 					, int) = 0
@@ -105,6 +107,10 @@ Shader "Sunao Shader/[Stencil Outline]/Opaque" {
 		_HueShiftOutlineMode ("Outline Mode"        		, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftRimMode ("Rim Mode"        						, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftStippleMode ("Stipple Mode"     				, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftCrosshatchMode ("Crosshatch Mode"			, int) = 0
 
 		[SToggle]
 		_StippleEnable     ("Enable Stippling"          , int) = 0

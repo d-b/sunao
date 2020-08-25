@@ -42,6 +42,13 @@
 	uniform bool      _OutLineTexColor;
 	uniform bool      _OutLineFixScale;
 
+//----Hue Shift
+	uniform bool      _HueShiftEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_HueShiftMask);
+	uniform float4 		_HueShiftMask_ST;
+	uniform float 		_HueShiftAmount;
+	uniform uint 		  _HueShiftOutlineMode;
+
 //----Other
 	uniform float     _DirectionalLight;
 	uniform float     _SHLight;
@@ -106,7 +113,7 @@ VOUT vert (VIN v) {
 
 			UVAnim.xy += floor(frac(UVAnimSpeed * _Time.y) * float2(_UVAnimX , _UVAnimY));
 		}
-		
+
 		o.uv  = (o.uv + UVAnim.xy) * UVAnim.zw;
 		o.uv += float2(_UVScrollX , _UVScrollY) * _Time.y;
 	}
@@ -200,6 +207,16 @@ float4 frag (VOUT IN) : COLOR {
 
 //----カラー計算
 	float4 OUT          = float4(0.0f , 0.0f , 0.0f , 1.0f);
+
+	if (_HueShiftEnable) {
+		float4 hueshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HueShiftMask, _MainTex, TRANSFORM_TEX(IN.uv, _HueShiftMask));
+
+		if (_HueShiftOutlineMode == 1)
+			IN.color.rgb = lerp(IN.color.rgb, HueShift(IN.color.rgb, _HueShiftAmount), hueshift_mask.r);
+
+		if (_HueShiftOutlineMode == 2)
+			IN.color.rgb = HueShift(IN.color.rgb, _HueShiftAmount);
+	}
 
 	OUT.rgb = UNITY_SAMPLE_TEX2D_SAMPLER(_OutLineTexture , _MainTex , IN.uv) * IN.color;
 
