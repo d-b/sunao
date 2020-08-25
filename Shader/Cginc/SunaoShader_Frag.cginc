@@ -83,14 +83,17 @@ float4 frag (VOUT IN) : COLOR {
 		}
 	}
 
-//----Hue adjustments
-	float4 hueshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HueShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HueShiftMask));
-	if(_HueShiftEnable) {
-		if (_HueShiftBaseMode == 1)
-			Color.rgb = lerp(Color.rgb, HueShift(Color.rgb, _HueShiftAmount), hueshift_mask.r);
+//----HSV adjustments
+	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
+	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
+	if (_HSVShiftEnable) {
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HSVShiftMask));
+		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
+		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
+		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
 
-		if (_HueShiftBaseMode == 2)
-			Color.rgb =HueShift(Color.rgb, _HueShiftAmount);
+		if (_HSVShiftBaseMode == 1) Color.rgb = HSVAdjust(Color.rgb, hsvadj_masked);
+		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
 	}
 
 //----Stippling & crosshatching
@@ -109,24 +112,18 @@ float4 frag (VOUT IN) : COLOR {
 	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _CrosshatchEmissionMap));
 
 	if (_StippleEnable) {
-		if(_HueShiftEnable) {
-			if (_HueShiftStippleMode == 1)
-				stipple_color.rgb = lerp(stipple_color.rgb, HueShift(stipple_color.rgb, _HueShiftAmount), hueshift_mask.r);
-
-			if (_HueShiftStippleMode == 2)
-				stipple_color.rgb = HueShift(stipple_color.rgb, _HueShiftAmount);
+		if(_HSVShiftEnable) {
+			if (_HSVShiftStippleMode == 1) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_masked);
+			if (_HSVShiftStippleMode == 2) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_unmasked);
 		}
 
 		Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
 	}
 
 	if (_CrosshatchEnable) {
-		if(_HueShiftEnable) {
-			if (_HueShiftCrosshatchMode == 1)
-				crosshatch_color.rgb = lerp(crosshatch_color.rgb, HueShift(crosshatch_color.rgb, _HueShiftAmount), hueshift_mask.r);
-
-			if (_HueShiftCrosshatchMode == 2)
-				crosshatch_color.rgb = HueShift(crosshatch_color.rgb, _HueShiftAmount);
+		if(_HSVShiftEnable) {
+			if (_HSVShiftCrosshatchMode == 1) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_masked);
+			if (_HSVShiftCrosshatchMode == 2) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_unmasked);
 		}
 
 		Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
@@ -178,12 +175,9 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //----影の色
-	if (_HueShiftEnable) {
-		if (_HueShiftShadeMode == 1)
-			_CustomShadeColor.rgb = lerp(_CustomShadeColor.rgb, HueShift(_CustomShadeColor.rgb, _HueShiftAmount), hueshift_mask.r);
-
-		if (_HueShiftShadeMode == 2)
-			_CustomShadeColor.rgb = HueShift(_CustomShadeColor.rgb, _HueShiftAmount);
+	if (_HSVShiftEnable) {
+		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
+		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
 	}
 
 	float3 ShadeColor   = saturate(Color * 3.0f - 1.5f) * _ShadeColor;
@@ -252,12 +246,9 @@ float4 frag (VOUT IN) : COLOR {
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
 
-		if(_HueShiftEnable) {
-			if (_HueShiftEmissionMode == 1)
-				Emission.rgb = lerp(Emission.rgb, HueShift(Emission.rgb, _HueShiftAmount), hueshift_mask.r);
-
-			if (_HueShiftEmissionMode == 2)
-				Emission.rgb = HueShift(Emission.rgb, _HueShiftAmount);
+		if(_HSVShiftEnable) {
+			if (_HSVShiftEmissionMode == 1) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_masked);
+			if (_HSVShiftEmissionMode == 2) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_unmasked);
 		}
 
 		if (_StippleEnable)
@@ -292,12 +283,9 @@ float4 frag (VOUT IN) : COLOR {
 		       Parallax   *= tex2D(_ParallaxMap  , ParallaxUV).rgb * tex2D(_ParallaxMap  , ParallaxUV).a * IN.peprm.x;
 		       Parallax   *= tex2D(_ParallaxMap2 , IN.peuv.zw).rgb * tex2D(_ParallaxMap2 , IN.peuv.zw).a;
 
-		if (_HueShiftEnable) {
-			if (_HueShiftParallaxMode == 1)
-				Parallax.rgb = lerp(Parallax.rgb, HueShift(Parallax.rgb, _HueShiftAmount), hueshift_mask.r);
-
-			if (_HueShiftParallaxMode == 2)
-				Parallax.rgb = HueShift(Parallax.rgb, _HueShiftAmount);
+		if (_HSVShiftEnable) {
+			if (_HSVShiftParallaxMode == 1) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_masked);
+			if (_HSVShiftParallaxMode == 2) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_unmasked);
 		}
 
 		if (_ParallaxLighting) {
@@ -377,12 +365,9 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //-------------------------------------リムライティング
-	if (_RimLitEnable && _HueShiftEnable) {
-		if (_HueShiftRimMode == 1)
-			_RimLitColor.rgb = lerp(_RimLitColor.rgb, HueShift(_RimLitColor.rgb, _HueShiftAmount), hueshift_mask.r);
-
-		if (_HueShiftRimMode == 2)
-			_RimLitColor.rgb = HueShift(_RimLitColor.rgb, _HueShiftAmount);
+	if (_RimLitEnable && _HSVShiftEnable) {
+		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
+		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
 	}
 
 	float3 RimLight = (float3)0.0f;

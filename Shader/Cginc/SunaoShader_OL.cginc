@@ -43,11 +43,13 @@
 	uniform bool      _OutLineFixScale;
 
 //----Hue Shift
-	uniform bool      _HueShiftEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_HueShiftMask);
-	uniform float4 		_HueShiftMask_ST;
-	uniform float 		_HueShiftAmount;
-	uniform uint 		  _HueShiftOutlineMode;
+	uniform bool      _HSVShiftEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVShiftMask);
+	uniform float4 		_HSVShiftMask_ST;
+	uniform float 		_HSVShiftHue;
+	uniform float 		_HSVShiftSat;
+	uniform float 		_HSVShiftVal;
+	uniform uint 		  _HSVShiftOutlineMode;
 
 //----Other
 	uniform float     _DirectionalLight;
@@ -208,14 +210,16 @@ float4 frag (VOUT IN) : COLOR {
 //----カラー計算
 	float4 OUT          = float4(0.0f , 0.0f , 0.0f , 1.0f);
 
-	if (_HueShiftEnable) {
-		float4 hueshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HueShiftMask, _MainTex, TRANSFORM_TEX(IN.uv, _HueShiftMask));
+	if (_HSVShiftEnable) {
+		float3 hsvadj_masked = float3(1.0, 1.0, 1.0);
+		float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVShiftMask, _MainTex, TRANSFORM_TEX(IN.uv, _HSVShiftMask));
+		hsvadj_masked.x = lerp(1.0f, _HSVShiftHue, hsvshift_mask.r);
+		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
+		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
 
-		if (_HueShiftOutlineMode == 1)
-			IN.color.rgb = lerp(IN.color.rgb, HueShift(IN.color.rgb, _HueShiftAmount), hueshift_mask.r);
-
-		if (_HueShiftOutlineMode == 2)
-			IN.color.rgb = HueShift(IN.color.rgb, _HueShiftAmount);
+		if (_HSVShiftOutlineMode == 1) IN.color.rgb = HSVAdjust(IN.color.rgb, hsvadj_masked);
+		if (_HSVShiftOutlineMode == 2) IN.color.rgb = HSVAdjust(IN.color.rgb, hsvadj_unmasked);
 	}
 
 	OUT.rgb = UNITY_SAMPLE_TEX2D_SAMPLER(_OutLineTexture , _MainTex , IN.uv) * IN.color;
