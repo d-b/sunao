@@ -149,12 +149,29 @@ float  RimLightCalc(float3 normal , float3 view , float power , float gradient) 
 	return orim;
 }
 
-float3 HueShift(float3 color, float hue)
+half3 RGB2HSV(half3 c) {
+  half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
+  half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+half3 HSV2RGB(half3 c) {
+  half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float3 HSVAdjust(float3 color, float3 adjustment)
 {
-	hue *= 2 * UNITY_PI;
-	float3 k = float3(0.57735, 0.57735, 0.57735);
-	float cosAngle = cos(hue);
-	return float3(color * cosAngle + cross(k, color) * sin(hue) + k * dot(k, color) * (1.0 - cosAngle));
+  float3 hsv = RGB2HSV(color);
+  hsv.x += fmod(adjustment.x, 360);
+  hsv.y = saturate(hsv.y * adjustment.y);
+  hsv.z *= adjustment.z;
+  return HSV2RGB(hsv);
 }
 
 float4x4 rotationMatrix(float3 axis, float angle)

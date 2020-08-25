@@ -69,17 +69,19 @@ namespace SunaoShader {
 		MaterialProperty Unlit;
 		MaterialProperty MonochromeLit;
 
-		MaterialProperty HueShiftEnable;
-		MaterialProperty HueShiftMask;
-		MaterialProperty HueShiftAmount;
-		MaterialProperty HueShiftBaseMode;
-		MaterialProperty HueShiftShadeMode;
-		MaterialProperty HueShiftEmissionMode;
-		MaterialProperty HueShiftOutlineMode;
-		MaterialProperty HueShiftRimMode;
-		MaterialProperty HueShiftParallaxMode;
-		MaterialProperty HueShiftStippleMode;
-		MaterialProperty HueShiftCrosshatchMode;
+		MaterialProperty HSVShiftEnable;
+		MaterialProperty HSVShiftMask;
+		MaterialProperty HSVShiftHue;
+		MaterialProperty HSVShiftSat;
+		MaterialProperty HSVShiftVal;
+		MaterialProperty HSVShiftBaseMode;
+		MaterialProperty HSVShiftShadeMode;
+		MaterialProperty HSVShiftEmissionMode;
+		MaterialProperty HSVShiftOutlineMode;
+		MaterialProperty HSVShiftRimMode;
+		MaterialProperty HSVShiftParallaxMode;
+		MaterialProperty HSVShiftStippleMode;
+		MaterialProperty HSVShiftCrosshatchMode;
 
 		MaterialProperty StippleEnable;
 		MaterialProperty StippleMask;
@@ -317,17 +319,19 @@ namespace SunaoShader {
 			Unlit             = FindProperty("_Unlit"             , Prop , false);
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
 
-			HueShiftEnable    = FindProperty("_HueShiftEnable"    , Prop , false);
-			HueShiftMask      = FindProperty("_HueShiftMask"      , Prop , false);
-			HueShiftAmount    = FindProperty("_HueShiftAmount"    , Prop , false);
-			HueShiftBaseMode = FindProperty("_HueShiftBaseMode" , Prop , false);
-			HueShiftShadeMode = FindProperty("_HueShiftShadeMode" , Prop , false);
-			HueShiftEmissionMode = FindProperty("_HueShiftEmissionMode" , Prop , false);
-			HueShiftOutlineMode = FindProperty("_HueShiftOutlineMode" , Prop , false);
-			HueShiftRimMode	= FindProperty("_HueShiftRimMode" , Prop , false);
-			HueShiftParallaxMode	= FindProperty("_HueShiftParallaxMode" , Prop , false);
-			HueShiftStippleMode	= FindProperty("_HueShiftStippleMode" , Prop , false);
-			HueShiftCrosshatchMode	= FindProperty("_HueShiftCrosshatchMode" , Prop , false);
+			HSVShiftEnable    = FindProperty("_HSVShiftEnable"    , Prop , false);
+			HSVShiftMask      = FindProperty("_HSVShiftMask"      , Prop , false);
+			HSVShiftHue       = FindProperty("_HSVShiftHue"       , Prop , false);
+			HSVShiftSat       = FindProperty("_HSVShiftSat"       , Prop , false);
+			HSVShiftVal       = FindProperty("_HSVShiftVal"       , Prop , false);
+			HSVShiftBaseMode = FindProperty("_HSVShiftBaseMode" , Prop , false);
+			HSVShiftShadeMode = FindProperty("_HSVShiftShadeMode" , Prop , false);
+			HSVShiftEmissionMode = FindProperty("_HSVShiftEmissionMode" , Prop , false);
+			HSVShiftOutlineMode = FindProperty("_HSVShiftOutlineMode" , Prop , false);
+			HSVShiftRimMode	= FindProperty("_HSVShiftRimMode" , Prop , false);
+			HSVShiftParallaxMode	= FindProperty("_HSVShiftParallaxMode" , Prop , false);
+			HSVShiftStippleMode	= FindProperty("_HSVShiftStippleMode" , Prop , false);
+			HSVShiftCrosshatchMode	= FindProperty("_HSVShiftCrosshatchMode" , Prop , false);
 
 			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
 			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
@@ -687,25 +691,27 @@ namespace SunaoShader {
 			}
 
 
-			GUILayout.Label("Hue Adjustment", EditorStyles.boldLabel);
+			GUILayout.Label("HSV Adjustment", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
 				using (new EditorGUILayout.VerticalScope("box")) {
 
-					GUILayout.Label("Hue Shift", EditorStyles.boldLabel);
+					GUILayout.Label("HSV Shift", EditorStyles.boldLabel);
 
-					ME.ShaderProperty(HueShiftEnable, new GUIContent("Enable Hue Shift"));
-					ME.TexturePropertySingleLine(new GUIContent("Hue Shift Mask"), HueShiftMask);
-					ME.TextureScaleOffsetProperty(HueShiftMask);
-					ME.ShaderProperty(HueShiftAmount, new GUIContent("Hue Shift Amount"));
-					ME.ShaderProperty(HueShiftBaseMode, new GUIContent("Base Mode"));
-					ME.ShaderProperty(HueShiftShadeMode, new GUIContent("Shade Mode"));
-					ME.ShaderProperty(HueShiftEmissionMode, new GUIContent("Emission Mode"));
-					ME.ShaderProperty(HueShiftOutlineMode, new GUIContent("Outline Mode"));
-					ME.ShaderProperty(HueShiftRimMode, new GUIContent("Rim Mode"));
-					ME.ShaderProperty(HueShiftParallaxMode, new GUIContent("Parallax Mode"));
-					ME.ShaderProperty(HueShiftStippleMode, new GUIContent("Stipple Mode"));
-					ME.ShaderProperty(HueShiftCrosshatchMode, new GUIContent("Crosshatch Mode"));
+					ME.ShaderProperty(HSVShiftEnable, new GUIContent("Enable HSV Shift"));
+					ME.TexturePropertySingleLine(new GUIContent("HSV Shift Mask"), HSVShiftMask);
+					ME.TextureScaleOffsetProperty(HSVShiftMask);
+					ME.ShaderProperty(HSVShiftHue, new GUIContent("Hue Shift"));
+					ME.ShaderProperty(HSVShiftSat, new GUIContent("Sat Shift"));
+					ME.ShaderProperty(HSVShiftVal, new GUIContent("Val Shift"));
+					ME.ShaderProperty(HSVShiftBaseMode, new GUIContent("Base Mode"));
+					ME.ShaderProperty(HSVShiftShadeMode, new GUIContent("Shade Mode"));
+					ME.ShaderProperty(HSVShiftEmissionMode, new GUIContent("Emission Mode"));
+					ME.ShaderProperty(HSVShiftOutlineMode, new GUIContent("Outline Mode"));
+					ME.ShaderProperty(HSVShiftRimMode, new GUIContent("Rim Mode"));
+					ME.ShaderProperty(HSVShiftParallaxMode, new GUIContent("Parallax Mode"));
+					ME.ShaderProperty(HSVShiftStippleMode, new GUIContent("Stipple Mode"));
+					ME.ShaderProperty(HSVShiftCrosshatchMode, new GUIContent("Crosshatch Mode"));
 				}
 			}
 

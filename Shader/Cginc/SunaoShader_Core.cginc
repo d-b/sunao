@@ -68,18 +68,20 @@
 	uniform bool      _MonochromeLit;
 
 //----Hue Shift
-	uniform bool      _HueShiftEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_HueShiftMask);
-	uniform float4 		_HueShiftMask_ST;
-	uniform float 		_HueShiftAmount;
-	uniform uint 		  _HueShiftBaseMode;
-	uniform uint 		  _HueShiftShadeMode;
-	uniform uint 		  _HueShiftEmissionMode;
-	uniform uint 		  _HueShiftOutlineMode;
-	uniform uint 		  _HueShiftRimMode;
-	uniform uint 		  _HueShiftParallaxMode;
-	uniform uint 		  _HueShiftStippleMode;
-	uniform uint 		  _HueShiftCrosshatchMode;
+	uniform bool      _HSVShiftEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVShiftMask);
+	uniform float4 		_HSVShiftMask_ST;
+	uniform float 		_HSVShiftHue;
+	uniform float 		_HSVShiftSat;
+	uniform float 		_HSVShiftVal;
+	uniform uint 		  _HSVShiftBaseMode;
+	uniform uint 		  _HSVShiftShadeMode;
+	uniform uint 		  _HSVShiftEmissionMode;
+	uniform uint 		  _HSVShiftOutlineMode;
+	uniform uint 		  _HSVShiftRimMode;
+	uniform uint 		  _HSVShiftParallaxMode;
+	uniform uint 		  _HSVShiftStippleMode;
+	uniform uint 		  _HSVShiftCrosshatchMode;
 
 //----Stippling & Crosshatching
 	uniform bool      _StippleEnable;
