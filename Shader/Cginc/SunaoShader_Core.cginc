@@ -76,6 +76,7 @@
 	uniform uint 		  _HueShiftEmissionMode;
 	uniform uint 		  _HueShiftOutlineMode;
 	uniform uint 		  _HueShiftRimMode;
+	uniform uint 		  _HueShiftParallaxMode;
 	uniform uint 		  _HueShiftStippleMode;
 	uniform uint 		  _HueShiftCrosshatchMode;
 

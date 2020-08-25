@@ -102,6 +102,8 @@ Shader "Sunao Shader/AlphaToCoverage" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftRimMode ("Rim Mode"        						, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HueShiftParallaxMode ("Parallax Mode"					, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftStippleMode ("Stipple Mode"     				, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HueShiftCrosshatchMode ("Crosshatch Mode"			, int) = 0
