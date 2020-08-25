@@ -72,10 +72,13 @@ namespace SunaoShader {
 		MaterialProperty HueShiftEnable;
 		MaterialProperty HueShiftMask;
 		MaterialProperty HueShiftAmount;
+		MaterialProperty HueShiftBaseMode;
 		MaterialProperty HueShiftShadeMode;
 		MaterialProperty HueShiftEmissionMode;
 		MaterialProperty HueShiftOutlineMode;
 		MaterialProperty HueShiftRimMode;
+		MaterialProperty HueShiftStippleMode;
+		MaterialProperty HueShiftCrosshatchMode;
 
 		MaterialProperty StippleEnable;
 		MaterialProperty StippleMask;
@@ -316,10 +319,13 @@ namespace SunaoShader {
 			HueShiftEnable    = FindProperty("_HueShiftEnable"    , Prop , false);
 			HueShiftMask      = FindProperty("_HueShiftMask"      , Prop , false);
 			HueShiftAmount    = FindProperty("_HueShiftAmount"    , Prop , false);
+			HueShiftBaseMode = FindProperty("_HueShiftBaseMode" , Prop , false);
 			HueShiftShadeMode = FindProperty("_HueShiftShadeMode" , Prop , false);
 			HueShiftEmissionMode = FindProperty("_HueShiftEmissionMode" , Prop , false);
 			HueShiftOutlineMode = FindProperty("_HueShiftOutlineMode" , Prop , false);
 			HueShiftRimMode	= FindProperty("_HueShiftRimMode" , Prop , false);
+			HueShiftStippleMode	= FindProperty("_HueShiftStippleMode" , Prop , false);
+			HueShiftCrosshatchMode	= FindProperty("_HueShiftCrosshatchMode" , Prop , false);
 
 			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
 			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
@@ -690,10 +696,13 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Hue Shift Mask"), HueShiftMask);
 					ME.TextureScaleOffsetProperty(HueShiftMask);
 					ME.ShaderProperty(HueShiftAmount, new GUIContent("Hue Shift Amount"));
+					ME.ShaderProperty(HueShiftBaseMode, new GUIContent("Base Mode"));
 					ME.ShaderProperty(HueShiftShadeMode, new GUIContent("Shade Mode"));
 					ME.ShaderProperty(HueShiftEmissionMode, new GUIContent("Emission Mode"));
 					ME.ShaderProperty(HueShiftOutlineMode, new GUIContent("Outline Mode"));
 					ME.ShaderProperty(HueShiftRimMode, new GUIContent("Rim Mode"));
+					ME.ShaderProperty(HueShiftStippleMode, new GUIContent("Stipple Mode"));
+					ME.ShaderProperty(HueShiftCrosshatchMode, new GUIContent("Crosshatch Mode"));
 				}
 			}
 

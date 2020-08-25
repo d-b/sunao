@@ -85,7 +85,13 @@ float4 frag (VOUT IN) : COLOR {
 
 //----Hue adjustments
 	float4 hueshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HueShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HueShiftMask));
-	if(_HueShiftEnable) Color.rgb = lerp(Color.rgb, HueShift(Color.rgb, _HueShiftAmount), hueshift_mask.r);
+	if(_HueShiftEnable) {
+		if (_HueShiftBaseMode == 1)
+			Color.rgb = lerp(Color.rgb, HueShift(Color.rgb, _HueShiftAmount), hueshift_mask.r);
+
+		if (_HueShiftBaseMode == 2)
+			Color.rgb =HueShift(Color.rgb, _HueShiftAmount);
+	}
 
 //----Stippling & crosshatching
 	float stipple_size = 0.0f;
@@ -102,8 +108,29 @@ float4 frag (VOUT IN) : COLOR {
 	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchMask));
 	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _CrosshatchEmissionMap));
 
-	if (_StippleEnable) Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
-	if (_CrosshatchEnable) Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
+	if (_StippleEnable) {
+		if(_HueShiftEnable) {
+			if (_HueShiftStippleMode == 1)
+				stipple_color.rgb = lerp(stipple_color.rgb, HueShift(stipple_color.rgb, _HueShiftAmount), hueshift_mask.r);
+
+			if (_HueShiftStippleMode == 2)
+				stipple_color.rgb = HueShift(stipple_color.rgb, _HueShiftAmount);
+		}
+
+		Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
+	}
+
+	if (_CrosshatchEnable) {
+		if(_HueShiftEnable) {
+			if (_HueShiftCrosshatchMode == 1)
+				crosshatch_color.rgb = lerp(crosshatch_color.rgb, HueShift(crosshatch_color.rgb, _HueShiftAmount), hueshift_mask.r);
+
+			if (_HueShiftCrosshatchMode == 2)
+				crosshatch_color.rgb = HueShift(crosshatch_color.rgb, _HueShiftAmount);
+		}
+
+		Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
+	}
 
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);

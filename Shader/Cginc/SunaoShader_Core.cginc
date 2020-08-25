@@ -72,10 +72,13 @@
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_HueShiftMask);
 	uniform float4 		_HueShiftMask_ST;
 	uniform float 		_HueShiftAmount;
+	uniform uint 		  _HueShiftBaseMode;
 	uniform uint 		  _HueShiftShadeMode;
 	uniform uint 		  _HueShiftEmissionMode;
 	uniform uint 		  _HueShiftOutlineMode;
 	uniform uint 		  _HueShiftRimMode;
+	uniform uint 		  _HueShiftStippleMode;
+	uniform uint 		  _HueShiftCrosshatchMode;
 
 //----Stippling & Crosshatching
 	uniform bool      _StippleEnable;
