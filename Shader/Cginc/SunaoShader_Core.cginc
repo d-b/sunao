@@ -105,6 +105,40 @@
 	uniform float4    _CrosshatchEmissionMap_ST;
 	uniform float 		_CrosshatchAmount;
 
+//----Vertex Color Alpha
+	uniform float3    _VertexColor01;
+	uniform float     _VertexAlpha01;
+	uniform float3    _VertexColor02;
+	uniform float     _VertexAlpha02;
+	uniform float3    _VertexColor03;
+	uniform float     _VertexAlpha03;
+	uniform float3    _VertexColor04;
+	uniform float     _VertexAlpha04;
+	uniform float3    _VertexColor05;
+	uniform float     _VertexAlpha05;
+	uniform float3    _VertexColor06;
+	uniform float     _VertexAlpha06;
+	uniform float3    _VertexColor07;
+	uniform float     _VertexAlpha07;
+	uniform float3    _VertexColor08;
+	uniform float     _VertexAlpha08;
+	uniform float3    _VertexColor09;
+	uniform float     _VertexAlpha09;
+	uniform float3    _VertexColor10;
+	uniform float     _VertexAlpha10;
+	uniform float3    _VertexColor11;
+	uniform float     _VertexAlpha11;
+	uniform float3    _VertexColor12;
+	uniform float     _VertexAlpha12;
+	uniform float3    _VertexColor13;
+	uniform float     _VertexAlpha13;
+	uniform float3    _VertexColor14;
+	uniform float     _VertexAlpha14;
+	uniform float3    _VertexColor15;
+	uniform float     _VertexAlpha15;
+	uniform float3    _VertexColor16;
+	uniform float     _VertexAlpha16;
+
 //----Emission
 	uniform bool      _EmissionEnable;
 	uniform sampler2D _EmissionMap;
@@ -238,6 +272,7 @@ struct VOUT {
 	float3 pview    : TEXCOORD16;
 	float4 worldpos : TEXCOORD17;
 	float4 objpos 	: TEXCOORD18;
+	float  alpha    : TEXCOORD19;
 
 	#ifdef PASS_FB
 		float3 shdir   : LIGHTDIR1;
@@ -246,8 +281,8 @@ struct VOUT {
 		float4 vldirX  : LIGHTDIR2;
 		float4 vldirY  : LIGHTDIR3;
 		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD19;
-		float4 vlatn   : TEXCOORD20;
+		float4 vlcorr  : TEXCOORD20;
+		float4 vlatn   : TEXCOORD21;
 	#endif
 
 	UNITY_FOG_COORDS(19)

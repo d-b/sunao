@@ -511,5 +511,8 @@ float4 frag (VOUT IN) : COLOR {
 		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
 	}
 
+//----Apply vertex alpha
+	OUT.a *= IN.alpha;
+
 	return OUT;
 }

@@ -135,6 +135,39 @@ Shader "Sunao Shader/Transparent" {
 		_CrosshatchEmissionMap ("Crosshatch Emission Mask", 2D) = "black" {}
 		_CrosshatchAmount  ("Crosshatch Amount"         , Range( 0.0,  1.0)) = 0.5
 
+		_VertexColor01  	 ("Vertex Color 1"            , Color) = (0,0,0)
+		_VertexAlpha01  	 ("Vertex Alpha 1"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor02  	 ("Vertex Color 2"            , Color) = (0,0,0)
+		_VertexAlpha02  	 ("Vertex Alpha 2"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor03  	 ("Vertex Color 3"            , Color) = (0,0,0)
+		_VertexAlpha03  	 ("Vertex Alpha 3"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor04  	 ("Vertex Color 4"            , Color) = (0,0,0)
+		_VertexAlpha04  	 ("Vertex Alpha 4"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor05  	 ("Vertex Color 5"            , Color) = (0,0,0)
+		_VertexAlpha05  	 ("Vertex Alpha 5"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor06  	 ("Vertex Color 6"            , Color) = (0,0,0)
+		_VertexAlpha06  	 ("Vertex Alpha 6"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor07  	 ("Vertex Color 7"            , Color) = (0,0,0)
+		_VertexAlpha07  	 ("Vertex Alpha 7"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor08  	 ("Vertex Color 8"            , Color) = (0,0,0)
+		_VertexAlpha08  	 ("Vertex Alpha 8"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor09  	 ("Vertex Color 9"            , Color) = (0,0,0)
+		_VertexAlpha09  	 ("Vertex Alpha 9"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor10  	 ("Vertex Color 10"            , Color) = (0,0,0)
+		_VertexAlpha10  	 ("Vertex Alpha 10"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor11  	 ("Vertex Color 11"            , Color) = (0,0,0)
+		_VertexAlpha11  	 ("Vertex Alpha 11"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor12  	 ("Vertex Color 12"            , Color) = (0,0,0)
+		_VertexAlpha12  	 ("Vertex Alpha 12"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor13  	 ("Vertex Color 13"            , Color) = (0,0,0)
+		_VertexAlpha13  	 ("Vertex Alpha 13"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor14  	 ("Vertex Color 14"            , Color) = (0,0,0)
+		_VertexAlpha14  	 ("Vertex Alpha 14"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor15  	 ("Vertex Color 15"            , Color) = (0,0,0)
+		_VertexAlpha15  	 ("Vertex Alpha 15"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor16  	 ("Vertex Color 16"            , Color) = (0,0,0)
+		_VertexAlpha16  	 ("Vertex Alpha 16"            , Range(0.0,  1.0)) = 1.0
+
 		[SToggle]
 		_OutLineEnable     ("Enable Outline"            , int) = 0
 		[NoScaleOffset]
