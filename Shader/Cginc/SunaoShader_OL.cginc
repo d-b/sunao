@@ -51,6 +51,17 @@
 	uniform float 		_HSVShiftVal;
 	uniform uint 		  _HSVShiftOutlineMode;
 
+//----Stippling & Crosshatching
+	uniform bool _StippleEnable;
+	uniform float _StippleSize;
+	uniform float _StippleAmount;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
+	uniform float4 _StippleMask_ST;
+	uniform bool _CrosshatchEnable;
+	uniform float _CrosshatchAmount;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
+	uniform float4 _CrosshatchMask_ST;
+
 //----Vertex Color Alpha
 	uniform float3    _VertexColor01;
 	uniform float     _VertexAlpha01;
@@ -109,24 +120,26 @@
 //-------------------------------------頂点シェーダ入力構造体
 
 struct VIN {
-	float4 vertex  : POSITION;
-	float2 uv      : TEXCOORD;
-	float3 normal  : NORMAL;
-	float3 color   : COLOR;
+	float4 vertex    : POSITION;
+	float2 uv        : TEXCOORD;
+	float3 normal    : NORMAL;
+	float3 color     : COLOR;
 };
 
 
 //-------------------------------------頂点シェーダ出力構造体
 
 struct VOUT {
-	float4 pos     : SV_POSITION;
-	float2 uv      : TEXCOORD0;
-	float3 color   : TEXCOORD1;
-	float  mask    : TEXCOORD2;
-	float  alpha   : TEXCOORD3;
+	float4 pos       : SV_POSITION;
+	float2 uv        : TEXCOORD0;
+	float3 color     : TEXCOORD1;
+	float  mask      : TEXCOORD2;
+	float  alpha     : TEXCOORD3;
+	float4 worldpos  : TEXCOORD4;
+	float4 screenpos : TEXCOORD5;
 
-	LIGHTING_COORDS(4 , 5)
-	UNITY_FOG_COORDS(6)
+	LIGHTING_COORDS(6 , 7)
+	UNITY_FOG_COORDS(8)
 };
 
 
@@ -178,6 +191,8 @@ VOUT vert (VIN v) {
 	}
 	o.pos   = UnityObjectToClipPos(outv);
 	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
+	o.worldpos = mul(unity_ObjectToWorld, outv);
+	o.screenpos = ComputeScreenPos(o.pos);
 
 //----カラー & ライティング
 	o.color = _OutLineColor.rgb;
@@ -297,11 +312,26 @@ float4 frag (VOUT IN) : COLOR {
 	       OUT.rgb     *= UNITY_SAMPLE_TEX2D(_MainTex , IN.uv);
 	}
 
-	#if defined(TRANSPARENT) || defined(CUTOUT)
+	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 		OUT.a     = saturate(UNITY_SAMPLE_TEX2D(_MainTex , IN.uv).a * _Color.a * _Alpha);
 		OUT.a    *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask , _MainTex , IN.uv).rgb) , _AlphaMaskStrength);
 	#endif
 
+//----Stippling & crosshatching
+	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
+	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(IN.uv, _StippleMask));
+	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(IN.uv, _CrosshatchMask));
+
+	if (_StippleEnable) {
+		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
+	}
+
+	if (_CrosshatchEnable) {
+		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
+	}
+
+//----Vertex Color Alpha
 	OUT.a *= IN.alpha;
 
 //----カットアウト
@@ -309,6 +339,13 @@ float4 frag (VOUT IN) : COLOR {
 	#ifdef CUTOUT
 		clip(OUT.a - _Cutout);
 		OUT.a = 1.0f;
+	#endif
+
+//----AlphaToCoverage
+	#ifdef ALPHA_TO_COVERAGE
+		float2 screenUV = CalcScreenUV(IN.screenpos);
+		float dither = CalcDither(screenUV.xy);
+		OUT.a = OUT.a - (dither * (1.0 - OUT.a) * 0.15);
 	#endif
 
 	clip(IN.mask - 0.1f);

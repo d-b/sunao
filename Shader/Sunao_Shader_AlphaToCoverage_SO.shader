@@ -475,6 +475,7 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_SC
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_SC.cginc"
 

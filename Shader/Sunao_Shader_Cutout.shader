@@ -475,6 +475,7 @@ Shader "Sunao Shader/Cutout" {
 			#pragma target 4.5
 
 			#define PASS_SC
+			#define CUTOUT
 
 			#include "./cginc/SunaoShader_SC.cginc"
 
