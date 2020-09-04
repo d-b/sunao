@@ -13,6 +13,7 @@ VOUT vert (VIN v) {
 	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
 	o.worldpos = mul(unity_ObjectToWorld, v.vertex);
 	o.objpos = normalize(v.vertex);
+	o.screenpos = ComputeScreenPos(o.pos);
 
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;

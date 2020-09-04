@@ -358,7 +358,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_FB
-			#define TRANSPARENT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_Core.cginc"
 
@@ -382,7 +382,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_OL_FB
-			#define TRANSPARENT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_OL.cginc"
 
@@ -407,7 +407,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_OL_FA
-			#define TRANSPARENT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_OL.cginc"
 
@@ -432,7 +432,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_FA
-			#define TRANSPARENT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_Core.cginc"
 
@@ -456,6 +456,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 			#pragma target 4.5
 
 			#define PASS_SC
+			#define ALPHA_TO_COVERAGE
 
 			#include "./cginc/SunaoShader_SC.cginc"
 

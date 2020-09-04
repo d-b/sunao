@@ -14,7 +14,7 @@ float4 frag (VOUT IN) : COLOR {
 	float2 SubUV        = IN.uv;
 	if (_UVAnimOtherTex) SubUV = MainUV;
 
-	#if defined(TRANSPARENT) || defined(CUTOUT)
+	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 	       OUT.a        = saturate(UNITY_SAMPLE_TEX2D(_MainTex , MainUV).a * _Color.a * _Alpha);
 	       OUT.a       *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask  , _MainTex , SubUV).rgb) , _AlphaMaskStrength);
 	#endif
@@ -132,9 +132,28 @@ float4 frag (VOUT IN) : COLOR {
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
 
+//----Stippling & halftone alpha
+	if (_StippleEnable) {
+		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
+	}
+
+	if (_CrosshatchEnable) {
+		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
+	}
+
+//----Apply vertex alpha
+	OUT.a *= IN.alpha;
+
 //-------------------------------------カットアウト
 	#ifdef CUTOUT
-	       clip(OUT.a - _Cutout);
+		clip(OUT.a - _Cutout);
+	#endif
+
+//-------------------------------------AlphaToCoverage
+	#ifdef ALPHA_TO_COVERAGE
+		float2 screenUV = CalcScreenUV(IN.screenpos);
+		float dither = CalcDither(screenUV.xy);
+		OUT.a = OUT.a - (dither * (1.0 - OUT.a) * 0.15);
 	#endif
 
 //-------------------------------------ノーマルマップ
@@ -501,18 +520,6 @@ float4 frag (VOUT IN) : COLOR {
 
 //-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
-
-//----Stippling & halftone alpha
-	if (_StippleEnable) {
-		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
-	}
-
-	if (_CrosshatchEnable) {
-		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
-	}
-
-//----Apply vertex alpha
-	OUT.a *= IN.alpha;
 
 	return OUT;
 }
