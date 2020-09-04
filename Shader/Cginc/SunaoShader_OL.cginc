@@ -123,8 +123,8 @@ struct VOUT {
 	float  mask    : TEXCOORD2;
 	float  alpha   : TEXCOORD3;
 
-	LIGHTING_COORDS(3 , 4)
-	UNITY_FOG_COORDS(5)
+	LIGHTING_COORDS(4 , 5)
+	UNITY_FOG_COORDS(6)
 };
 
 
