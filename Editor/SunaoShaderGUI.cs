@@ -232,6 +232,7 @@ namespace SunaoShader {
 		bool    ParallaxFoldout   = false;
 		bool    ReflectionFoldout = false;
 		bool    RimLightFoldout   = false;
+		bool    VertexAlphaFoldout= false;
 		bool    OtherFoldout      = false;
 
 		bool    OnceRun           = true;
@@ -801,92 +802,6 @@ namespace SunaoShader {
 			}
 
 
-			GUILayout.Label("Vertex Alpha", EditorStyles.boldLabel);
-
-			using (new EditorGUILayout.VerticalScope("box")) {
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor01, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha01, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 2", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor02, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha02, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 3", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor03, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha03, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 4", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor04, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha04, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 5", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor05, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha05, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 6", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor06, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha06, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 7", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor07, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha07, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 8", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor08, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha08, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 9", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor09, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha09, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 10", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor10, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha10, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 11", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor11, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha11, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 12", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor12, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha12, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 13", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor13, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha13, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 14", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor14, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha14, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 15", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor15, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha15, new GUIContent("Alpha"));
-				}
-				using (new EditorGUILayout.VerticalScope("box")) {
-					GUILayout.Label("Vertex Color 16", EditorStyles.boldLabel);
-					ME.ShaderProperty(VertexColor16, new GUIContent("Color"));
-					ME.ShaderProperty(VertexAlpha16, new GUIContent("Alpha"));
-				}
-			}
-
-
 			GUILayout.Label("Outline", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
@@ -1151,6 +1066,110 @@ namespace SunaoShader {
 					}
 
 					EditorGUI.indentLevel --;
+				}
+			}
+
+
+			GUILayout.Label("Vertex Alpha", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+
+				if (mat.GetInt("_VertexAlphaFO") == 1) VertexAlphaFoldout = true;
+
+					EditorGUI.indentLevel ++;
+
+					if (VertexAlphaFoldout) {
+						VertexAlphaFoldout = EditorGUILayout.Foldout(VertexAlphaFoldout , ""              , EditorStyles.boldFont);
+					} else {
+						VertexAlphaFoldout = EditorGUILayout.Foldout(VertexAlphaFoldout , "Show Settings" , EditorStyles.boldFont);
+					}
+
+					EditorGUI.indentLevel --;
+
+				if (VertexAlphaFoldout) {
+					mat.SetInt("_VertexAlphaFO" , 1);
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor01, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha01, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 2", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor02, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha02, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 3", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor03, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha03, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 4", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor04, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha04, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 5", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor05, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha05, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 6", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor06, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha06, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 7", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor07, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha07, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 8", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor08, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha08, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 9", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor09, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha09, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 10", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor10, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha10, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 11", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor11, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha11, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 12", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor12, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha12, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 13", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor13, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha13, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 14", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor14, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha14, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 15", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor15, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha15, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 16", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor16, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha16, new GUIContent("Alpha"));
+					}
+				} else {
+					mat.SetInt("_VertexAlphaFO" , 0);
 				}
 			}
 

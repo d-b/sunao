@@ -324,6 +324,7 @@ Shader "Sunao Shader/Transparent" {
 		[HideInInspector] _ParallaxFO      ("Parallax FO"       , int) = 0
 		[HideInInspector] _ReflectionFO    ("Reflection FO"     , int) = 0
 		[HideInInspector] _RimLightingFO   ("Rim Lighting FO"   , int) = 0
+		[HideInInspector] _VertexAlphaFO   ("Vertex Alpha FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
 		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 1
