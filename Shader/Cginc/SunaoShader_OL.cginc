@@ -51,6 +51,40 @@
 	uniform float 		_HSVShiftVal;
 	uniform uint 		  _HSVShiftOutlineMode;
 
+//----Vertex Color Alpha
+	uniform float3    _VertexColor01;
+	uniform float     _VertexAlpha01;
+	uniform float3    _VertexColor02;
+	uniform float     _VertexAlpha02;
+	uniform float3    _VertexColor03;
+	uniform float     _VertexAlpha03;
+	uniform float3    _VertexColor04;
+	uniform float     _VertexAlpha04;
+	uniform float3    _VertexColor05;
+	uniform float     _VertexAlpha05;
+	uniform float3    _VertexColor06;
+	uniform float     _VertexAlpha06;
+	uniform float3    _VertexColor07;
+	uniform float     _VertexAlpha07;
+	uniform float3    _VertexColor08;
+	uniform float     _VertexAlpha08;
+	uniform float3    _VertexColor09;
+	uniform float     _VertexAlpha09;
+	uniform float3    _VertexColor10;
+	uniform float     _VertexAlpha10;
+	uniform float3    _VertexColor11;
+	uniform float     _VertexAlpha11;
+	uniform float3    _VertexColor12;
+	uniform float     _VertexAlpha12;
+	uniform float3    _VertexColor13;
+	uniform float     _VertexAlpha13;
+	uniform float3    _VertexColor14;
+	uniform float     _VertexAlpha14;
+	uniform float3    _VertexColor15;
+	uniform float     _VertexAlpha15;
+	uniform float3    _VertexColor16;
+	uniform float     _VertexAlpha16;
+
 //----Other
 	uniform float     _DirectionalLight;
 	uniform float     _SHLight;
@@ -89,6 +123,7 @@ struct VOUT {
 	float2 uv      : TEXCOORD0;
 	float3 color   : TEXCOORD1;
 	float  mask    : TEXCOORD2;
+	float  alpha   : TEXCOORD3;
 
 	LIGHTING_COORDS(3 , 4)
 	UNITY_FOG_COORDS(5)
@@ -146,6 +181,24 @@ VOUT vert (VIN v) {
 
 //----カラー & ライティング
 	o.color = _OutLineColor.rgb;
+
+//-------------------------------------vertex alpha
+	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01) *
+						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02) *
+						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03) *
+						VertexAlpha(v.color, _VertexColor04, _VertexAlpha04) *
+						VertexAlpha(v.color, _VertexColor05, _VertexAlpha05) *
+						VertexAlpha(v.color, _VertexColor06, _VertexAlpha06) *
+						VertexAlpha(v.color, _VertexColor07, _VertexAlpha07) *
+						VertexAlpha(v.color, _VertexColor08, _VertexAlpha08) *
+						VertexAlpha(v.color, _VertexColor09, _VertexAlpha09) *
+						VertexAlpha(v.color, _VertexColor10, _VertexAlpha10) *
+						VertexAlpha(v.color, _VertexColor11, _VertexAlpha11) *
+						VertexAlpha(v.color, _VertexColor12, _VertexAlpha12) *
+						VertexAlpha(v.color, _VertexColor13, _VertexAlpha13) *
+						VertexAlpha(v.color, _VertexColor14, _VertexAlpha14) *
+						VertexAlpha(v.color, _VertexColor15, _VertexAlpha15) *
+						VertexAlpha(v.color, _VertexColor16, _VertexAlpha16);
 
 	if (_OutLineTexColor) {
 		if (_VertexColor) o.color *= v.color;
@@ -248,6 +301,8 @@ float4 frag (VOUT IN) : COLOR {
 		OUT.a     = saturate(UNITY_SAMPLE_TEX2D(_MainTex , IN.uv).a * _Color.a * _Alpha);
 		OUT.a    *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask , _MainTex , IN.uv).rgb) , _AlphaMaskStrength);
 	#endif
+
+	OUT.a *= IN.alpha;
 
 //----カットアウト
 

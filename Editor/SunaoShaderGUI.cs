@@ -99,6 +99,39 @@ namespace SunaoShader {
 		MaterialProperty CrosshatchEmissionMap;
 		MaterialProperty CrosshatchAmount;
 
+		MaterialProperty VertexColor01;
+		MaterialProperty VertexAlpha01;
+		MaterialProperty VertexColor02;
+		MaterialProperty VertexAlpha02;
+		MaterialProperty VertexColor03;
+		MaterialProperty VertexAlpha03;
+		MaterialProperty VertexColor04;
+		MaterialProperty VertexAlpha04;
+		MaterialProperty VertexColor05;
+		MaterialProperty VertexAlpha05;
+		MaterialProperty VertexColor06;
+		MaterialProperty VertexAlpha06;
+		MaterialProperty VertexColor07;
+		MaterialProperty VertexAlpha07;
+		MaterialProperty VertexColor08;
+		MaterialProperty VertexAlpha08;
+		MaterialProperty VertexColor09;
+		MaterialProperty VertexAlpha09;
+		MaterialProperty VertexColor10;
+		MaterialProperty VertexAlpha10;
+		MaterialProperty VertexColor11;
+		MaterialProperty VertexAlpha11;
+		MaterialProperty VertexColor12;
+		MaterialProperty VertexAlpha12;
+		MaterialProperty VertexColor13;
+		MaterialProperty VertexAlpha13;
+		MaterialProperty VertexColor14;
+		MaterialProperty VertexAlpha14;
+		MaterialProperty VertexColor15;
+		MaterialProperty VertexAlpha15;
+		MaterialProperty VertexColor16;
+		MaterialProperty VertexAlpha16;
+
 		MaterialProperty OutLineEnable;
 		MaterialProperty OutLineMask;
 		MaterialProperty OutLineColor;
@@ -348,6 +381,39 @@ namespace SunaoShader {
 			CrosshatchTexture = FindProperty("_CrosshatchTexture" , Prop , false);
 			CrosshatchEmissionMap = FindProperty("_CrosshatchEmissionMap", Prop, false);
 			CrosshatchAmount  = FindProperty("_CrosshatchAmount"  , Prop , false);
+
+			VertexColor01     = FindProperty("_VertexColor01"     , Prop , false);
+			VertexAlpha01     = FindProperty("_VertexAlpha01"     , Prop , false);
+			VertexColor02     = FindProperty("_VertexColor02"     , Prop , false);
+			VertexAlpha02     = FindProperty("_VertexAlpha02"     , Prop , false);
+			VertexColor03     = FindProperty("_VertexColor03"     , Prop , false);
+			VertexAlpha03     = FindProperty("_VertexAlpha03"     , Prop , false);
+			VertexColor04     = FindProperty("_VertexColor04"     , Prop , false);
+			VertexAlpha04     = FindProperty("_VertexAlpha04"     , Prop , false);
+			VertexColor05     = FindProperty("_VertexColor05"     , Prop , false);
+			VertexAlpha05     = FindProperty("_VertexAlpha05"     , Prop , false);
+			VertexColor06     = FindProperty("_VertexColor06"     , Prop , false);
+			VertexAlpha06     = FindProperty("_VertexAlpha06"     , Prop , false);
+			VertexColor07     = FindProperty("_VertexColor07"     , Prop , false);
+			VertexAlpha07     = FindProperty("_VertexAlpha07"     , Prop , false);
+			VertexColor08     = FindProperty("_VertexColor08"     , Prop , false);
+			VertexAlpha08     = FindProperty("_VertexAlpha08"     , Prop , false);
+			VertexColor09     = FindProperty("_VertexColor09"     , Prop , false);
+			VertexAlpha09     = FindProperty("_VertexAlpha09"     , Prop , false);
+			VertexColor10     = FindProperty("_VertexColor10"     , Prop , false);
+			VertexAlpha10     = FindProperty("_VertexAlpha10"     , Prop , false);
+			VertexColor11     = FindProperty("_VertexColor11"     , Prop , false);
+			VertexAlpha11     = FindProperty("_VertexAlpha11"     , Prop , false);
+			VertexColor12     = FindProperty("_VertexColor12"     , Prop , false);
+			VertexAlpha12     = FindProperty("_VertexAlpha12"     , Prop , false);
+			VertexColor13     = FindProperty("_VertexColor13"     , Prop , false);
+			VertexAlpha13     = FindProperty("_VertexAlpha13"     , Prop , false);
+			VertexColor14     = FindProperty("_VertexColor14"     , Prop , false);
+			VertexAlpha14     = FindProperty("_VertexAlpha14"     , Prop , false);
+			VertexColor15     = FindProperty("_VertexColor15"     , Prop , false);
+			VertexAlpha15     = FindProperty("_VertexAlpha15"     , Prop , false);
+			VertexColor16     = FindProperty("_VertexColor16"     , Prop , false);
+			VertexAlpha16     = FindProperty("_VertexAlpha16"     , Prop , false);
 
 			OutLineEnable     = FindProperty("_OutLineEnable"     , Prop , false);
 			OutLineMask       = FindProperty("_OutLineMask"       , Prop , false);
@@ -750,6 +816,92 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Emission Mask"), CrosshatchEmissionMap);
 					ME.TextureScaleOffsetProperty(CrosshatchEmissionMap);
 					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
+				}
+			}
+
+
+			GUILayout.Label("Vertex Alpha", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor01, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha01, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 2", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor02, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha02, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 3", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor03, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha03, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 4", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor04, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha04, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 5", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor05, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha05, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 6", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor06, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha06, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 7", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor07, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha07, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 8", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor08, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha08, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 9", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor09, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha09, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 10", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor10, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha10, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 11", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor11, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha11, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 12", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor12, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha12, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 13", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor13, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha13, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 14", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor14, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha14, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 15", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor15, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha15, new GUIContent("Alpha"));
+				}
+				using (new EditorGUILayout.VerticalScope("box")) {
+					GUILayout.Label("Vertex Color 16", EditorStyles.boldLabel);
+					ME.ShaderProperty(VertexColor16, new GUIContent("Color"));
+					ME.ShaderProperty(VertexAlpha16, new GUIContent("Alpha"));
 				}
 			}
 

@@ -174,6 +174,14 @@ float3 HSVAdjust(float3 color, float3 adjustment)
   return HSV2RGB(hsv);
 }
 
+float VertexAlpha(float3 color, float3 comperand, float alpha) {
+	if (min(length(color), length(comperand)) > 0.0) {
+		return lerp(1.0, alpha, step(0.9999, 1.0 - length(color - comperand)));
+	} else {
+		return 1.0;
+	}
+}
+
 float4x4 rotationMatrix(float3 axis, float angle)
 {
     axis = normalize(axis);
