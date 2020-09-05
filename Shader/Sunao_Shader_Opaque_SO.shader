@@ -135,6 +135,7 @@ Shader "Sunao Shader/[Stencil Outline]/Opaque" {
 		_CrosshatchEmissionMap ("Crosshatch Emission Mask", 2D) = "black" {}
 		_CrosshatchAmount  ("Crosshatch Amount"         , Range( 0.0,  1.0)) = 0.5
 
+		_VertexColorThreshold ("Vertex Alpha 1", Range(0.0,  1.0)) = 0.9999
 		_VertexColor01  	 ("Vertex Color 1"            , Color) = (0,0,0)
 		_VertexAlpha01  	 ("Vertex Alpha 1"            , Range(0.0,  1.0)) = 1.0
 		_VertexColor02  	 ("Vertex Color 2"            , Color) = (0,0,0)

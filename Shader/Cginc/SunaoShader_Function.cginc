@@ -181,9 +181,9 @@ half3 LIN2SRGB(half3 color) {
   return float3(LIN2SRGB(color.r), LIN2SRGB(color.g), LIN2SRGB(color.b));
 }
 
-float VertexAlpha(float3 color, float3 comperand, float alpha) {
+float VertexAlpha(float3 color, float3 comperand, float alpha, float threshold) {
 	if (min(length(color), length(comperand)) > 0.0) {
-		return lerp(1.0, alpha, step(0.9999, 1.0 - length(color - LIN2SRGB(comperand))));
+		return lerp(1.0, alpha, step(threshold, 1.0 - length(color - LIN2SRGB(comperand))));
 	} else {
 		return 1.0;
 	}
