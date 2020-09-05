@@ -99,6 +99,7 @@ namespace SunaoShader {
 		MaterialProperty CrosshatchEmissionMap;
 		MaterialProperty CrosshatchAmount;
 
+		MaterialProperty VertexColorThreshold;
 		MaterialProperty VertexColor01;
 		MaterialProperty VertexAlpha01;
 		MaterialProperty VertexColor02;
@@ -383,6 +384,7 @@ namespace SunaoShader {
 			CrosshatchEmissionMap = FindProperty("_CrosshatchEmissionMap", Prop, false);
 			CrosshatchAmount  = FindProperty("_CrosshatchAmount"  , Prop , false);
 
+			VertexColorThreshold = FindProperty("_VertexColorThreshold", Prop, false);
 			VertexColor01     = FindProperty("_VertexColor01"     , Prop , false);
 			VertexAlpha01     = FindProperty("_VertexAlpha01"     , Prop , false);
 			VertexColor02     = FindProperty("_VertexColor02"     , Prop , false);
@@ -1121,6 +1123,7 @@ namespace SunaoShader {
 
 				if (VertexAlphaFoldout) {
 					mat.SetInt("_VertexAlphaFO" , 1);
+					ME.ShaderProperty(VertexColorThreshold, new GUIContent("Threshold"));
 					using (new EditorGUILayout.VerticalScope("box")) {
 						GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
 						ME.ShaderProperty(VertexColor01, new GUIContent("Color"));

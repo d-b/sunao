@@ -63,6 +63,7 @@
 	uniform float4 _CrosshatchMask_ST;
 
 //----Vertex Color Alpha
+	uniform float     _VertexColorThreshold;
 	uniform float3    _VertexColor01;
 	uniform float     _VertexAlpha01;
 	uniform float3    _VertexColor02;
@@ -198,22 +199,22 @@ VOUT vert (VIN v) {
 	o.color = _OutLineColor.rgb;
 
 //-------------------------------------vertex alpha
-	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01) *
-						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02) *
-						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03) *
-						VertexAlpha(v.color, _VertexColor04, _VertexAlpha04) *
-						VertexAlpha(v.color, _VertexColor05, _VertexAlpha05) *
-						VertexAlpha(v.color, _VertexColor06, _VertexAlpha06) *
-						VertexAlpha(v.color, _VertexColor07, _VertexAlpha07) *
-						VertexAlpha(v.color, _VertexColor08, _VertexAlpha08) *
-						VertexAlpha(v.color, _VertexColor09, _VertexAlpha09) *
-						VertexAlpha(v.color, _VertexColor10, _VertexAlpha10) *
-						VertexAlpha(v.color, _VertexColor11, _VertexAlpha11) *
-						VertexAlpha(v.color, _VertexColor12, _VertexAlpha12) *
-						VertexAlpha(v.color, _VertexColor13, _VertexAlpha13) *
-						VertexAlpha(v.color, _VertexColor14, _VertexAlpha14) *
-						VertexAlpha(v.color, _VertexColor15, _VertexAlpha15) *
-						VertexAlpha(v.color, _VertexColor16, _VertexAlpha16);
+	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor04, _VertexAlpha04, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor05, _VertexAlpha05, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor06, _VertexAlpha06, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor07, _VertexAlpha07, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor08, _VertexAlpha08, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor09, _VertexAlpha09, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor10, _VertexAlpha10, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor11, _VertexAlpha11, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor12, _VertexAlpha12, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor13, _VertexAlpha13, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor14, _VertexAlpha14, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor15, _VertexAlpha15, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor16, _VertexAlpha16, _VertexColorThreshold);
 
 	if (_OutLineTexColor) {
 		if (_VertexColor) o.color *= v.color;

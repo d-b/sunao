@@ -107,6 +107,7 @@
 	uniform float 		_CrosshatchAmount;
 
 //----Vertex Color Alpha
+	uniform float     _VertexColorThreshold;
 	uniform float3    _VertexColor01;
 	uniform float     _VertexAlpha01;
 	uniform float3    _VertexColor02;
