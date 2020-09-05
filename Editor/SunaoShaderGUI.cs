@@ -1090,7 +1090,6 @@ namespace SunaoShader {
 
 				if (VertexAlphaFoldout) {
 					mat.SetInt("_VertexAlphaFO" , 1);
-					ME.ShaderProperty(VertexColorThreshold, new GUIContent("Threshold"));
 					using (new EditorGUILayout.VerticalScope("box")) {
 						GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
 						ME.ShaderProperty(VertexColor01, new GUIContent("Color"));
@@ -1170,6 +1169,10 @@ namespace SunaoShader {
 						GUILayout.Label("Vertex Color 16", EditorStyles.boldLabel);
 						ME.ShaderProperty(VertexColor16, new GUIContent("Color"));
 						ME.ShaderProperty(VertexAlpha16, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color Threshold", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColorThreshold, new GUIContent("Threshold"));
 					}
 				} else {
 					mat.SetInt("_VertexAlphaFO" , 0);
