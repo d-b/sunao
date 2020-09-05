@@ -170,9 +170,20 @@ float3 HSVAdjust(float3 color, float3 adjustment)
   return HSV2RGB(hsv);
 }
 
+half LIN2SRGB(half color) {
+    if (color > 0.0031308)
+        return 1.055 * (pow(color, (1.0 / 2.4))) - 0.055;
+    else
+        return 12.92 * color;
+}
+
+half3 LIN2SRGB(half3 color) {
+  return float3(LIN2SRGB(color.r), LIN2SRGB(color.g), LIN2SRGB(color.b));
+}
+
 float VertexAlpha(float3 color, float3 comperand, float alpha) {
 	if (min(length(color), length(comperand)) > 0.0) {
-		return lerp(1.0, alpha, step(0.9999, 1.0 - length(color - comperand)));
+		return lerp(1.0, alpha, step(0.9999, 1.0 - length(color - LIN2SRGB(comperand))));
 	} else {
 		return 1.0;
 	}
