@@ -94,15 +94,15 @@ float4 frag (VOUT IN) : COLOR {
 
 		if (_HSVShiftBaseMode == 1) Color.rgb = HSVAdjust(Color.rgb, hsvadj_masked);
 		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
+		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
+		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
+		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
 	}
 
 //----Stippling & crosshatching
-	float stipple_size = 0.0f;
-	if(_StippleMode == 0) stipple_size = clamp(_StippleSize + sin(_Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
-	if(_StippleMode == 1) stipple_size = clamp(_StippleSize + sin(IN.objpos.y * _StippleFrequency + _Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
-
-	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, stipple_size));
-	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+	half dot_halftone = 0.0f;
+	half line_halftone = 0.0f;
 	float2 emission_scroll = float2(_EmissionScrX , _EmissionScrY) * _Time.y;
 	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
 	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleMask));
@@ -112,34 +112,35 @@ float4 frag (VOUT IN) : COLOR {
 	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _CrosshatchEmissionMap));
 
 	if (_StippleEnable) {
+		float stipple_size = 0.0f;
+		if(_StippleMode == 0) stipple_size = clamp(_StippleSize + sin(_Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
+		if(_StippleMode == 1) stipple_size = clamp(_StippleSize + sin(IN.objpos.y * _StippleFrequency + _Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
+
+		dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, stipple_size));
+
 		if(_HSVShiftEnable) {
 			if (_HSVShiftStippleMode == 1) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_masked);
 			if (_HSVShiftStippleMode == 2) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_unmasked);
 		}
 
 		Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
+		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
 	}
 
 	if (_CrosshatchEnable) {
+		half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+
 		if(_HSVShiftEnable) {
 			if (_HSVShiftCrosshatchMode == 1) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_masked);
 			if (_HSVShiftCrosshatchMode == 2) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_unmasked);
 		}
 
 		Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
+		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
 	}
 
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
-
-//----Stippling & halftone alpha
-	if (_StippleEnable) {
-		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
-	}
-
-	if (_CrosshatchEnable) {
-		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
-	}
 
 //----Apply vertex alpha
 	OUT.a *= IN.alpha;
@@ -194,11 +195,6 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //----影の色
-	if (_HSVShiftEnable) {
-		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
-		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
-	}
-
 	float3 ShadeColor   = saturate(Color * 3.0f - 1.5f) * _ShadeColor;
 	       ShadeColor   = lerp(ShadeColor , _CustomShadeColor.rgb , _CustomShadeColor.a);
 
@@ -384,11 +380,6 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //-------------------------------------リムライティング
-	if (_RimLitEnable && _HSVShiftEnable) {
-		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
-		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
-	}
-
 	float3 RimLight = (float3)0.0f;
 	#ifdef PASS_FB
 		if (_RimLitEnable) {
