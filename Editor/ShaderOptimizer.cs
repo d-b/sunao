@@ -66,11 +66,11 @@ namespace SunaoShader
 
         private static string GenerateDefines(MaterialProperty[] props) {
             StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("#define OPTIMIZED_SHADER 1");
             foreach (MaterialProperty prop in props) {
-                if (prop == null) continue;
-                if (prop.type == MaterialProperty.PropType.Float && Math.Abs(prop.floatValue) > 0.0f) {
+                if (prop != null && prop.type == MaterialProperty.PropType.Float)
                     sb.AppendLine("#define PROP_" + ToSnakeCase(prop.name) + " " + prop.floatValue);
-                }
             }
 
             return sb.ToString();
