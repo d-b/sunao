@@ -15,6 +15,7 @@ using System;
 namespace SunaoShader {
 
 	public class GUI : ShaderGUI {
+		MaterialProperty OptimizerEnable;
 
 		MaterialProperty MainTex;
 		MaterialProperty Color;
@@ -290,6 +291,7 @@ namespace SunaoShader {
 
 			if ((Shader_Type) != (Previous_Type)) OnceRun = true;
 
+			OptimizerEnable   = FindProperty("_OptimizerEnable"   , Prop , false);
 
 			MainTex           = FindProperty("_MainTex"           , Prop , false);
 			Color             = FindProperty("_Color"             , Prop , false);
@@ -554,10 +556,59 @@ namespace SunaoShader {
 			}
 
 
+			GUILayout.Label("Shader Optimizer", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+        if (OptimizerEnable.hasMixedValue) {
+          EditorGUI.BeginChangeCheck();
+          GUILayout.Button("Lock (" + ME.targets.Length + " materials)");
+          if (EditorGUI.EndChangeCheck()) {
+            foreach (Material m in ME.targets) {
+                m.SetFloat("_OptimizerEnable", 1);
+                if (!ShaderOptimizer.Lock(m, Prop))
+                	m.SetFloat("_OptimizerEnable", 0);
+            }
+          }
+        } else {
+          EditorGUI.BeginChangeCheck();
+          if (OptimizerEnable.floatValue == 0) GUILayout.Button("Lock");
+          else GUILayout.Button("Unlock");
+
+          if (EditorGUI.EndChangeCheck())
+          {
+            if (OptimizerEnable.floatValue == 0)
+            {
+            	// Optimizer disabled, lock materials
+              foreach (Material m in ME.targets) {
+              	m.SetFloat("_OptimizerEnable", 1);
+                if (!ShaderOptimizer.Lock(m, Prop))
+                  m.SetFloat("_OptimizerEnable", 0);
+              }
+            }
+            else
+            {
+            	// Optimizer enabled, unlock materials
+              foreach (Material m in ME.targets) {
+              	m.SetFloat("_OptimizerEnable", 0);
+              	if (!ShaderOptimizer.Unlock(m))
+              		m.SetFloat("_OptimizerEnable", 1);
+              }
+            }
+          }
+        }
+      }
+
+      if (OptimizerEnable.floatValue != 0) {
+	      EditorGUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
+				GUILayout.Label("Sunao Shader " + Version_H + "." + Version_M + "." + Version_L , EditorStyles.boldLabel);
+				EditorGUILayout.EndHorizontal();
+				return;
+      }
+
 			GUILayout.Label("Main", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
-
 				using (new EditorGUILayout.VerticalScope("box")) {
 
 					GUILayout.Label("Main Color & Texture Maps", EditorStyles.boldLabel);

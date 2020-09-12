@@ -13,6 +13,8 @@ Shader "Sunao Shader/Opaque" {
 
 
 	Properties {
+		[SToggle]
+		_OptimizerEnable   ("Enable Optimizer"  				, int) = 0
 
 		[NoScaleOffset]
 		_MainTex           ("Main Texture"              , 2D) = "white" {}
