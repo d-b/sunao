@@ -23,8 +23,8 @@ float4 frag (VOUT IN) : COLOR {
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
 
 //----デカール
-	if (_DecalEnable) {
-
+  #if WHEN_OPT(PROP_DECAL_ENABLE == 1)
+  OPT_IF(_DecalEnable)
 		float4   DecalColor    = float4(0.0f , 0.0f , 0.0f , 1.0f);
 
 		float2   DecalUV       = (float2)0.0f;
@@ -81,12 +81,14 @@ float4 frag (VOUT IN) : COLOR {
 			float DecalMixCol = max(Color.r , max(Color.g , Color.b));
 			Color = lerp(Color , DecalMixCol * DecalColor.rgb , DecalColor.a);
 		}
-	}
+	OPT_FI
+	#endif
 
 //----HSV adjustments
+	#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
 	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
 	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
-	if (_HSVShiftEnable) {
+	OPT_IF(_HSVShiftEnable)
 		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HSVShiftMask));
 		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
 		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
@@ -98,7 +100,8 @@ float4 frag (VOUT IN) : COLOR {
 		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
 		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
 		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
-	}
+	OPT_FI
+	#endif
 
 //----Stippling & crosshatching
 	half dot_halftone = 0.0f;
@@ -118,10 +121,12 @@ float4 frag (VOUT IN) : COLOR {
 
 		dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, stipple_size));
 
-		if(_HSVShiftEnable) {
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
 			if (_HSVShiftStippleMode == 1) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_masked);
 			if (_HSVShiftStippleMode == 2) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_unmasked);
-		}
+		OPT_FI
+		#endif
 
 		Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
 		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
@@ -130,10 +135,12 @@ float4 frag (VOUT IN) : COLOR {
 	if (_CrosshatchEnable) {
 		half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 
-		if(_HSVShiftEnable) {
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
 			if (_HSVShiftCrosshatchMode == 1) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_masked);
 			if (_HSVShiftCrosshatchMode == 2) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_unmasked);
-		}
+		OPT_FI
+		#endif
 
 		Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
 		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
@@ -187,13 +194,15 @@ float4 frag (VOUT IN) : COLOR {
 	#endif
 
 //----トゥーンシェーディング
-	if (_ToonEnable) {
+	#if WHEN_OPT(PROP_TOON_ENABLE == 1)
+	OPT_IF(_ToonEnable)
 		Diffuse   = ToonCalc(Diffuse , IN.toon);
 		#ifdef PASS_FB
 			SHDiffuse = ToonCalc(SHDiffuse , IN.toon);
 			VLDiffuse = ToonCalc(VLDiffuse , IN.toon);
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //----影の色
 	float3 ShadeColor   = saturate(Color * 3.0f - 1.5f) * _ShadeColor;
@@ -213,7 +222,8 @@ float4 frag (VOUT IN) : COLOR {
 	#endif
 
 //----モノクロライティング
-	if (_MonochromeLit) {
+	#if WHEN_OPT(PROP_MONOCHROME_LIT == 1)
+	OPT_IF(_MonochromeLit)
 		LightBase  = MonoColor(LightBase);
 		#ifdef PASS_FB
 			VLight0    = MonoColor(VLight0);
@@ -222,7 +232,8 @@ float4 frag (VOUT IN) : COLOR {
 			VLight3    = MonoColor(VLight3);
 			VLightBase = MonoColor(VLightBase);
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //----ライト反映
 	float3 Lighting     = LightBase;
@@ -264,15 +275,18 @@ float4 frag (VOUT IN) : COLOR {
 		EmissionFlag = _EmissionEnable && _EmissionLighting;
 	#endif
 
-	if (EmissionFlag) {
+	#if WHEN_OPT(PROP_EMISSION_ENABLE == 1)
+	OPT_IF(EmissionFlag)
 		       Emission    = _Emission * _EmissionColor.rgb;
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
 
-		if(_HSVShiftEnable) {
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
 			if (_HSVShiftEmissionMode == 1) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_masked);
 			if (_HSVShiftEmissionMode == 2) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_unmasked);
-		}
+		OPT_FI
+		#endif
 
 		if (_StippleEnable)
 			Emission = _Emission * IN.eprm.x * lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
@@ -288,7 +302,8 @@ float4 frag (VOUT IN) : COLOR {
 				Emission   *= saturate(MonoColor(LightBase));
 			#endif
 		}
-	}
+	OPT_FI
+	#endif
 
 //-------------------------------------視差エミッション
 	float3 Parallax     = (float3)0.0f;
@@ -298,7 +313,8 @@ float4 frag (VOUT IN) : COLOR {
 		ParallaxFlag = _ParallaxEnable && _ParallaxLighting;
 	#endif
 
-	if (ParallaxFlag) {
+	#if WHEN_OPT(PROP_PARALLAX_ENABLE == 1)
+	OPT_IF(ParallaxFlag)
 		float  Height      = (1.0f - MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_ParallaxDepthMap , _MainTex , IN.pduv).rgb)) * _ParallaxDepth;
 		float2 ParallaxUV  = IN.peuv.xy;
 		       ParallaxUV -= normalize(IN.pview).xz * Height * _ParallaxMap_ST.xy;
@@ -306,10 +322,12 @@ float4 frag (VOUT IN) : COLOR {
 		       Parallax   *= tex2D(_ParallaxMap  , ParallaxUV).rgb * tex2D(_ParallaxMap  , ParallaxUV).a * IN.peprm.x;
 		       Parallax   *= tex2D(_ParallaxMap2 , IN.peuv.zw).rgb * tex2D(_ParallaxMap2 , IN.peuv.zw).a;
 
-		if (_HSVShiftEnable) {
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
 			if (_HSVShiftParallaxMode == 1) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_masked);
 			if (_HSVShiftParallaxMode == 2) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_unmasked);
-		}
+		OPT_FI
+		#endif
 
 		if (_ParallaxLighting) {
 			#ifdef PASS_FB
@@ -319,7 +337,8 @@ float4 frag (VOUT IN) : COLOR {
 				Parallax   *= saturate(MonoColor(LightBase));
 			#endif
 		}
-	}
+	OPT_FI
+	#endif
 
 //-------------------------------------リフレクション
 	float  Smoothness   = 0.0f;
@@ -331,7 +350,10 @@ float4 frag (VOUT IN) : COLOR {
 	float3 Reflection   = (float3)0.0f;
 	float3 MatCapture   = (float3)0.0f;
 
-	if (_ReflectionEnable) {
+	#if WHEN_OPT(PROP_REFLECTION_ENABLE == 1)
+	OPT_IF(_ReflectionEnable)
+		float  Smoothness   = _GlossMapScale * tex2D(_MetallicGlossMap , SubUV).a;
+
 //----スペキュラ反射
 		       Smoothness   = tex2D(_MetallicGlossMap , SubUV).a * _GlossMapScale;
 		       SpecularMask = tex2D(_MetallicGlossMap , SubUV).rgb;
@@ -402,25 +424,30 @@ float4 frag (VOUT IN) : COLOR {
 		if (_SpecularTexColor ) Specular    *= Color;
 		if (_MetallicTexColor ) Reflection  *= Color;
 		if (_MatCapTexColor   ) MatCapture  *= Color;
-	}
+OPT_FI
+#endif
 
 //-------------------------------------リムライティング
 	float3 RimLight = (float3)0.0f;
 	#ifdef PASS_FB
-		if (_RimLitEnable) {
+		#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
+		OPT_IF(_RimLitEnable)
 			       RimLight  = RimLightCalc(Normal , IN.view , _RimLit , _RimLitGradient);
 			       RimLight *= _RimLitColor.rgb * _RimLitColor.a * UNITY_SAMPLE_TEX2D_SAMPLER(_RimLitMask , _MainTex , SubUV).rgb;
 			if (_RimLitLighthing) RimLight *= saturate(LightBase + IN.shmax + VLightBase);
 			if (_RimLitTexColor ) RimLight *= Color;
-		}
+		OPT_FI
+		#endif
 	#endif
 	#ifdef PASS_FA
-		if (_RimLitEnable && _RimLitLighthing) {
+		#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
+		OPT_IF(_RimLitEnable && _RimLitLighthing)
 			       RimLight  = RimLightCalc(Normal , IN.view , _RimLit , _RimLitGradient);
 			       RimLight *= _RimLitColor.rgb * _RimLitColor.a * UNITY_SAMPLE_TEX2D_SAMPLER(_RimLitMask , _MainTex , SubUV).rgb;
 			       RimLight *= saturate(LightBase);
 			if (_RimLitTexColor ) RimLight *= Color;
-		}
+		OPT_FI
+		#endif
 	#endif
 
 //-------------------------------------最終カラー計算
@@ -431,14 +458,18 @@ float4 frag (VOUT IN) : COLOR {
 	       OUT.rgb     += MatCapture;
 
 //----リムライティング混合
-	if (_RimLitEnable) {
+	#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
+	OPT_IF(_RimLitEnable)
 		if (_RimLitMode == 0) OUT.rgb += RimLight;
 		if (_RimLitMode == 1) OUT.rgb *= RimLight;
 		if (_RimLitMode == 2) OUT.rgb  = saturate(OUT.rgb - RimLight);
-	}
+	OPT_FI
+	#endif
 
 //----エミッション混合
-	if (EmissionFlag) {
+
+	#if WHEN_OPT(PROP_EMISSION_ENABLE == 1)
+	OPT_IF(EmissionFlag)
 
 		float EmissionRev   = MonoColor(LightBase);
 		#ifdef PASS_FB
@@ -455,10 +486,12 @@ float4 frag (VOUT IN) : COLOR {
 			OUT.rgb += (lerp(Color , Reflection , (_Metallic * ReflectMask)) + ((Specular + MatCapture) * SpecularMask)) * Emission;
 		}
 		if (_EmissionMode == 2) OUT.rgb  = saturate(OUT.rgb - Emission);
-	}
+	OPT_FI
+	#endif
 
 //----視差エミッション混合
-	if (ParallaxFlag) {
+	#if WHEN_OPT(PROP_PARALLAX_ENABLE == 1)
+	OPT_IF(ParallaxFlag)
 
 		float ParallaxRev   = MonoColor(LightBase);
 		#ifdef PASS_FB
@@ -475,7 +508,8 @@ float4 frag (VOUT IN) : COLOR {
 			OUT.rgb += (lerp(Color , Reflection , (_Metallic * ReflectMask)) + ((Specular + MatCapture) * SpecularMask)) * Parallax;
 		}
 		if (_ParallaxMode == 2) OUT.rgb  = saturate(OUT.rgb - Parallax);
-	}
+	OPT_FI
+	#endif
 
 //----オクルージョンマスク
 	if (_OcclusionMode == 2) OUT.rgb *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);

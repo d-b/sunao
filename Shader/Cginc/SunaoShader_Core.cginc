@@ -9,6 +9,7 @@
 	#include "UnityCG.cginc"
 	#include "AutoLight.cginc"
 	#include "Lighting.cginc"
+	#include "SunaoShader_Macro.cginc"
 	#include "SunaoShader_Function.cginc"
 
 //-------------------------------------変数宣言
