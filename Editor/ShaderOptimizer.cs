@@ -22,7 +22,7 @@ namespace SunaoShader
             string materialFolder = Path.GetDirectoryName(materialFilePath);
             string guid = Guid.NewGuid().ToString();
             string newShaderName = shader.name + ".Optimized/" + material.name + "-" + guid;
-            string newShaderFileName = Path.GetFileNameWithoutExtension(shaderFilePath) + "_" + material.name + guid + ".shader";
+            string newShaderFileName = Path.GetFileNameWithoutExtension(shaderFilePath) + "_" + material.name + "-" + guid + ".shader";
             string newShaderFilePath = materialFolder + "/Optimized/" + newShaderFileName;
 
             // Generate the new shader
