@@ -89,7 +89,7 @@ float4 frag (VOUT IN) : COLOR {
 	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
 	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
 	OPT_IF(_HSVShiftEnable)
-		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVShiftMask, _MainTex, TRANSFORM_TEX(SubUV, _HSVShiftMask));
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D(_HSVShiftMask, TRANSFORM_TEX(SubUV, _HSVShiftMask));
 		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
 		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
 		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
