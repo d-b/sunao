@@ -44,7 +44,7 @@
 
 //----Hue Shift
 	uniform bool      _HSVShiftEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVShiftMask);
+	UNITY_DECLARE_TEX2D(_HSVShiftMask);
 	uniform float4 		_HSVShiftMask_ST;
 	uniform float 		_HSVShiftHue;
 	uniform float 		_HSVShiftSat;
@@ -282,7 +282,7 @@ float4 frag (VOUT IN) : COLOR {
 	if (_HSVShiftEnable) {
 		float3 hsvadj_masked = float3(1.0, 1.0, 1.0);
 		float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
-		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVShiftMask, _MainTex, TRANSFORM_TEX(IN.uv, _HSVShiftMask));
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D(_HSVShiftMask, TRANSFORM_TEX(IN.uv, _HSVShiftMask));
 		hsvadj_masked.x = lerp(1.0f, _HSVShiftHue, hsvshift_mask.r);
 		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
 		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);

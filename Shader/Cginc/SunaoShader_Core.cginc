@@ -69,7 +69,7 @@
 
 //----Hue Shift
 	uniform bool      _HSVShiftEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVShiftMask);
+	UNITY_DECLARE_TEX2D(_HSVShiftMask);
 	uniform float4 		_HSVShiftMask_ST;
 	uniform float 		_HSVShiftHue;
 	uniform float 		_HSVShiftSat;
