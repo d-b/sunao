@@ -131,6 +131,8 @@ Shader "Sunao Shader/Transparent" {
 		_StippleSpeed      ("Stipple Speed"             , Range(0.0, 50.0)) = 1.0
 		_StippleFrequency  ("Stipple Frequency"         , Range(0.0, 200.0)) = 30.0
 		[SToggle]
+		_StippleDisableOutline ("Stipple Disable Outline", int) = 1
+		[SToggle]
 		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
 		_CrosshatchMask    ("Crosshatch Mask"           , 2D) = "white" {}
 		_CrosshatchTexture ("Crosshatch Texture"        , 2D) = "black" {}
