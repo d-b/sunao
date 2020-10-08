@@ -97,6 +97,7 @@
 	uniform float 		_StippleAnimation;
 	uniform float 		_StippleSpeed;
 	uniform float 		_StippleFrequency;
+	uniform bool      _StippleDisableOutline;
 	uniform bool      _CrosshatchEnable;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
 	uniform float4 		_CrosshatchMask_ST;

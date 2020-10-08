@@ -53,6 +53,7 @@
 
 //----Stippling & Crosshatching
 	uniform bool _StippleEnable;
+	uniform bool _StippleDisableOutline;
 	uniform float _StippleSize;
 	uniform float _StippleAmount;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
@@ -174,7 +175,7 @@ VOUT vert (VIN v) {
 
 //----頂点座標変換
 	float4 outv = (float4)0.0f;
-	if (_OutLineEnable) {
+	if (_OutLineEnable && !(_StippleEnable && _StippleDisableOutline)) {
 
 		float4 fixscale;
 		fixscale.x  = length(float3(unity_ObjectToWorld[0].x , unity_ObjectToWorld[1].x , unity_ObjectToWorld[2].x));
