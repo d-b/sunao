@@ -437,6 +437,10 @@ OPT_FI
 	       OUT.rgb     += Specular   * SpecularMask;
 	       OUT.rgb     += MatCapture * ReflectMask;
 
+	      #ifdef PASS_FB
+	       OUT.rgb 		 += ToonAnisoSpecularCalc(IN.normal, IN.tangent, IN.ldir, IN.view, 0.99, 1.0, 0);
+	      #endif
+
 //----リムライティング混合
 	#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
 	OPT_IF(_RimLitEnable)

@@ -84,6 +84,12 @@ float2 EmissionWave(uint mode , float blink , float freq , float offset) {
 	return wave;
 }
 
+//-------------------------------------Calculate bitangent
+float3 Bitangent(float3 normal, float4 tangent)
+{
+  return cross(normal, tangent.xyz) * (tangent.w * unity_WorldTransformParams.w);
+}
+
 //-------------------------------------ディフューズシェーディングの計算
 float  DiffuseCalc(float3 normal , float3 ldir , float gradient , float width) {
 	float Diffuse;
@@ -123,6 +129,24 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	specular = saturate(specular * specular * specular);
 
 	return specular;
+}
+
+float3 ToonAnisoSpecularCalc(float3 normal, float4 tangent, float3 ldir, float3 view, fixed gradientStart, fixed gradientEnd, float jitter)
+{
+  float3 bitangent = Bitangent(normal, tangent);
+
+  bitangent += jitter;
+
+  float NdotL = dot(ldir, normal);
+  float TdotL = dot(ldir, bitangent);
+  float TdotV = dot(view, bitangent);
+
+  float specular = saturate(sqrt(1.0 - (TdotL * TdotL)) * sqrt(1.0 - (TdotV * TdotV)) - TdotL * TdotV);
+  fixed smoothAlpha = specular;
+
+  specular = smoothstep(gradientStart, gradientEnd, smoothAlpha);
+
+  return saturate(NdotL) * specular;
 }
 
 //-------------------------------------環境マッピングの計算
