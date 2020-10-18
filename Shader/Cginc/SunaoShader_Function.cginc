@@ -4,6 +4,11 @@
 //--------------------------------------------------------------
 
 
+//-------------------------------------モノクロカラーに変換
+float  MonoColor(float3 col) {
+	return (0.2126f * col.r) + (0.7152f * col.g) + (0.0722f * col.b); //BT.709
+}
+
 //-------------------------------------SHライトの方向を取得
 float3 SHLightDirection(float len[6]) {
 	return normalize(float3(len[1] - len[0] , len[3] - len[2] , len[5] - len[4]));
@@ -24,12 +29,17 @@ float3 SHLightMax(float3 col[6]) {
 
 //-------------------------------------暗いSHライトを取得
 float3 SHLightMin(float3 col[6]) {
-	return (col[0] + col[1] + col[2] + col[3] + col[4] + col[5]) * 0.166667f; // 0.166667 = 1/6
-}
+	float3 ocol;
+	ocol  = col[0] + col[1] + col[2] + col[3] + col[4] + col[5];
+	ocol *= 0.166667f;	// 0.166667 = 1/6
 
-//-------------------------------------モノクロカラーに変換
-float  MonoColor(float3 col) {
-	return (0.2126f * col.r) + (0.7152f * col.g) + (0.0722f * col.b); //BT.709
+	float zcol;
+	zcol  = MonoColor(abs(col[1] - col[0]) + abs(col[3] - col[2]) + abs(col[5] - col[4]));
+	zcol  = saturate(zcol);
+
+	ocol  = lerp(ocol * 0.75f , ocol , zcol);
+
+	return ocol;
 }
 
 //-------------------------------------頂点ライトの距離を計算

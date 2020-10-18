@@ -145,6 +145,7 @@
 	uniform float     _PointLight;
 	uniform float     _SHLight;
 	uniform bool      _LightLimitter;
+	uniform float     _MinimumLight;
 
 	uniform bool      _EnableGammaFix;
 	uniform float     _GammaR;

@@ -9,7 +9,7 @@
 // see LICENSE or http://sunao.orz.hm/agenasulab/ss/LICENSE
 //--------------------------------------------------------------
 
-Shader "Sunao Shader/[Stencil Outline]/Cutout" {
+Shader "Sunao Shader/[Stencil]/Write" {
 
 
 	Properties {
@@ -67,7 +67,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		_DecalAnimY        ("Animation Y Size"          , int) = 1
 
 
-		_StencilNumb       ("Stencil Number"            , int) = 2
+		_StencilNumb       ("Stencil Number"            , int) = 4
 		[Enum(NotEqual , 6 , Equal , 3 , Less , 2 , LessEqual , 4 , Greater , 5 , GreaterEqual , 7)]
 		_StencilCompMode   ("Stencil Compare Mode"      , int) = 6
 
@@ -252,7 +252,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		[HideInInspector] _RimLightingFO   ("Rim Lighting FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
-		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 5
+		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 7
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 0
 		[HideInInspector] _VersionM        ("Version M"         , int) = 0
@@ -308,9 +308,15 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 				"LightMode"  = "ForwardAdd"
 			}
 
-			Cull [_Culling]
+			Cull Front
 			Blend One One
 			ZWrite Off
+
+			Stencil {
+				Ref  [_StencilNumb]
+				Comp Always
+				Pass Replace
+			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -319,10 +325,10 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 			#pragma multi_compile_fog
 			#pragma target 4.5
 
-			#define PASS_FA
+			#define PASS_OL_FA
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_Core.cginc"
+			#include "./cginc/SunaoShader_OL.cginc"
 
 			ENDCG
 		}
@@ -338,7 +344,8 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 
 			Stencil {
 				Ref  [_StencilNumb]
-				Comp NotEqual
+				Comp Always
+				Pass Replace
 			}
 
 			CGPROGRAM
@@ -362,13 +369,14 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 				"LightMode"  = "ForwardAdd"
 			}
 
-			Cull Front
+			Cull [_Culling]
 			Blend One One
 			ZWrite Off
 
 			Stencil {
 				Ref  [_StencilNumb]
-				Comp NotEqual
+				Comp Always
+				Pass Replace
 			}
 
 			CGPROGRAM
@@ -378,13 +386,14 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 			#pragma multi_compile_fog
 			#pragma target 4.5
 
-			#define PASS_OL_FA
+			#define PASS_FA
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_OL.cginc"
+			#include "./cginc/SunaoShader_Core.cginc"
 
 			ENDCG
 		}
+
 
 
 		Pass {
@@ -409,7 +418,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		}
 	}
 
-	FallBack "Transparent/Cutout/Diffuse"
+	FallBack "Diffuse"
 
 	CustomEditor "SunaoShader.GUI"
 }

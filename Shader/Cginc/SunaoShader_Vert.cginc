@@ -62,7 +62,7 @@ VOUT vert (VIN v) {
 		o.decal2.zw  = o.decal2.xy * 0.5f;
 
 		o.decal.xy   = 1.0f / max(o.decal2.xy , 0.00001f);
-		o.decal.z    = cos(0.017453293f * _DecalRotation);		//0.017453293 = PI / 180
+		o.decal.z    = cos(0.017453293f * _DecalRotation);		//0.017453293 = π/180
 		o.decal.w    = sin(0.017453293f * _DecalRotation);
 	}
 
@@ -104,6 +104,10 @@ VOUT vert (VIN v) {
 			o.shmax  = MonoColor(o.shmax);
 			o.shmin  = MonoColor(o.shmin);
 		}
+
+		o.shmax      = max(o.shmax , _MinimumLight        );
+		o.shmin      = max(o.shmin , _MinimumLight * 0.75f);
+
 	#endif
 
 //-------------------------------------Vertexライト

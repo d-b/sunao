@@ -9,7 +9,7 @@
 // see LICENSE or http://sunao.orz.hm/agenasulab/ss/LICENSE
 //--------------------------------------------------------------
 
-Shader "Sunao Shader/[Stencil Outline]/Cutout" {
+Shader "Sunao Shader/[Stencil]/Read" {
 
 
 	Properties {
@@ -67,7 +67,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		_DecalAnimY        ("Animation Y Size"          , int) = 1
 
 
-		_StencilNumb       ("Stencil Number"            , int) = 2
+		_StencilNumb       ("Stencil Number"            , int) = 4
 		[Enum(NotEqual , 6 , Equal , 3 , Less , 2 , LessEqual , 4 , Greater , 5 , GreaterEqual , 7)]
 		_StencilCompMode   ("Stencil Compare Mode"      , int) = 6
 
@@ -252,7 +252,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		[HideInInspector] _RimLightingFO   ("Rim Lighting FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
-		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 5
+		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 6
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 0
 		[HideInInspector] _VersionM        ("Version M"         , int) = 0
@@ -269,7 +269,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		Tags {
 			"IgnoreProjector" = "True"
 			"RenderType"      = "TransparentCutout"
-			"Queue"           = "AlphaTest"
+			"Queue"           = "AlphaTest+1"
 		}
 
 
@@ -283,8 +283,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 
 			Stencil {
 				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
+				Comp [_StencilCompMode]
 			}
 
 			CGPROGRAM
@@ -312,6 +311,11 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 			Blend One One
 			ZWrite Off
 
+			Stencil {
+				Ref  [_StencilNumb]
+				Comp [_StencilCompMode]
+			}
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -338,7 +342,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 
 			Stencil {
 				Ref  [_StencilNumb]
-				Comp NotEqual
+				Comp [_StencilCompMode]
 			}
 
 			CGPROGRAM
@@ -368,7 +372,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 
 			Stencil {
 				Ref  [_StencilNumb]
-				Comp NotEqual
+				Comp [_StencilCompMode]
 			}
 
 			CGPROGRAM
@@ -395,6 +399,11 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 			ZWrite On
 			ZTest LEqual
 
+			Stencil {
+				Ref  [_StencilNumb]
+				Comp [_StencilCompMode]
+			}
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -409,7 +418,7 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		}
 	}
 
-	FallBack "Transparent/Cutout/Diffuse"
+	FallBack "Diffuse"
 
 	CustomEditor "SunaoShader.GUI"
 }

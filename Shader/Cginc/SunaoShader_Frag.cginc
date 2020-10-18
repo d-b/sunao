@@ -29,11 +29,22 @@ float4 frag (VOUT IN) : COLOR {
 
 		float2   DecalUV       = (float2)0.0f;
 		float2x2 DecalRot      = float2x2(IN.decal.z, -IN.decal.w, IN.decal.w, IN.decal.z);
-		         DecalUV       = IN.uv  - float2(_DecalPosX , _DecalPosY) + IN.decal2.zw;
+
+		if  (_DecalMirror <  4) {
+			DecalUV    = IN.uv   - float2(_DecalPosX , _DecalPosY) + IN.decal2.zw;
+		} else {
+			DecalUV.x  = 0.5f + (floor(_DecalPosX + 0.5f) - 0.5f) * abs(2.0f * IN.uv.x -1.0f);
+			DecalUV.y  = IN.uv.y;
+			DecalUV    = DecalUV - float2(_DecalPosX , _DecalPosY) + IN.decal2.zw;
+		}
 
 		if ((_DecalMirror == 1) || (_DecalMirror == 3)) {
-			DecalUV = lerp(DecalUV , float2(-DecalUV.x , DecalUV.y) , saturate(IN.tangent.w));
+			DecalUV    = lerp(DecalUV , float2(-DecalUV.x , DecalUV.y) , saturate(IN.tangent.w));
 			DecalUV.x += IN.decal2.z * saturate(IN.tangent.w) * 2.0f;
+		}
+		if  (_DecalMirror == 5) {
+			DecalUV    = lerp(DecalUV , float2(-DecalUV.x , DecalUV.y) , floor(IN.uv.x + 0.5f));
+			DecalUV.x += IN.decal2.z * floor(IN.uv.x + 0.5f) * 2.0f;
 		}
 
 		         DecalUV       = mul(DecalRot, DecalUV - IN.decal2.zw) + IN.decal2.zw;

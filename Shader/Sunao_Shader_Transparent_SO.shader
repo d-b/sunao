@@ -1,5 +1,5 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.3.2
+//              Sunao Shader    Ver 1.4.0
 //
 //                      Copyright (c) 2020 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
@@ -16,7 +16,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 		[NoScaleOffset]
 		_MainTex           ("Main Texture"              , 2D) = "white" {}
-		_Color             ("Color"                     ,  Color) = (1,1,1,1)
+		_Color             ("Color"                     , Color) = (1,1,1,1)
 		_Alpha             ("Alpha"                     , Range( 0.0,  2.0)) = 1.0
 		_Cutout            ("Cutout"                    , Range( 0.0,  1.0)) = 0.5
 
@@ -44,19 +44,20 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[SToggle]
 		_UVAnimOtherTex    ("Animation Other Maps"      , int) = 1
 
+
 		[SToggle]
 		_DecalEnable       ("Enable Decal"              , int) = 0
 		_DecalTex          ("Decal Texture"             , 2D) = "white" {}
-		_DecalColor        ("Decal Color"               ,  Color) = (1,1,1,1)
+		_DecalColor        ("Decal Color"               , Color) = (1,1,1,1)
 		_DecalPosX         ("Position X"                , Range( 0.0, 1.0)) = 0.5
 		_DecalPosY         ("Position Y"                , Range( 0.0, 1.0)) = 0.5
 		_DecalSizeX        ("Size X"                    , Range( 0.0, 1.0)) = 0.5
 		_DecalSizeY        ("Size Y"                    , Range( 0.0, 1.0)) = 0.5
 		_DecalRotation     ("Rotation"                  , Range(-180.0, 180.0)) = 0.0
 
-		[Enum(Override , 0 ,Add , 1 , Multiply , 2 , Multiply(Mono) , 3)]
+		[Enum(Override , 0 , Add , 1 , Multiply , 2 , Multiply(Mono) , 3)]
 		_DecalMode         ("Decal Mode"                , int) = 0
-		[Enum(Normal , 0 ,Fixed , 1 , Mirror1 , 2 , Mirror2 , 3)]
+		[Enum(Normal , 0 , Fixed , 1 , Mirror1 , 2 , Mirror2 , 3 , Copy(Mirror) , 4 , Copy(Fixed) , 5)]
 		_DecalMirror       ("Decal Mirror Mode"         , int) = 0
 
 		_DecalScrollX      ("Scroll X"                  , Range(-10.0, 10.0)) = 0.0
@@ -64,6 +65,11 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		_DecalAnimation    ("Animation Speed"           , Range(  0.0, 10.0)) = 0.0
 		_DecalAnimX        ("Animation X Size"          , int) = 1
 		_DecalAnimY        ("Animation Y Size"          , int) = 1
+
+
+		_StencilNumb       ("Stencil Number"            , int) = 2
+		[Enum(NotEqual , 6 , Equal , 3 , Less , 2 , LessEqual , 4 , Greater , 5 , GreaterEqual , 7)]
+		_StencilCompMode   ("Stencil Compare Mode"      , int) = 6
 
 
 		[NoScaleOffset]
@@ -218,6 +224,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		_PointLight        ("Point Light"               , Range( 0.0,  2.0)) = 1.0
 		[SToggle]
 		_LightLimitter     ("Light Limitter"            , int) = 1
+		_MinimumLight      ("Minimum Light Limit"       , Range( 0.0,  1.0)) = 0.0
 
 		[SToggle]
 		_EnableGammaFix    ("Enable Gamma Fix"          , int) = 0
@@ -245,7 +252,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[HideInInspector] _RimLightingFO   ("Rim Lighting FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
-		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 1
+		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 4
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 0
 		[HideInInspector] _VersionM        ("Version M"         , int) = 0
@@ -275,7 +282,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 			ZWrite [_EnableZWrite]
 
 			Stencil {
-				Ref 2
+				Ref  [_StencilNumb]
 				Comp Always
 				Pass Replace
 			}
@@ -297,6 +304,30 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		}
 
 
+		Pass {
+			Tags {
+				"LightMode"  = "ForwardAdd"
+			}
+
+			Cull [_Culling]
+			Blend SrcAlpha One
+			ZWrite Off
+
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_fwdadd
+			#pragma multi_compile_fog
+			#pragma target 4.5
+
+			#define PASS_FA
+			#define TRANSPARENT
+
+			#include "./cginc/SunaoShader_Core.cginc"
+
+			ENDCG
+		}
+
 
 		Pass {
 			Tags {
@@ -308,7 +339,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 			ZWrite [_EnableZWrite]
 
 			Stencil {
-				Ref 2
+				Ref  [_StencilNumb]
 				Comp NotEqual
 			}
 
@@ -338,7 +369,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 			ZWrite Off
 
 			Stencil {
-				Ref 2
+				Ref  [_StencilNumb]
 				Comp NotEqual
 			}
 
@@ -353,31 +384,6 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 			#define TRANSPARENT
 
 			#include "./cginc/SunaoShader_OL.cginc"
-
-			ENDCG
-		}
-
-
-		Pass {
-			Tags {
-				"LightMode"  = "ForwardAdd"
-			}
-
-			Cull [_Culling]
-			Blend SrcAlpha One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fwdadd
-			#pragma multi_compile_fog
-			#pragma target 4.5
-
-			#define PASS_FA
-			#define TRANSPARENT
-
-			#include "./cginc/SunaoShader_Core.cginc"
 
 			ENDCG
 		}

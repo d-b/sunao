@@ -35,6 +35,7 @@ namespace SunaoShader {
 		MaterialProperty UVAnimX;
 		MaterialProperty UVAnimY;
 		MaterialProperty UVAnimOtherTex;
+
 		MaterialProperty DecalEnable;
 		MaterialProperty DecalTex;
 		MaterialProperty DecalColor;
@@ -51,6 +52,8 @@ namespace SunaoShader {
 		MaterialProperty DecalAnimX;
 		MaterialProperty DecalAnimY;
 
+		MaterialProperty StencilNumb;
+		MaterialProperty StencilCompMode;
 
 		MaterialProperty ShadeMask;
 		MaterialProperty Shade;
@@ -146,6 +149,7 @@ namespace SunaoShader {
 		MaterialProperty SHLight;
 		MaterialProperty PointLight;
 		MaterialProperty LightLimitter;
+		MaterialProperty MinimumLight;
 		MaterialProperty EnableGammaFix;
 		MaterialProperty GammaR;
 		MaterialProperty GammaG;
@@ -170,8 +174,8 @@ namespace SunaoShader {
 		bool    OnceRun           = true;
 
 		int     Version_H         = 1;
-		int     Version_M         = 3;
-		int     Version_L         = 2;
+		int     Version_M         = 4;
+		int     Version_L         = 0;
 
 		int     VersionC          = 0;
 		int     VersionM          = 0;
@@ -180,8 +184,46 @@ namespace SunaoShader {
 
 			var mat = (Material)ME.target;
 
-			bool Shader_Cutout      = mat.shader.name.Contains("Cutout");
-			bool Shader_Transparent = mat.shader.name.Contains("Transparent");
+			bool Shader_Opaque      = mat.shader.name.Contains("Opaque"           );
+			bool Shader_Transparent = mat.shader.name.Contains("Transparent"      );
+			bool Shader_Cutout      = mat.shader.name.Contains("Cutout"           );
+			bool Shader_StencilOut  = mat.shader.name.Contains("[Stencil Outline]");
+			bool Shader_Stencil     = mat.shader.name.Contains("[Stencil]"        );
+			bool Shader_StencilRW   = mat.shader.name.Contains("Read"             );
+
+			int  Shader_Type        = 0;
+			int  Previous_Type      = mat.GetInt("_SunaoShaderType");
+
+			if (Shader_Opaque) {
+				if (Shader_StencilOut) {
+					Shader_Type = 3;
+				} else {
+					Shader_Type = 0;
+				}
+			}
+			if (Shader_Transparent) {
+				if (Shader_StencilOut) {
+					Shader_Type = 4;
+				} else {
+					Shader_Type = 1;
+				}
+			}
+			if (Shader_Cutout) {
+				if (Shader_StencilOut) {
+					Shader_Type = 5;
+				} else {
+					Shader_Type = 2;
+				}
+			}
+			if (Shader_Stencil) {
+				if (Shader_StencilRW) {
+					Shader_Type = 6;
+				} else {
+					Shader_Type = 7;
+				}
+			}
+
+			if ((Shader_Type) != (Previous_Type)) OnceRun = true;
 
 
 			MainTex           = FindProperty("_MainTex"           , Prop , false);
@@ -219,6 +261,9 @@ namespace SunaoShader {
 			DecalAnimation    = FindProperty("_DecalAnimation"    , Prop , false);
 			DecalAnimX        = FindProperty("_DecalAnimX"        , Prop , false);
 			DecalAnimY        = FindProperty("_DecalAnimY"        , Prop , false);
+
+			StencilNumb       = FindProperty("_StencilNumb"       , Prop , false);
+			StencilCompMode   = FindProperty("_StencilCompMode"   , Prop , false);
 
 			ShadeMask         = FindProperty("_ShadeMask"         , Prop , false);
 			Shade             = FindProperty("_Shade"             , Prop , false);
@@ -316,6 +361,7 @@ namespace SunaoShader {
 			SHLight           = FindProperty("_SHLight"           , Prop , false);
 			PointLight        = FindProperty("_PointLight"        , Prop , false);
 			LightLimitter     = FindProperty("_LightLimitter"     , Prop , false);
+			MinimumLight      = FindProperty("_MinimumLight"      , Prop , false);
 			EnableGammaFix    = FindProperty("_EnableGammaFix"    , Prop , false);
 			GammaR            = FindProperty("_GammaR"            , Prop , false);
 			GammaG            = FindProperty("_GammaG"            , Prop , false);
@@ -330,15 +376,18 @@ namespace SunaoShader {
 			if (OnceRun) {
 				OnceRun = false;
 
-				if ((Shader_Cutout == false) && (Shader_Transparent == false)) {
-					mat.SetInt ("_SunaoShaderType" , 0);
+				if (Shader_StencilOut) {
+					if ((Previous_Type < 3) || (5 < Previous_Type)) {
+						mat.SetInt("_StencilNumb" , 2);
+					}
 				}
-				if (Shader_Transparent == true) {
-					mat.SetInt ("_SunaoShaderType" , 1);
+				if (Shader_Stencil) {
+					if  (Previous_Type < 6) {
+						mat.SetInt("_StencilNumb" , 4);
+					}
 				}
-				if (Shader_Cutout == true) {
-					mat.SetInt ("_SunaoShaderType" , 2);
-				}
+
+				mat.SetInt("_SunaoShaderType" , Shader_Type);
 
 				VersionC = Version_H               * 10000 + Version_M               * 100 + Version_L;
 				VersionM = mat.GetInt("_VersionH") * 10000 + mat.GetInt("_VersionM") * 100 + mat.GetInt("_VersionL");
@@ -355,6 +404,7 @@ namespace SunaoShader {
 					mat.DisableKeyword(Key);
 				}
 			}
+
 
 			if (VersionC < VersionM) {
 				using (new EditorGUILayout.VerticalScope("box")) {
@@ -374,6 +424,7 @@ namespace SunaoShader {
 				}
 			}
 
+
 			GUILayout.Label("Main", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
@@ -387,11 +438,12 @@ namespace SunaoShader {
 
 					if (Shader_Cutout     ) ME.ShaderProperty(Cutout , new GUIContent("Cutout"));
 					if (Shader_Transparent) ME.ShaderProperty(Alpha  , new GUIContent("Alpha" ));
+					if (Shader_Stencil    ) ME.ShaderProperty(Cutout , new GUIContent("Cutout"));
 
 
 					ME.TexturePropertySingleLine(new GUIContent("Normal Map") , BumpMap     );
 					ME.TexturePropertySingleLine(new GUIContent("Occlusion" ) , OcclusionMap);
-					if (Shader_Cutout || Shader_Transparent) ME.TexturePropertySingleLine(new GUIContent("Alpha Mask") , AlphaMask);
+					if (Shader_Cutout || Shader_Transparent || Shader_Stencil) ME.TexturePropertySingleLine(new GUIContent("Alpha Mask") , AlphaMask);
 
 
 					EditorGUI.indentLevel ++;
@@ -411,7 +463,7 @@ namespace SunaoShader {
 							ME.ShaderProperty(OcclusionStrength , new GUIContent("Occlusion Strength"));
 							ME.ShaderProperty(OcclusionMode     , new GUIContent("Occlusion Mode"    ));
 						}
-						if ((AlphaMask.textureValue   != null) && (Shader_Cutout || Shader_Transparent)) {
+						if ((AlphaMask.textureValue   != null) && (Shader_Cutout || Shader_Transparent || Shader_Stencil)) {
 							ME.ShaderProperty(AlphaMaskStrength , new GUIContent("Alpha Mask Strength"));
 						}
 
@@ -479,6 +531,23 @@ namespace SunaoShader {
 
 						EditorGUI.indentLevel --;
 
+					}
+				}
+			}
+
+
+			if ((Shader_Stencil) || (Shader_StencilOut)) {
+
+				GUILayout.Label("Stencil", EditorStyles.boldLabel);
+
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					ME.ShaderProperty(StencilNumb , new GUIContent("Stencil Number"));
+					if (mat.GetInt("_StencilNumb") <   0) mat.SetInt("_StencilNumb" ,   0);
+					if (mat.GetInt("_StencilNumb") > 255) mat.SetInt("_StencilNumb" , 255);
+	
+					if (Shader_StencilRW) {
+						ME.ShaderProperty(StencilCompMode , new GUIContent("Stencil Compare Mode"));
 					}
 				}
 			}
@@ -854,6 +923,7 @@ namespace SunaoShader {
 						ME.ShaderProperty(SHLight          , new GUIContent("SH Light Intensity"         ));
 						ME.ShaderProperty(PointLight       , new GUIContent("Point/Spot Light Intensity" ));
 						ME.ShaderProperty(LightLimitter    , new GUIContent("Light Intensity Limitter"   ));
+						ME.ShaderProperty(MinimumLight     , new GUIContent("Minimum Light Limit"        ));
 
 					}
 
