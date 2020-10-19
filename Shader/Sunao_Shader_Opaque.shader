@@ -95,6 +95,7 @@ Shader "Sunao Shader/Opaque" {
 		[SToggle]
 		_MonochromeLit     ("Monochrome Lighting"       , int) = 0
 
+
 		[SToggle]
 		_HSVShiftEnable    ("Enable HSV Shift"          , int) = 0
 		_HSVShiftMask      ("HSV Shift Mask"            , 2D) = "white" {}
@@ -118,6 +119,7 @@ Shader "Sunao Shader/Opaque" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftCrosshatchMode ("Crosshatch Mode"			, int) = 0
 
+
 		[SToggle]
 		_StippleEnable     ("Enable Stippling"          , int) = 0
 		_StippleMask       ("Stipple Mask"              , 2D) = "white" {}
@@ -138,6 +140,7 @@ Shader "Sunao Shader/Opaque" {
 		_CrosshatchTexture ("Crosshatch Texture"        , 2D) = "black" {}
 		_CrosshatchEmissionMap ("Crosshatch Emission Mask", 2D) = "black" {}
 		_CrosshatchAmount  ("Crosshatch Amount"         , Range( 0.0,  1.0)) = 0.5
+
 
 		_VertexColorThreshold ("Vertex Alpha 1", Range(0.0,  1.0)) = 0.9999
 		_VertexColor01  	 ("Vertex Color 1"            , Color) = (0,0,0)
@@ -172,6 +175,7 @@ Shader "Sunao Shader/Opaque" {
 		_VertexAlpha15  	 ("Vertex Alpha 15"            , Range(0.0,  1.0)) = 1.0
 		_VertexColor16  	 ("Vertex Color 16"            , Color) = (0,0,0)
 		_VertexAlpha16  	 ("Vertex Alpha 16"            , Range(0.0,  1.0)) = 1.0
+
 
 		[SToggle]
 		_OutLineEnable     ("Enable Outline"            , int) = 0
