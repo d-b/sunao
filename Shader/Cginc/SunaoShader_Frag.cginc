@@ -152,6 +152,13 @@ float4 frag (VOUT IN) : COLOR {
 //----Apply vertex alpha
 	OUT.a *= IN.alpha;
 
+// Mirror control
+	#if WHEN_OPT(PROP_MIRROR_CONTROL_ENABLE == 1)
+	OPT_IF(_MirrorControlEnable)
+		if (IsInMirror()) OUT.a *= _MirrorCopyAlpha;
+		else OUT.a *= _RealCopyAlpha;
+	OPT_FI
+	#endif
 //-------------------------------------カットアウト
 	#ifdef CUTOUT
 		clip(OUT.a - _Cutout);
