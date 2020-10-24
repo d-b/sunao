@@ -70,6 +70,10 @@ namespace SunaoShader {
 		MaterialProperty Unlit;
 		MaterialProperty MonochromeLit;
 
+		MaterialProperty MirrorControlEnable;
+		MaterialProperty MirrorCopyAlpha;
+		MaterialProperty RealCopyAlpha;
+
 		MaterialProperty HSVShiftEnable;
 		MaterialProperty HSVShiftMask;
 		MaterialProperty HSVShiftHue;
@@ -348,6 +352,10 @@ namespace SunaoShader {
 			LightBoost        = FindProperty("_LightBoost"        , Prop , false);
 			Unlit             = FindProperty("_Unlit"             , Prop , false);
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
+
+			MirrorControlEnable = FindProperty("_MirrorControlEnable", Prop, false);
+			MirrorCopyAlpha   = FindProperty("_MirrorCopyAlpha"   , Prop , false);
+			RealCopyAlpha     = FindProperty("_RealCopyAlpha"     , Prop , false);
 
 			HSVShiftEnable    = FindProperty("_HSVShiftEnable"    , Prop , false);
 			HSVShiftMask      = FindProperty("_HSVShiftMask"      , Prop , false);
@@ -791,6 +799,15 @@ namespace SunaoShader {
 					ME.ShaderProperty(MonochromeLit , new GUIContent("Monochrome Lighting"));
 
 				}
+			}
+
+
+			GUILayout.Label("Mirror Control", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				ME.ShaderProperty(MirrorControlEnable, new GUIContent("Enable Mirror Control"));
+				ME.ShaderProperty(RealCopyAlpha, new GUIContent("Real Copy Alpha"));
+				ME.ShaderProperty(MirrorCopyAlpha, new GUIContent("Mirror Copy Alpha"));
 			}
 
 

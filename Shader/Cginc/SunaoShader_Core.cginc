@@ -67,6 +67,11 @@
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
 
+//----Mirror control
+	uniform bool      _MirrorControlEnable;
+	uniform float     _MirrorCopyAlpha;
+	uniform float     _RealCopyAlpha;
+
 //----Hue Shift
 	uniform bool      _HSVShiftEnable;
 	UNITY_DECLARE_TEX2D(_HSVShiftMask);

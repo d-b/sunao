@@ -97,6 +97,12 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 
 		[SToggle]
+		_MirrorControlEnable ("Enable Mirror Control" , int) = 0
+		_RealCopyAlpha	   ("Real Copy Alpha"           , Range( 0.0,  1.0)) = 1.0
+		_MirrorCopyAlpha	 ("Mirror Copy Alpha"         , Range( 0.0,  1.0)) = 1.0
+
+
+		[SToggle]
 		_HSVShiftEnable    ("Enable HSV Shift"          , int) = 0
 		_HSVShiftMask      ("HSV Shift Mask"            , 2D) = "white" {}
 		_HSVShiftHue  		 ("Hue Shift"                 , Range( 0.0,  1.0)) = 0.0
