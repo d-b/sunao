@@ -82,6 +82,7 @@
 	uniform float 		_HSVShiftVal;
 	uniform uint 		  _HSVShiftBaseMode;
 	uniform uint 		  _HSVShiftShadeMode;
+	uniform uint 		  _HSVShiftSpecularMode;
 	uniform uint 		  _HSVShiftEmissionMode;
 	uniform uint 		  _HSVShiftOutlineMode;
 	uniform uint 		  _HSVShiftRimMode;

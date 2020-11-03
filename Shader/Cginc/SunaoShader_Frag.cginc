@@ -98,6 +98,8 @@ float4 frag (VOUT IN) : COLOR {
 		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
 		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
 		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftSpecularMode == 1) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_masked);
+		if (_HSVShiftSpecularMode == 2) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_unmasked);
 		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
 		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
 	OPT_FI
