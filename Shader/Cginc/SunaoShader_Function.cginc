@@ -131,22 +131,12 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	return specular;
 }
 
-float3 ToonAnisoSpecularCalc(float3 normal, float4 tangent, float3 ldir, float3 view, fixed gradientStart, fixed gradientEnd, float jitter)
+float3 ToonSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
 {
-  float3 bitangent = Bitangent(normal, tangent);
+  float NdotL = dot(ldir + view, normal);
+  float NdotLO = dot(view + float3(0.0, offset, 0.0), normal);
 
-  bitangent += jitter;
-
-  float NdotL = dot(ldir, normal);
-  float TdotL = dot(ldir, bitangent);
-  float TdotV = dot(view, bitangent);
-
-  float specular = saturate(sqrt(1.0 - (TdotL * TdotL)) * sqrt(1.0 - (TdotV * TdotV)) - TdotL * TdotV);
-  fixed smoothAlpha = specular;
-
-  specular = smoothstep(gradientStart, gradientEnd, smoothAlpha);
-
-  return saturate(NdotL) * specular;
+  return saturate(NdotL * pow(sqrt(1.0 - NdotLO * NdotLO), sharpness));
 }
 
 //-------------------------------------環境マッピングの計算

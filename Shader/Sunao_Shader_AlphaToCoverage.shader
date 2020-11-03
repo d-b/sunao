@@ -46,6 +46,7 @@ Shader "Sunao Shader/AlphaToCoverage" {
 		[SToggle]
 		_UVAnimOtherTex    ("Animation Other Maps"      , int) = 1
 
+
 		[SToggle]
 		_DecalEnable       ("Enable Decal"              , int) = 0
 		_DecalTex          ("Decal Texture"             , 2D) = "white" {}
@@ -99,7 +100,6 @@ Shader "Sunao Shader/AlphaToCoverage" {
 		_MirrorControlEnable ("Enable Mirror Control" , int) = 0
 		_RealCopyAlpha	   ("Real Copy Alpha"           , Range( 0.0,  1.0)) = 1.0
 		_MirrorCopyAlpha	 ("Mirror Copy Alpha"         , Range( 0.0,  1.0)) = 1.0
-
 
 
 		[SToggle]
@@ -254,6 +254,16 @@ Shader "Sunao Shader/AlphaToCoverage" {
 		[SToggle]
 		_IgnoreTexAlphaPE  ("Ignore Texture Alpha"      , int) = 0
 		_ParallaxInTheDark ("Only in the Dark"          , Range(  0.0,  1.0)) = 0.0
+
+
+		[SToggle]
+		_ToonSpecEnable    ("Enable Toon Specular"      , int) = 0
+		_ToonSpecMask      ("Specular Mask"             , 2D) = "white" {}
+		[HDR]
+		_ToonSpecColor 		 ("Specular Color"            , Color) = (1,1,1)
+		_ToonSpecOffset    ("Specular Offset"           , Range(-10.0, 10.0)) = -2.0
+		_ToonSpecIntensity ("Specular Intensity"        , Range( 0.0,  10.0)) = 1.0
+		_ToonSpecSharpness ("Specular Sharpness"        , Range( 0.0,  1000.0)) = 500.0
 
 
 		[SToggle]
