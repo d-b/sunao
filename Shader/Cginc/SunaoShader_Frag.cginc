@@ -349,6 +349,8 @@ float4 frag (VOUT IN) : COLOR {
 
 //-------------------------------------リフレクション
 	float  Smoothness   = 0.0f;
+	float3 ToonSpec 		= (float3)0.0f;
+	float3 ToonSpecMask = (float3)0.0f;
 	float3 SpecularMask = (float3)0.0f;
 	float3 ReflectMask  = (float3)0.0f;
 	float  MatCapSmooth = 0.0f;
@@ -356,6 +358,22 @@ float4 frag (VOUT IN) : COLOR {
 	float3 Specular     = (float3)0.0f;
 	float3 Reflection   = (float3)0.0f;
 	float3 MatCapture   = (float3)0.0f;
+
+	#if WHEN_OPT(PROP_TOON_SPEC_ENABLE == 1)
+	OPT_IF(_ToonSpecEnable)
+		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
+
+		float3 RLToonSpec = ToonSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
+
+		#ifdef PASS_FB
+			float SHToonSpec = ToonSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
+			ToonSpec = (RLToonSpec + SHToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+		#endif
+		#ifdef PASS_FA
+			ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+		#endif
+	OPT_FI
+	#endif
 
 	#if WHEN_OPT(PROP_REFLECTION_ENABLE == 1)
 	OPT_IF(_ReflectionEnable)
@@ -431,8 +449,8 @@ float4 frag (VOUT IN) : COLOR {
 		if (_SpecularTexColor ) Specular    *= Color;
 		if (_MetallicTexColor ) Reflection  *= Color;
 		if (_MatCapTexColor   ) MatCapture  *= Color;
-OPT_FI
-#endif
+	OPT_FI
+	#endif
 
 //-------------------------------------リムライティング
 	float3 RimLight = (float3)0.0f;
@@ -462,6 +480,7 @@ OPT_FI
 	       OUT.rgb      = lerp(OUT.rgb , Color , _Unlit);
 	       OUT.rgb      = lerp(OUT.rgb , Reflection , _Metallic * ReflectMask);
 	       OUT.rgb     += Specular;
+	       OUT.rgb     += Specular   * SpecularMask;
 	       OUT.rgb     += MatCapture;
 
 //----リムライティング混合

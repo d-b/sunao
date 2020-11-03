@@ -187,6 +187,13 @@ namespace SunaoShader {
 		MaterialProperty IgnoreTexAlphaPE;
 		MaterialProperty ParallaxInTheDark;
 
+		MaterialProperty ToonSpecEnable;
+		MaterialProperty ToonSpecMask;
+		MaterialProperty ToonSpecColor;
+		MaterialProperty ToonSpecOffset;
+		MaterialProperty ToonSpecIntensity;
+		MaterialProperty ToonSpecSharpness;
+
 		MaterialProperty ReflectionEnable;
 		MaterialProperty MetallicGlossMap;
 		MaterialProperty GlossColor;
@@ -478,6 +485,13 @@ namespace SunaoShader {
 			IgnoreTexAlphaPE  = FindProperty("_IgnoreTexAlphaPE"  , Prop , false);
 			ParallaxInTheDark = FindProperty("_ParallaxInTheDark" , Prop , false);
 
+			ToonSpecEnable 		= FindProperty("_ToonSpecEnable"    , Prop , false);
+			ToonSpecMask      = FindProperty("_ToonSpecMask"      , Prop , false);
+			ToonSpecColor     = FindProperty("_ToonSpecColor"     , Prop , false);
+			ToonSpecOffset    = FindProperty("_ToonSpecOffset"    , Prop , false);
+			ToonSpecIntensity = FindProperty("_ToonSpecIntensity" , Prop , false);
+			ToonSpecSharpness = FindProperty("_ToonSpecSharpness" , Prop , false);
+
 			ReflectionEnable  = FindProperty("_ReflectionEnable"  , Prop , false);
 			MetallicGlossMap  = FindProperty("_MetallicGlossMap"  , Prop , false);
 			GlossColor        = FindProperty("_GlossColor"        , Prop , false);
@@ -754,7 +768,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(StencilNumb , new GUIContent("Stencil Number"));
 					if (mat.GetInt("_StencilNumb") <   0) mat.SetInt("_StencilNumb" ,   0);
 					if (mat.GetInt("_StencilNumb") > 255) mat.SetInt("_StencilNumb" , 255);
-	
+
 					if (Shader_StencilRW) {
 						ME.ShaderProperty(StencilCompMode , new GUIContent("Stencil Compare Mode"));
 					}
@@ -1060,6 +1074,23 @@ namespace SunaoShader {
 
 					EditorGUI.indentLevel --;
 
+				}
+			}
+
+
+			GUILayout.Label("Toon Specular", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+
+				ME.ShaderProperty(ToonSpecEnable , new GUIContent("Enable Toon Specular"));
+
+				if (ToonSpecEnable.floatValue >= 0.5f) {
+					ME.TexturePropertySingleLine(new GUIContent("Specular Mask"), ToonSpecMask);
+					ME.TextureScaleOffsetProperty(ToonSpecMask);
+					ME.ShaderProperty(ToonSpecColor, new GUIContent("Specular Color"));
+					ME.ShaderProperty(ToonSpecOffset, new GUIContent("Specular Offset"));
+					ME.ShaderProperty(ToonSpecIntensity, new GUIContent("Specular Intensity"));
+					ME.ShaderProperty(ToonSpecSharpness, new GUIContent("Specular Sharpness"));
 				}
 			}
 

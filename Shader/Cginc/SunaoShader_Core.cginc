@@ -194,6 +194,15 @@
 	uniform bool      _IgnoreTexAlphaPE;
 	uniform float     _ParallaxInTheDark;
 
+//----Toon Specular
+	uniform bool      _ToonSpecEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ToonSpecMask);
+  uniform float4    _ToonSpecMask_ST;
+  uniform float     _ToonSpecOffset;
+	uniform float     _ToonSpecIntensity;
+	uniform float     _ToonSpecSharpness;
+	uniform float4    _ToonSpecColor;
+
 //----Reflection
 	uniform bool      _ReflectionEnable;
 	uniform sampler2D _MetallicGlossMap;
