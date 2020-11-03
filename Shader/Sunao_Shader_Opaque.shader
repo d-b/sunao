@@ -111,7 +111,9 @@ Shader "Sunao Shader/Opaque" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftBaseMode	("Base Mode"   								, int) = 1
 		[Enum(None , 0 , Mask , 1 , All , 2)]
-		_HSVShiftShadeMode	("Shade Mode"   						, int) = 0
+		_HSVShiftShadeMode ("Shade Mode"   				  		, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftSpecularMode ("Specular Mode"          , int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftEmissionMode	("Emission Mode" 					, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]

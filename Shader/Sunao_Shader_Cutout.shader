@@ -113,6 +113,8 @@ Shader "Sunao Shader/Cutout" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftShadeMode	("Shade Mode"   						, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftSpecularMode ("Specular Mode"          , int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftEmissionMode	("Emission Mode" 					, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftOutlineMode ("Outline Mode"        		, int) = 0
