@@ -134,9 +134,9 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 float3 ToonSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
 {
   float NdotL = dot(ldir + view, normal);
-  float NdotLO = dot(view + float3(0.0, offset, 0.0), normal);
+  float NdotVO = dot(view + float3(0.0, offset, 0.0), normal);
 
-  return saturate(NdotL * pow(sqrt(1.0 - NdotLO * NdotLO), sharpness));
+  return saturate(NdotL * pow(sqrt(1.0 - NdotVO * NdotVO), sharpness));
 }
 
 //-------------------------------------環境マッピングの計算
