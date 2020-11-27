@@ -197,12 +197,15 @@
 
 //----Toon Specular
 	uniform bool      _ToonSpecEnable;
+	uniform uint      _ToonSpecMode;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_ToonSpecMask);
   uniform float4    _ToonSpecMask_ST;
-  uniform float     _ToonSpecOffset;
-	uniform float     _ToonSpecIntensity;
-	uniform float     _ToonSpecSharpness;
 	uniform float4    _ToonSpecColor;
+	uniform float     _ToonSpecIntensity;
+  uniform float     _ToonSpecRoughnessT;
+	uniform float     _ToonSpecRoughnessB;
+  uniform float     _ToonSpecOffset;
+	uniform float     _ToonSpecSharpness;
 
 //----Reflection
 	uniform bool      _ReflectionEnable;

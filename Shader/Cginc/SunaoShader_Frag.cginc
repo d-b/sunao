@@ -365,20 +365,49 @@ float4 frag (VOUT IN) : COLOR {
 	OPT_IF(_ToonSpecEnable)
 		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
 
-		float3 RLToonSpec = ToonSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
+		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 0)
+		OPT_IF(_ToonSpecMode == 0)
+			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, IN.ldir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
 
-		#ifdef PASS_FB
-			float SHToonSpec = ToonSpecularCalc(Normal, IN.shdir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
-			float3 VL0ToonSpec = ToonSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
-			float3 VL1ToonSpec = ToonSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
-			float3 VL2ToonSpec = ToonSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
-			float3 VL3ToonSpec = ToonSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
+			#ifdef PASS_FB
+				float SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
+				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
+				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
+				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
+				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
 
-			ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+			#endif
+			#ifdef PASS_FA
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+			#endif
+		OPT_FI
 		#endif
-		#ifdef PASS_FA
-			ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+
+		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 1)
+		OPT_IF(_ToonSpecMode == 1)
+			float3 RLToonSpec = ToonViewOffSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
+
+			#ifdef PASS_FB
+				float SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
+				float3 VL0ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
+				float3 VL1ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
+				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
+				float3 VL3ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
+
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+			#endif
+			#ifdef PASS_FA
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+			#endif
+		OPT_FI
 		#endif
+	OPT_FI
+	#endif
+
+	#if WHEN_OPT(PROP_TOON_SPEC_ENABLE == 1)
+	OPT_IF(_ToonSpecEnable)
+		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
 	OPT_FI
 	#endif
 

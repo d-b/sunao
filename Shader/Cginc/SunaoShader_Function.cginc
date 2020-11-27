@@ -131,7 +131,20 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	return specular;
 }
 
-float3 ToonSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
+float3 ToonAnisoSpecularCalc(float3 normal, float4 tangent, float3 ldir, float3 view, float roughnessT, float roughnessB)
+{
+  float3 hv = normalize(ldir  + view);
+  float3 bitangent = Bitangent(normal, tangent);
+
+  float NdotL = dot(normal, hv);
+  float TdotL = dot(tangent, hv);
+  float BTdotL = dot(bitangent, hv);
+
+  float f = TdotL * TdotL / (roughnessT * roughnessT) + BTdotL * BTdotL / (roughnessB * roughnessB) + NdotL * NdotL;
+  return saturate(1.0 / (roughnessT * roughnessB * f * f));
+}
+
+float3 ToonViewOffSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
 {
   float NdotL = dot(ldir + view, normal);
   float NdotVO = dot(view + float3(0.0, offset, 0.0), normal);
