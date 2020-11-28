@@ -266,8 +266,8 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[HDR]
 		_ToonSpecColor 		 ("Specular Color"            , Color) = (1,1,1)
 		_ToonSpecIntensity ("Specular Intensity"        , Range( 0.0,  10.0)) = 1.0
-		_ToonSpecRoughnessT ("Specular Roughness X"     , Range( 0,    1.0)) = 1.0
-		_ToonSpecRoughnessB ("Specular Roughness Y"     , Range( 0,    1.0)) = 0.2
+		_ToonSpecRoughnessT ("Specular Roughness X"     , Range( 0,    1.0)) = 0.1
+		_ToonSpecRoughnessB ("Specular Roughness Y"     , Range( 0,    1.0)) = 0.02
 		_ToonSpecOffset    ("Specular Offset"           , Range(-10.0, 10.0)) = -2.0
 		_ToonSpecSharpness ("Specular Sharpness"        , Range( 0.0,  1000.0)) = 500.0
 
