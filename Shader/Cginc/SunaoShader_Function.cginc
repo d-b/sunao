@@ -84,12 +84,6 @@ float2 EmissionWave(uint mode , float blink , float freq , float offset) {
 	return wave;
 }
 
-//-------------------------------------Calculate bitangent
-float3 Bitangent(float3 normal, float4 tangent)
-{
-  return cross(normal, tangent.xyz) * (tangent.w * unity_WorldTransformParams.w);
-}
-
 //-------------------------------------ディフューズシェーディングの計算
 float  DiffuseCalc(float3 normal , float3 ldir , float gradient , float width) {
 	float Diffuse;
@@ -131,16 +125,15 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	return specular;
 }
 
-float3 ToonAnisoSpecularCalc(float3 normal, float4 tangent, float3 ldir, float3 view, float roughnessT, float roughnessB)
+float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, float3 ldir, float3 view, float roughnessT, float roughnessB)
 {
-  float3 hv = normalize(ldir  + view);
-  float3 bitangent = Bitangent(normal, tangent);
+  float3 hv = normalize(ldir + view);
 
-  float NdotL = dot(normal, hv);
-  float TdotL = dot(tangent, hv);
-  float BTdotL = dot(bitangent, hv);
+  float NdotH = dot(normal, hv);
+  float TdotH = dot(tangent, hv);
+  float BTdotH = dot(bitangent, hv);
 
-  float f = TdotL * TdotL / (roughnessT * roughnessT) + BTdotL * BTdotL / (roughnessB * roughnessB) + NdotL * NdotL;
+  float f = TdotH * TdotH / (roughnessT * roughnessT) + BTdotH * BTdotH / (roughnessB * roughnessB) + NdotH * NdotH;
   return saturate(1.0 / (roughnessT * roughnessB * f * f));
 }
 

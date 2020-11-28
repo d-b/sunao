@@ -186,6 +186,9 @@ float4 frag (VOUT IN) : COLOR {
 	       Normal.y     = dot(tan_sy , NormalMap);
 	       Normal.z     = dot(tan_sz , NormalMap);
 
+//-------------------------------------Bitangent
+	float3 Bitangent		= cross(Normal, IN.tanW) * IN.tangent.w * unity_WorldTransformParams.w;
+
 //-------------------------------------シェーディング
 	float3 ShadeMask    = UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMask , _MainTex , SubUV).rgb * _Shade;
 	float3 LightBoost   = 1.0f + (UNITY_SAMPLE_TEX2D_SAMPLER(_LightMask , _MainTex , SubUV).rgb * (_LightBoost - 1.0f));
@@ -367,14 +370,14 @@ float4 frag (VOUT IN) : COLOR {
 
 		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 0)
 		OPT_IF(_ToonSpecMode == 0)
-			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, IN.ldir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
+			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.ldir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
 
 			#ifdef PASS_FB
-				float SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
-				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
-				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
-				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
-				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
+				float SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
+				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
+				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
+				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
+				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
 
 				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
 			#endif
