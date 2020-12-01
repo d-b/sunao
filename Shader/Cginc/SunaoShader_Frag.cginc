@@ -22,6 +22,27 @@ float4 frag (VOUT IN) : COLOR {
 	float3 Color        = UNITY_SAMPLE_TEX2D(_MainTex , MainUV).rgb;
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
 
+//----HSV adjustments
+	#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
+	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
+	OPT_IF(_HSVShiftEnable)
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D(_HSVShiftMask, TRANSFORM_TEX(SubUV, _HSVShiftMask));
+		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
+		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
+		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
+
+		if (_HSVShiftBaseMode == 1) Color.rgb = HSVAdjust(Color.rgb, hsvadj_masked);
+		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
+		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
+		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftSpecularMode == 1) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_masked);
+		if (_HSVShiftSpecularMode == 2) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
+		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
+	OPT_FI
+	#endif
+
 //----デカール
   #if WHEN_OPT(PROP_DECAL_ENABLE == 1)
   OPT_IF(_DecalEnable)
@@ -59,6 +80,13 @@ float4 frag (VOUT IN) : COLOR {
 		if (_DecalMirror == 2) DecalColor.a = DecalColor.a * (1.0f - saturate(IN.tangent.w));
 		if (_DecalMirror == 3) DecalColor.a = DecalColor.a *         saturate(IN.tangent.w);
 
+		#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+		OPT_IF(_HSVShiftEnable)
+			if (_HSVShiftDecalMode == 1) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_masked);
+			if (_HSVShiftDecalMode == 2) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_unmasked);
+		OPT_FI
+		#endif		
+
 		#ifdef TRANSPARENT
 			if (_DecalMode == 0) {
 				Color        = lerp(Color , lerp(DecalColor.rgb , Color , OUT.a) , DecalColor.a);
@@ -81,27 +109,6 @@ float4 frag (VOUT IN) : COLOR {
 			float DecalMixCol = max(Color.r , max(Color.g , Color.b));
 			Color = lerp(Color , DecalMixCol * DecalColor.rgb , DecalColor.a);
 		}
-	OPT_FI
-	#endif
-
-//----HSV adjustments
-	#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
-	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
-	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
-	OPT_IF(_HSVShiftEnable)
-		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D(_HSVShiftMask, TRANSFORM_TEX(SubUV, _HSVShiftMask));
-		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
-		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
-		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
-
-		if (_HSVShiftBaseMode == 1) Color.rgb = HSVAdjust(Color.rgb, hsvadj_masked);
-		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
-		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
-		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
-		if (_HSVShiftSpecularMode == 1) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_masked);
-		if (_HSVShiftSpecularMode == 2) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_unmasked);
-		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
-		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
 	OPT_FI
 	#endif
 

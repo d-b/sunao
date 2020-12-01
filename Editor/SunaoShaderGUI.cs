@@ -80,6 +80,7 @@ namespace SunaoShader {
 		MaterialProperty HSVShiftSat;
 		MaterialProperty HSVShiftVal;
 		MaterialProperty HSVShiftBaseMode;
+		MaterialProperty HSVShiftDecalMode;
 		MaterialProperty HSVShiftShadeMode;
 		MaterialProperty HSVShiftSpecularMode;
 		MaterialProperty HSVShiftEmissionMode;
@@ -382,6 +383,7 @@ namespace SunaoShader {
 			HSVShiftSat       = FindProperty("_HSVShiftSat"       , Prop , false);
 			HSVShiftVal       = FindProperty("_HSVShiftVal"       , Prop , false);
 			HSVShiftBaseMode = FindProperty("_HSVShiftBaseMode" , Prop , false);
+			HSVShiftDecalMode = FindProperty("_HSVShiftDecalMode" , Prop , false);
 			HSVShiftShadeMode = FindProperty("_HSVShiftShadeMode" , Prop , false);
 			HSVShiftSpecularMode = FindProperty("_HSVShiftSpecularMode" , Prop , false);
 			HSVShiftEmissionMode = FindProperty("_HSVShiftEmissionMode" , Prop , false);
@@ -866,6 +868,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(HSVShiftSat, new GUIContent("Sat Shift"));
 					ME.ShaderProperty(HSVShiftVal, new GUIContent("Val Shift"));
 					ME.ShaderProperty(HSVShiftBaseMode, new GUIContent("Base Mode"));
+					ME.ShaderProperty(HSVShiftDecalMode, new GUIContent("Decal Mode"));
 					ME.ShaderProperty(HSVShiftShadeMode, new GUIContent("Shade Mode"));
 					ME.ShaderProperty(HSVShiftSpecularMode, new GUIContent("Specular Mode"));
 					ME.ShaderProperty(HSVShiftEmissionMode, new GUIContent("Emission Mode"));

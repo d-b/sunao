@@ -111,6 +111,8 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftBaseMode	("Base Mode"   								, int) = 1
 		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftDecalMode ("Decal Mode"   							, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftShadeMode ("Shade Mode"   					  	, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftSpecularMode ("Specular Mode"     	  	, int) = 0
