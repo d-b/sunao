@@ -202,6 +202,7 @@
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_ToonSpecMask);
   uniform float4    _ToonSpecMask_ST;
 	uniform float4    _ToonSpecColor;
+	uniform float     _ToonSpecMetallic;
 	uniform float     _ToonSpecIntensity;
   uniform float     _ToonSpecRoughnessT;
 	uniform float     _ToonSpecRoughnessB;

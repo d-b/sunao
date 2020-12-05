@@ -193,6 +193,7 @@ namespace SunaoShader {
 		MaterialProperty ToonSpecMode;
 		MaterialProperty ToonSpecMask;
 		MaterialProperty ToonSpecColor;
+		MaterialProperty ToonSpecMetallic;
 		MaterialProperty ToonSpecIntensity;
 		MaterialProperty ToonSpecRoughnessT;
 		MaterialProperty ToonSpecRoughnessB;
@@ -496,6 +497,7 @@ namespace SunaoShader {
 			ToonSpecMode  		= FindProperty("_ToonSpecMode"      , Prop , false);
 			ToonSpecMask      = FindProperty("_ToonSpecMask"      , Prop , false);
 			ToonSpecColor     = FindProperty("_ToonSpecColor"     , Prop , false);
+			ToonSpecMetallic  = FindProperty("_ToonSpecMetallic"  , Prop , false);
 			ToonSpecIntensity = FindProperty("_ToonSpecIntensity" , Prop , false);
 			ToonSpecRoughnessT = FindProperty("_ToonSpecRoughnessT", Prop, false);
 			ToonSpecRoughnessB = FindProperty("_ToonSpecRoughnessB", Prop, false);
@@ -1101,15 +1103,16 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Specular Mask"), ToonSpecMask);
 					ME.TextureScaleOffsetProperty(ToonSpecMask);
 					ME.ShaderProperty(ToonSpecColor, new GUIContent("Specular Color"));
-					ME.ShaderProperty(ToonSpecIntensity, new GUIContent("Specular Intensity"));
+					ME.ShaderProperty(ToonSpecMetallic, new GUIContent("Metallic"));
+					ME.ShaderProperty(ToonSpecIntensity, new GUIContent("Intensity"));
 
 					if (ToonSpecMode.floatValue >= 0.5f) {
-						ME.ShaderProperty(ToonSpecOffset, new GUIContent("Specular Offset"));
-						ME.ShaderProperty(ToonSpecSharpness, new GUIContent("Specular Sharpness"));
+						ME.ShaderProperty(ToonSpecOffset, new GUIContent("Offset"));
+						ME.ShaderProperty(ToonSpecSharpness, new GUIContent("Sharpness"));
 					}
 					else {
-						ME.ShaderProperty(ToonSpecRoughnessT, new GUIContent("Specular Roughness X"));
-						ME.ShaderProperty(ToonSpecRoughnessB, new GUIContent("Specular Roughness Y"));
+						ME.ShaderProperty(ToonSpecRoughnessT, new GUIContent("Roughness X"));
+						ME.ShaderProperty(ToonSpecRoughnessB, new GUIContent("Roughness Y"));
 					}
 				}
 			}

@@ -267,6 +267,7 @@ Shader "Sunao Shader/[Stencil Outline]/Opaque" {
 		_ToonSpecMask      ("Specular Mask"             , 2D) = "white" {}
 		[HDR]
 		_ToonSpecColor 		 ("Specular Color"            , Color) = (1,1,1)
+		_ToonSpecMetallic  ("Specular Metallic"         , Range( 0.0,  1.0)) = 0.0
 		_ToonSpecIntensity ("Specular Intensity"        , Range( 0.0,  10.0)) = 1.0
 		_ToonSpecRoughnessT ("Specular Roughness X"     , Range( 0,    1.0)) = 0.1
 		_ToonSpecRoughnessB ("Specular Roughness Y"     , Range( 0,    1.0)) = 0.02
