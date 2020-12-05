@@ -85,7 +85,7 @@ float4 frag (VOUT IN) : COLOR {
 			if (_HSVShiftDecalMode == 1) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_masked);
 			if (_HSVShiftDecalMode == 2) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_unmasked);
 		OPT_FI
-		#endif		
+		#endif
 
 		#ifdef TRANSPARENT
 			if (_DecalMode == 0) {
@@ -360,20 +360,22 @@ float4 frag (VOUT IN) : COLOR {
 	#endif
 
 //-------------------------------------リフレクション
-	float  Smoothness   = 0.0f;
-	float3 ToonSpec 		= (float3)0.0f;
-	float3 ToonSpecMask = (float3)0.0f;
-	float3 SpecularMask = (float3)0.0f;
-	float3 ReflectMask  = (float3)0.0f;
-	float  MatCapSmooth = 0.0f;
-	float3 MatCapMask   = (float3)0.0f;
-	float3 Specular     = (float3)0.0f;
-	float3 Reflection   = (float3)0.0f;
-	float3 MatCapture   = (float3)0.0f;
+	float  Smoothness    = 0.0f;
+	float3 ToonSpec      = (float3)0.0f;
+	float3 ToonSpecMask  = (float3)0.0f;
+	float3 ToonSpecColor = (float3)0.0f;
+	float3 SpecularMask  = (float3)0.0f;
+	float3 ReflectMask   = (float3)0.0f;
+	float  MatCapSmooth  = 0.0f;
+	float3 MatCapMask    = (float3)0.0f;
+	float3 Specular      = (float3)0.0f;
+	float3 Reflection    = (float3)0.0f;
+	float3 MatCapture    = (float3)0.0f;
 
 	#if WHEN_OPT(PROP_TOON_SPEC_ENABLE == 1)
 	OPT_IF(_ToonSpecEnable)
 		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
+		ToonSpecColor = lerp(_ToonSpecColor, Color, _ToonSpecMetallic);
 
 		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 0)
 		OPT_IF(_ToonSpecMode == 0)
@@ -386,10 +388,10 @@ float4 frag (VOUT IN) : COLOR {
 				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
 				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
 
-				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
 			#endif
 			#ifdef PASS_FA
-				ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * ToonSpecColor;
 			#endif
 		OPT_FI
 		#endif
@@ -405,10 +407,10 @@ float4 frag (VOUT IN) : COLOR {
 				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
 				float3 VL3ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
 
-				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * _ToonSpecColor;
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
 			#endif
 			#ifdef PASS_FA
-				ToonSpec = RLToonSpec * _ToonSpecIntensity * _ToonSpecColor;
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * ToonSpecColor;
 			#endif
 		OPT_FI
 		#endif
