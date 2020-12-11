@@ -125,16 +125,39 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	return specular;
 }
 
+float D_GGX_Anisotropic(float at, float ab, float TdotH, float BdotH, float NdotH) {
+  // Burley 2012, "Physically-Based Shading at Disney"
+
+  // The values at and ab are perceptualRoughness^2, a2 is therefore perceptualRoughness^4
+  // The dot product below computes perceptualRoughness^8. We cannot fit in fp16 without clamping
+  // the roughness to too high values so we perform the dot product and the division in fp32
+  float a2 = at * ab;
+  float3 d = float3(ab * TdotH, at * BdotH, a2 * NdotH);
+  float d2 = dot(d, d);
+  float b2 = a2 / d2;
+  return a2 * b2 * b2 * (1.0 / UNITY_PI);
+}
+
+float V_SmithGGXCorrelated_Anisotropic(float at, float ab, float TdotV, float BdotV, float TdotL, float BdotL, float NdotV, float NdotL) {
+  // Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"
+  float lambdaV = NdotL * length(float3(at * TdotV, ab * BdotV, NdotV));
+  float lambdaL = NdotV * length(float3(at * TdotL, ab * BdotL, NdotL));
+  return 0.5 / (lambdaV + lambdaL);
+}
+
 float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, float3 ldir, float3 view, float roughnessT, float roughnessB)
 {
   float3 hv = normalize(ldir + view);
 
-  float NdotH = dot(normal, hv);
-  float TdotH = dot(tangent, hv);
-  float BTdotH = dot(bitangent, hv);
+  float NdotL = saturate(dot(normal, ldir));
+  float NdotH = saturate(dot(normal, hv));
 
-  float f = TdotH * TdotH / (roughnessT * roughnessT) + BTdotH * BTdotH / (roughnessB * roughnessB) + NdotH * NdotH;
-  return saturate(1.0 / (roughnessT * roughnessB * f * f));
+  float TdotH = dot(tangent, hv);
+  float BdotH = dot(bitangent, hv);
+
+  float D = D_GGX_Anisotropic(roughnessT, roughnessB, TdotH, BdotH, NdotH);
+
+  return saturate(D * NdotL);
 }
 
 float3 ToonViewOffSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
