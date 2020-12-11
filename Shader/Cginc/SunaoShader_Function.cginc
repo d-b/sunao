@@ -125,6 +125,7 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 	return specular;
 }
 
+//-------------------------------------GGX Anisotropic NDF
 float D_GGX_Anisotropic(float at, float ab, float TdotH, float BdotH, float NdotH) {
   // Burley 2012, "Physically-Based Shading at Disney"
 
@@ -138,6 +139,7 @@ float D_GGX_Anisotropic(float at, float ab, float TdotH, float BdotH, float Ndot
   return a2 * b2 * b2 * (1.0 / UNITY_PI);
 }
 
+//-------------------------------------GGX Anisotropic visibility function
 float V_SmithGGXCorrelated_Anisotropic(float at, float ab, float TdotV, float BdotV, float TdotL, float BdotL, float NdotV, float NdotL) {
   // Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"
   float lambdaV = NdotL * length(float3(at * TdotV, ab * BdotV, NdotV));
@@ -145,8 +147,8 @@ float V_SmithGGXCorrelated_Anisotropic(float at, float ab, float TdotV, float Bd
   return 0.5 / (lambdaV + lambdaL);
 }
 
-float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, float3 ldir, float3 view, float roughnessT, float roughnessB)
-{
+//-------------------------------------GGX Anisotropic model
+float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, float3 ldir, float3 view, float roughnessT, float roughnessB) {
   float3 hv = normalize(ldir + view);
 
   float NdotL = saturate(dot(normal, ldir));
@@ -160,12 +162,12 @@ float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, fl
   return saturate(D * NdotL);
 }
 
-float3 ToonViewOffSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset)
-{
+//-------------------------------------View + offset based specular
+float3 ToonViewOffSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset) {
   float NdotL = dot(ldir + view, normal);
   float NdotVO = dot(view + float3(0.0, offset, 0.0), normal);
 
-  return saturate(NdotL * pow(sqrt(1.0 - NdotVO * NdotVO), sharpness));
+  return saturate(pow(sqrt(1.0 - NdotVO * NdotVO), sharpness) * NdotL);
 }
 
 //-------------------------------------環境マッピングの計算
@@ -192,24 +194,26 @@ float  RimLightCalc(float3 normal , float3 view , float power , float gradient) 
 	return orim;
 }
 
-half3 RGB2HSV(half3 c) {
+//-------------------------------------RGB to HSV
+float3 RGB2HSV(float3 c) {
   half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
   half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
   half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
 
   float d = q.x - min(q.w, q.y);
   float e = 1.0e-10;
-  return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
-half3 HSV2RGB(half3 c) {
+//-------------------------------------HSV to RGB
+float3 HSV2RGB(float3 c) {
   half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-  half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+  float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
   return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-float3 HSVAdjust(float3 color, float3 adjustment)
-{
+//-------------------------------------Adjust a colour by HSV offset
+float3 HSVAdjust(float3 color, float3 adjustment) {
   float3 hsv = RGB2HSV(color);
   hsv.x += fmod(adjustment.x, 360);
   hsv.y = saturate(hsv.y * adjustment.y);
@@ -217,17 +221,20 @@ float3 HSVAdjust(float3 color, float3 adjustment)
   return HSV2RGB(hsv);
 }
 
-half LIN2SRGB(half color) {
+//-------------------------------------Linear to SRGB
+float LIN2SRGB(float color) {
     if (color > 0.0031308)
         return 1.055 * (pow(color, (1.0 / 2.4))) - 0.055;
     else
         return 12.92 * color;
 }
 
-half3 LIN2SRGB(half3 color) {
+//-------------------------------------RGB linear to SRGB
+float3 LIN2SRGB(float3 color) {
   return float3(LIN2SRGB(color.r), LIN2SRGB(color.g), LIN2SRGB(color.b));
 }
 
+//-------------------------------------Vertex colour based alpha
 float VertexAlpha(float3 color, float3 comperand, float alpha, float threshold) {
 	if (min(length(color), length(comperand)) > 0.0) {
 		return lerp(1.0, alpha, step(threshold, 1.0 - length(color - LIN2SRGB(comperand))));
@@ -236,11 +243,11 @@ float VertexAlpha(float3 color, float3 comperand, float alpha, float threshold) 
 	}
 }
 
-half2 CalcScreenUV(half4 screenPos)
-{
-    half2 uv = screenPos / (screenPos.w + 0.0000000001); //0.0x1 Stops division by 0 warning in console.
+//-------------------------------------Stereo correct UV by screen position
+float2 CalcScreenUV(half4 screenPos) {
+    float2 uv = screenPos / (screenPos.w + 0.0000000001); //0.0x1 Stops division by 0 warning in console.
     #if UNITY_SINGLE_PASS_STEREO
-        uv.xy *= half2(_ScreenParams.x * 2, _ScreenParams.y);
+        uv.xy *= float2(_ScreenParams.x * 2, _ScreenParams.y);
     #else
         uv.xy *= _ScreenParams.xy;
     #endif
@@ -248,9 +255,9 @@ half2 CalcScreenUV(half4 screenPos)
     return uv;
 }
 
-inline half Dither8x8Bayer( int x, int y )
-{
-    const half dither[ 64 ] = {
+//-------------------------------------Dithering pattern
+inline float Dither8x8Bayer( int x, int y ) {
+    const float dither[ 64 ] = {
     1, 49, 13, 61,  4, 52, 16, 64,
     33, 17, 45, 29, 36, 20, 48, 32,
     9, 57,  5, 53, 12, 60,  8, 56,
@@ -263,14 +270,14 @@ inline half Dither8x8Bayer( int x, int y )
     return dither[r] / 64;
 }
 
-half CalcDither(half2 screenPos)
-{
-    half dither = Dither8x8Bayer(fmod(screenPos.x, 8), fmod(screenPos.y, 8));
+//-------------------------------------Dithering value by screen position
+float CalcDither(float2 screenPos) {
+    float dither = Dither8x8Bayer(fmod(screenPos.x, 8), fmod(screenPos.y, 8));
     return dither;
 }
 
-float4x4 rotationMatrix(float3 axis, float angle)
-{
+//-------------------------------------Rotate on specified axis by specified angle
+float4x4 RotationMatrix(float3 axis, float angle) {
     axis = normalize(axis);
     float s = sin(angle);
     float c = cos(angle);
@@ -282,31 +289,30 @@ float4x4 rotationMatrix(float3 axis, float angle)
                     0.0,                                0.0,                                0.0,                                1.0);
 }
 
-half3 calcViewDir(half3 worldPos)
-{
-	half3 camDir = normalize(mul(UNITY_MATRIX_V, float4(0, 1, 0, 0)).xyz);
-	half3 viewDir = normalize(_WorldSpaceCameraPos - worldPos);
+//-------------------------------------Calculate corrected view direction to avoid poles
+float3 CalcViewDir(float3 worldPos) {
+	float3 camDir = normalize(mul(UNITY_MATRIX_V, float4(0, 1, 0, 0)).xyz);
+	float3 viewDir = normalize(_WorldSpaceCameraPos - worldPos);
 	if (dot(camDir, float3(0.0f, 0.0f, 1.0f)) >= 0.8f) {
 		float val = (dot(camDir, float3(0.0f, 0.0f, 1.0f)) - 0.8f)/0.2f;
-		float3 target = mul(rotationMatrix(float3(1.0f, 0.0, 0), UNITY_PI * 0.5), viewDir);
+		float3 target = mul(RotationMatrix(float3(1.0f, 0.0, 0), UNITY_PI * 0.5), viewDir);
 		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
 	}
 	if (dot(camDir, float3(0.0f, 0.0f, -1.0f)) >= 0.8f) {
 		float val = (dot(camDir, float3(0.0f, 0.0f, -1.0f)) - 0.8f)/0.2f;
-		float3 target = mul(rotationMatrix(float3(1.0f, 0.0, 0), -UNITY_PI * 0.5), viewDir);
+		float3 target = mul(RotationMatrix(float3(1.0f, 0.0, 0), -UNITY_PI * 0.5), viewDir);
 		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
 	}
 	return viewDir;
 }
 
-bool IsInMirror()
-{
+//-------------------------------------True when rendering mirror copy
+bool IsInMirror() {
 	return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
 }
 
-// Halftone functions, finish implementing later.. Not correct right now.
-float2 SphereUV( float3 coords /*viewDir?*/)
-{
+//-------------------------------------3-space to spherical coordinates
+float2 SphereUV(float3 coords) {
 	float3 nc = normalize(coords);
 	float lat = acos(nc.y);
 	float lon = atan2(nc.z, nc.x);
@@ -314,35 +320,35 @@ float2 SphereUV( float3 coords /*viewDir?*/)
 	return (coord + float4(0, 1-unity_StereoEyeIndex,1,1.0).xy) * float4(0, 1-unity_StereoEyeIndex,1,1.0).zw;
 }
 
-half2 rotateUV(half2 uv, half rotation)
-{
-	half mid = 0.5;
-	return half2(
+//-------------------------------------Apply rotation to UV
+float2 RotateUV(float2 uv, float rotation) {
+	float mid = 0.5;
+	return float2(
 		cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
 		cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
 	);
 }
 
-half DotHalftone(float4 worldPos, half halftoneDotAmount, half scalar)
-{
-	half2 uv = SphereUV(calcViewDir(worldPos));
+//-------------------------------------Stipple based halftones
+float DotHalftone(float4 worldPos, float halftoneDotAmount, float scalar) {
+	float2 uv = SphereUV(CalcViewDir(worldPos));
 	uv.xy *= halftoneDotAmount;
-	half2 nearest = 2 * frac(100 * uv) - 1;
-	half dist = length(nearest);
-	half dotSize = 100 * scalar;
-	half dotMask = step(dotSize, dist);
+	float2 nearest = 2 * frac(100 * uv) - 1;
+	float dist = length(nearest);
+	float dotSize = 100 * scalar;
+	float dotMask = step(dotSize, dist);
 
 	return lerp(1, 1-dotMask, smoothstep(0, 0.4, 1/distance(worldPos, _WorldSpaceCameraPos)));;
 }
 
-half LineHalftone(float4 worldPos, half scalar)
-{
-	half2 uv = SphereUV(calcViewDir(worldPos));
-	uv = rotateUV(uv, -0.785398);
+//-------------------------------------Crosshatch based halftones
+float LineHalftone(float4 worldPos, float scalar) {
+	float2 uv = SphereUV(CalcViewDir(worldPos));
+	uv = RotateUV(uv, -0.785398);
 	uv.x = sin(uv.x * scalar);
 
-	half2 steppedUV = smoothstep(0,0.2,uv.x);
-	half lineMask = lerp(1, steppedUV, smoothstep(0, 0.4, 1/distance(worldPos, _WorldSpaceCameraPos)));
+	float2 steppedUV = smoothstep(0,0.2,uv.x);
+	float lineMask = lerp(1, steppedUV, smoothstep(0, 0.4, 1/distance(worldPos, _WorldSpaceCameraPos)));
 
 	return saturate(lineMask);
 }

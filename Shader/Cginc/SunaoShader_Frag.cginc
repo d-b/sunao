@@ -113,8 +113,8 @@ float4 frag (VOUT IN) : COLOR {
 	#endif
 
 //----Stippling & crosshatching
-	half dot_halftone = 0.0f;
-	half line_halftone = 0.0f;
+	float dot_halftone = 0.0f;
+	float line_halftone = 0.0f;
 	float2 emission_scroll = float2(_EmissionScrX , _EmissionScrY) * _Time.y;
 	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
 	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleMask));
@@ -142,7 +142,7 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 	if (_CrosshatchEnable) {
-		half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+		float line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 
     #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
     OPT_IF(_HSVShiftEnable)

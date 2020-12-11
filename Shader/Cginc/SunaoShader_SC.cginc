@@ -107,8 +107,8 @@ float4 frag (VOUT IN) : COLOR {
 	float alpha = _Alpha;
 
 //----Stippling & crosshatching
-	half dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
-	half line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
+	float dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
+	float line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
 	float4 stipple_mask = UNITY_SAMPLE_TEX2D(_StippleMask, TRANSFORM_TEX(IN.uv, _StippleMask));
 	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D(_CrosshatchMask, TRANSFORM_TEX(IN.uv, _CrosshatchMask));
 
