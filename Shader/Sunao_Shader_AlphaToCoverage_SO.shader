@@ -332,6 +332,7 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 		_PointLight        ("Point Light"               , Range( 0.0,  2.0)) = 1.0
 		[SToggle]
 		_LightLimitter     ("Light Limitter"            , int) = 1
+		_MinimumLight      ("Minimum Light Limit"       , Range( 0.0,  1.0)) = 0.0
 
 		[SToggle]
 		_EnableGammaFix    ("Enable Gamma Fix"          , int) = 0
