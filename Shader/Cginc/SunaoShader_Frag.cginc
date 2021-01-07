@@ -382,7 +382,7 @@ float4 frag (VOUT IN) : COLOR {
 			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.ldir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
 
 			#ifdef PASS_FB
-				float SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
+				float3 SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
 				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
 				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
 				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
@@ -401,7 +401,7 @@ float4 frag (VOUT IN) : COLOR {
 			float3 RLToonSpec = ToonViewOffSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
 
 			#ifdef PASS_FB
-				float SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
+				float3 SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
 				float3 VL0ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
 				float3 VL1ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
 				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
