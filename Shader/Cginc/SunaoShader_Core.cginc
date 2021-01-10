@@ -57,6 +57,7 @@
 	uniform bool      _TanEnable;
 	uniform uint      _TanMode;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_TanMap);
+	uniform float4    _TanMap_ST;
 
 //----Shading & Lighting
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadeMask);

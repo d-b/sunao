@@ -48,9 +48,8 @@ Shader "Sunao Shader/TransClipping" {
 
 		[SToggle]
 		_TanEnable         ("Enable Tangent Map"        , int) = 0
-		[Enum(Rotation Map , 0)]
+		[Enum(Tangent Map , 0 , Rotation Map , 1)]
 		_TanMode           ("Tangent Map Mode"          , int) = 0
-		[NoScaleOffset]
 		_TanMap            ("Tangent Map"               , 2D) = "black" {}
 
 		[SToggle]
