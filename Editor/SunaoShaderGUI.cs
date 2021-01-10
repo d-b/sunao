@@ -741,6 +741,7 @@ namespace SunaoShader {
 					if (TanEnable.floatValue >= 0.5f) {
 						ME.ShaderProperty(TanMode, new GUIContent("Tangent Map Mode"));
 						ME.TexturePropertySingleLine (new GUIContent("Tangent Map") , TanMap);
+						ME.TextureScaleOffsetProperty(TanMap);
 					}
 				}
 

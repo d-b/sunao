@@ -27,7 +27,15 @@ float4 frag (VOUT IN) : COLOR {
 	#if WHEN_OPT(PROP_TAN_ENABLE == 1)
 	OPT_IF(_TanEnable)
 		if (_TanMode == 0) {
-			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap , _MainTex , SubUV);
+			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap, _MainTex, TRANSFORM_TEX(SubUV, _TanMap));
+			float3x3 TBN = transpose(float3x3(IN.tangent.xyz, cross(IN.tangent.xyz, IN.normal), IN.normal));
+			IN.tangent = float4(mul(TBN, float3(TanMap.rg, 0)), IN.tangent.w);
+			IN.tanW = UnityObjectToWorldDir(IN.tangent.xyz);
+			IN.tanB = cross(UnityObjectToWorldNormal(IN.normal) , IN.tanW) * IN.tangent.w * unity_WorldTransformParams.w;
+			NormalUV = RotateUV(NormalUV, TanMap.b * 2.0 * UNITY_PI);
+		}
+		else if (_TanMode == 1) {
+			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap, _MainTex, TRANSFORM_TEX(SubUV, _TanMap));
 			IN.tangent = float4(QuatRotate(float4(IN.normal, TanMap.r * 2.0 * UNITY_PI), IN.tangent.xyz), IN.tangent.w);
 			IN.tanW = UnityObjectToWorldDir(IN.tangent.xyz);
 			IN.tanB = cross(UnityObjectToWorldNormal(IN.normal) , IN.tanW) * IN.tangent.w * unity_WorldTransformParams.w;
