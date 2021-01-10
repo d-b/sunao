@@ -53,6 +53,11 @@
 	uniform uint      _DecalAnimX;
 	uniform uint      _DecalAnimY;
 
+//----Tangents
+	uniform bool      _TanEnable;
+	uniform uint 		  _TanMode;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_TanMap);
+
 //----Shading & Lighting
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadeMask);
 	uniform float     _Shade;

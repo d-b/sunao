@@ -37,6 +37,10 @@ namespace SunaoShader {
 		MaterialProperty UVAnimY;
 		MaterialProperty UVAnimOtherTex;
 
+		MaterialProperty TanEnable;
+		MaterialProperty TanMode;
+		MaterialProperty TanMap;
+
 		MaterialProperty DecalEnable;
 		MaterialProperty DecalTex;
 		MaterialProperty DecalColor;
@@ -338,6 +342,10 @@ namespace SunaoShader {
 			UVAnimX           = FindProperty("_UVAnimX"           , Prop , false);
 			UVAnimY           = FindProperty("_UVAnimY"           , Prop , false);
 			UVAnimOtherTex    = FindProperty("_UVAnimOtherTex"    , Prop , false);
+
+			TanEnable         = FindProperty("_TanEnable"         , Prop , false);
+			TanMode           = FindProperty("_TanMode"           , Prop , false);
+			TanMap            = FindProperty("_TanMap"            , Prop , false);
 
 			DecalEnable       = FindProperty("_DecalEnable"       , Prop , false);
 			DecalTex          = FindProperty("_DecalTex"          , Prop , false);
@@ -723,6 +731,17 @@ namespace SunaoShader {
 
 					EditorGUI.indentLevel --;
 
+				}
+
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					GUILayout.Label("Tangent Map", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(TanEnable , new GUIContent("Enable Tangent Map"));
+					if (TanEnable.floatValue >= 0.5f) {
+						ME.ShaderProperty(TanMode, new GUIContent("Tangent Map Mode"));
+						ME.TexturePropertySingleLine (new GUIContent("Tangent Map") , TanMap);
+					}
 				}
 
 				using (new EditorGUILayout.VerticalScope("box")) {

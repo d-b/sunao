@@ -46,6 +46,12 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		[SToggle]
 		_UVAnimOtherTex    ("Animation Other Maps"      , int) = 1
 
+		[SToggle]
+		_TanEnable         ("Enable Tangent Map"        , int) = 0
+		[Enum(Rotation Map , 0)]
+		_TanMode           ("Tangent Map Mode"          , int) = 0
+		[NoScaleOffset]
+		_TanMap            ("Tangent Map"               , 2D) = "black" {}
 
 		[SToggle]
 		_DecalEnable       ("Enable Decal"              , int) = 0

@@ -3,6 +3,22 @@
 //                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
+//-------------------------------------Multiply quaternions
+float4 MultQuat(float4 q1, float4 q2)
+{
+  return float4(
+    q1.w * q2.x + q1.x * q2.w + q1.z * q2.y - q1.y * q2.z,
+    q1.w * q2.y + q1.y * q2.w + q1.x * q2.z - q1.z * q2.x,
+    q1.w * q2.z + q1.z * q2.w + q1.y * q2.x - q1.x * q2.y,
+    q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z
+  );
+}
+
+//-------------------------------------Rotate by quaternion
+float3 QuatRotate(float4 q, float3 v)
+{
+  return v + 2.0 * cross(cross(v, q.xyz) + q.w * v, q.xyz);
+}
 
 //-------------------------------------モノクロカラーに変換
 float  MonoColor(float3 col) {
