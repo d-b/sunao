@@ -223,6 +223,9 @@ VOUT vert (VIN v) {
 		o.peprm.x  = EmissionWave(_ParallaxWaveform , _ParallaxBlink , _ParallaxFrequency , _ParallaxPhaseOfs);
 	}
 
+//-------------------------------------Rotate tangents
+	//v.tangent = float4(QuatRotate(float4(v.normal, 0), v.tangent.xyz), v.tangent.w);
+
 //-------------------------------------タンジェント
 	o.tangent = v.tangent;
 	o.tanW    = UnityObjectToWorldDir(v.tangent.xyz);

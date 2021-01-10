@@ -13,6 +13,7 @@ float4 frag (VOUT IN) : COLOR {
 	       MainUV      += float2(_UVScrollX , _UVScrollY) * _Time.y;
 	float2 SubUV        = IN.uv;
 	if (_UVAnimOtherTex) SubUV = MainUV;
+	float2 NormalUV     = SubUV;
 
 	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 	       OUT.a        = saturate(UNITY_SAMPLE_TEX2D(_MainTex , MainUV).a * _Color.a * _Alpha);
@@ -21,6 +22,19 @@ float4 frag (VOUT IN) : COLOR {
 
 	float3 Color        = UNITY_SAMPLE_TEX2D(_MainTex , MainUV).rgb;
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
+
+//----Tangent map application
+	#if WHEN_OPT(PROP_TAN_ENABLE == 1)
+	OPT_IF(_TanEnable)
+		if (_TanMode == 0) {
+			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap , _MainTex , SubUV);
+			IN.tangent = float4(QuatRotate(float4(IN.normal, TanMap.r * 2.0 * UNITY_PI), IN.tangent.xyz), IN.tangent.w);
+			IN.tanW = UnityObjectToWorldDir(IN.tangent.xyz);
+			IN.tanB = cross(UnityObjectToWorldNormal(IN.normal) , IN.tanW) * IN.tangent.w * unity_WorldTransformParams.w;
+			NormalUV = RotateUV(NormalUV, TanMap.g * 2.0 * UNITY_PI);
+		}
+	OPT_FI
+	#endif
 
 //----HSV adjustments
 	#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
@@ -187,8 +201,7 @@ float4 frag (VOUT IN) : COLOR {
 	float3 tan_sy       = float3(IN.tanW.y , IN.tanB.y , Normal.y);
 	float3 tan_sz       = float3(IN.tanW.z , IN.tanB.z , Normal.z);
 
-	float2 NormalMapUV  = MixingTransformTex(SubUV , _MainTex_ST , _BumpMap_ST);
-	float3 NormalMap    = normalize(UnpackScaleNormal(tex2D(_BumpMap , NormalMapUV) , _BumpScale));
+	float3 NormalMap    = normalize(UnpackScaleNormal(tex2D(_BumpMap , TRANSFORM_TEX(NormalUV, _BumpMap)) , _BumpScale));
 	       Normal.x     = dot(tan_sx , NormalMap);
 	       Normal.y     = dot(tan_sy , NormalMap);
 	       Normal.z     = dot(tan_sz , NormalMap);
