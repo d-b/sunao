@@ -55,7 +55,7 @@
 
 //----Tangents
 	uniform bool      _TanEnable;
-	uniform uint 		  _TanMode;
+	uniform uint      _TanMode;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_TanMap);
 
 //----Shading & Lighting
