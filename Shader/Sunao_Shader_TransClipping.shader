@@ -383,7 +383,7 @@ Shader "Sunao Shader/TransClipping" {
 		Tags {
 			"IgnoreProjector" = "True"
 			"RenderType"      = "TransparentCutout"
-			"Queue"           = "AlphaTest"
+			"Queue"           = "AlphaTest+50"
 		}
 
 		Pass {
