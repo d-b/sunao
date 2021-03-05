@@ -1,7 +1,7 @@
 =----------------------------------------------------------------------------=
-                Sunao Shader    Ver 1.4.0
+                Sunao Shader    Ver 1.4.2
 
-                        Copyright (c) 2020 揚茄子研究所
+                        Copyright (c) 2021 揚茄子研究所
                                 Twitter : @SUNAO_VRC
                                 VRChat  : SUNAO_
 =----------------------------------------------------------------------------=
@@ -38,7 +38,7 @@ Sunao Shaderは以下の機能を持っています。
 アバターが表示されても描画がおかしくなることがありません。
 
 
-解説書は http://sunao.orz.hm/agenasulab/ss/ にあります。
+解説書は http://suna.ooo/agenasulab/ss/ にあります。
 
   --------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ Sunao Shaderは以下の機能を持っています。
 改変、再配布、アセットやモデルデータへの同梱（有償、無償問わず）等は
 MIT Licenseの範囲内で自由に行うことができます。
 
-詳しくは同梱のLICENSE及び http://sunao.orz.hm/agenasulab/ss/LICENSE を参照して
+詳しくは同梱のLICENSE及び http://suna.ooo/agenasulab/ss/LICENSE を参照して
 ください。
 (日本語訳: https://ja.osdn.net/projects/opensource/wiki/licenses%2FMIT_license )
 

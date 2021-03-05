@@ -1,12 +1,12 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.4.0
+//              Sunao Shader    Ver 1.4.2
 //
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
 //                              VRChat  : SUNAO_
 //
 // This software is released under the MIT License.
-// see LICENSE or http://sunao.orz.hm/agenasulab/ss/LICENSE
+// see LICENSE or http://suna.ooo/agenasulab/ss/LICENSE
 //--------------------------------------------------------------
 
 Shader "Sunao Shader/Opaque" {
@@ -20,7 +20,7 @@ Shader "Sunao Shader/Opaque" {
 		_Alpha             ("Alpha"                     , Range( 0.0,  2.0)) = 1.0
 		_Cutout            ("Cutout"                    , Range( 0.0,  1.0)) = 0.5
 
-		[NoScaleOffset][Normal]
+		[Normal]
 		_BumpMap           ("Normal Map"                , 2D) = "bump" {}
 		[NoScaleOffset]
 		_OcclusionMap      ("Occlusion"                 , 2D) = "white" {}
@@ -139,7 +139,7 @@ Shader "Sunao Shader/Opaque" {
 
 		[SToggle]
 		_ParallaxEnable    ("Enable Parallax Emission"  , int) = 0
-		_ParallaxMap       ("Parallax Emission Mask"    , 2D) = "white" {}
+		_ParallaxMap       ("Parallax Emission Texture" , 2D) = "white" {}
 		[HDR]
 		_ParallaxColor     ("Emission Color"            , Color) = (1,1,1)
 		_ParallaxEmission  ("Emission Intensity"        , Range( 0.0,  2.0)) = 1.0
@@ -171,12 +171,22 @@ Shader "Sunao Shader/Opaque" {
 		_ReflectionEnable  ("Enable Reflection"         , int) = 0
 		[NoScaleOffset]
 		_MetallicGlossMap  ("Reflection Mask"           , 2D) = "white" {}
-		[NoScaleOffset]
-		_MatCap            ("Material Capture"          , 2D) = "black" {}
+		_GlossColor        ("Reflection Color"          , Color) = (1,1,1,1)
 		_Specular          ("Specular Intensity"        , Range( 0.0,  2.0)) = 1.0
 		_Metallic          ("Metallic"                  , Range( 0.0,  1.0)) = 0.5
-		_MatCapStrength    ("MatCap Strength"           , Range( 0.0,  2.0)) = 1.0
 		_GlossMapScale     ("Smoothness"                , Range( 0.0,  1.0)) = 0.75
+		[NoScaleOffset]
+		_MatCap            ("MatCap Texture"            , 2D) = "black" {}
+		_MatCapColor       ("MatCap Color"              , Color) = (1,1,1,1)
+		[SToggle]
+		_MatCapMaskEnable  ("Use Reflection Mask"       , int) = 1
+		[NoScaleOffset]
+		_MatCapMask        ("MatCap Mask"               , 2D) = "white" {}
+		_MatCapStrength    ("MatCap Strength"           , Range( 0.0,  2.0)) = 1.0
+		[SToggle]
+		_ToonGlossEnable   ("Enable Toon Reflection"    , int) = 0
+		[IntRange]
+		_ToonGloss         ("Toon"                      , Range( 0.0,  9.0)) = 9.0
 		[SToggle]
 		_SpecularTexColor  ("Tex Color for Specular"    , int) = 0
 		[SToggle]
@@ -188,7 +198,7 @@ Shader "Sunao Shader/Opaque" {
 		[SToggle]
 		_SpecularMask      ("Use Mask for Specular"     , int) = 1
 		[Enum(None , 0 , RealTime , 1 , SH , 2 , Both , 3)]
-		_ReflectLit        ("Light Color for Reflection", int) = 0
+		_ReflectLit        ("Light Color for Reflection", int) = 3
 		[Enum(None , 0 , RealTime , 1 , SH , 2 , Both , 3)]
 		_MatCapLit         ("Light Color for MatCap"    , int) = 3
 		[SToggle]
@@ -225,6 +235,8 @@ Shader "Sunao Shader/Opaque" {
 		[SToggle]
 		_LightLimitter     ("Light Limitter"            , int) = 1
 		_MinimumLight      ("Minimum Light Limit"       , Range( 0.0,  1.0)) = 0.0
+		[Enum(Add , 0 , Max , 4)]
+		_BlendOperation    ("ForwardAdd Blend Mode"     , int) = 4
 
 		[SToggle]
 		_EnableGammaFix    ("Enable Gamma Fix"          , int) = 0
@@ -254,9 +266,9 @@ Shader "Sunao Shader/Opaque" {
 
 		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 0
 
-		[HideInInspector] _VersionH        ("Version H"         , int) = 0
-		[HideInInspector] _VersionM        ("Version M"         , int) = 0
-		[HideInInspector] _VersionL        ("Version L"         , int) = 0
+		[HideInInspector] _VersionH        ("Version H"         , int) = 1
+		[HideInInspector] _VersionM        ("Version M"         , int) = 4
+		[HideInInspector] _VersionL        ("Version L"         , int) = 2
 
 	}
 
@@ -325,6 +337,7 @@ Shader "Sunao Shader/Opaque" {
 			}
 
 			Cull Front
+			BlendOp [_BlendOperation]
 			Blend One One
 			ZWrite Off
 
@@ -350,6 +363,7 @@ Shader "Sunao Shader/Opaque" {
 			}
 
 			Cull [_Culling]
+			BlendOp [_BlendOperation]
 			Blend One One
 			ZWrite Off
 

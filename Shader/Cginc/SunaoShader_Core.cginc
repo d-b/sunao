@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Core
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -20,6 +20,7 @@
 	uniform float     _Cutout;
 	uniform float     _Alpha;
 	uniform sampler2D _BumpMap;
+	uniform float4    _BumpMap_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_OcclusionMap);
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_AlphaMask);
 	uniform float     _Bright;
@@ -61,7 +62,7 @@
 	uniform bool      _ToonEnable;
 	uniform uint      _Toon;
 	uniform float     _ToonSharpness;
-	uniform sampler2D _LightMask;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_LightMask);
 	uniform float     _LightBoost;
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
@@ -115,11 +116,17 @@
 //----Reflection
 	uniform bool      _ReflectionEnable;
 	uniform sampler2D _MetallicGlossMap;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_MatCap);
+	uniform float3    _GlossColor;
 	uniform float     _Specular;
 	uniform float     _Metallic;
-	uniform float     _MatCapStrength;
 	uniform float     _GlossMapScale;
+	uniform sampler2D _MatCap;
+	uniform float3    _MatCapColor;
+	uniform bool      _MatCapMaskEnable;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_MatCapMask);
+	uniform float     _MatCapStrength;
+	uniform bool      _ToonGlossEnable;
+	uniform uint      _ToonGloss;
 	uniform bool      _SpecularTexColor;
 	uniform bool      _MetallicTexColor;
 	uniform bool      _MatCapTexColor;
@@ -146,6 +153,7 @@
 	uniform float     _SHLight;
 	uniform bool      _LightLimitter;
 	uniform float     _MinimumLight;
+	uniform int       _BlendOperation;
 
 	uniform bool      _EnableGammaFix;
 	uniform float     _GammaR;

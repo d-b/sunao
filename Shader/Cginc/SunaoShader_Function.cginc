@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Function
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -108,11 +108,11 @@ float  ToonCalc(float diffuse , float4 toon) {
 
 //-------------------------------------ライトの計算
 float3 LightingCalc(float3 light , float diffuse , float3 shadecol , float shademask) {
-	float3 col;
-	col = lerp(light * shadecol , light, diffuse  );
-	col = lerp(light            , col  , shademask);
+	float3 ocol;
+	ocol = lerp(light * shadecol , light, diffuse  );
+	ocol = lerp(light            , ocol  , shademask);
 
-	return col;
+	return ocol;
 }
 
 //-------------------------------------スペキュラ反射の計算
@@ -128,10 +128,14 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 //-------------------------------------環境マッピングの計算
 float3 ReflectionCalc(float3 normal , float3 view , float scale) {
 	float3 dir = reflect(-view , normal);
-	float3 refl;
-	refl = DecodeHDR(UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0 , dir, (1.0f - scale) * 7.0f) , unity_SpecCube0_HDR);
+	float3 ocol;
+	float3 refl0;
+	float3 refl1;
+	refl0 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_LOD        (unity_SpecCube0                  , dir, (1.0f - scale) * 7.0f) , unity_SpecCube0_HDR);
+	refl1 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0 , dir, (1.0f - scale) * 7.0f) , unity_SpecCube1_HDR);
+	ocol  = lerp(refl1 , refl0 , unity_SpecCube0_BoxMin.w);
 	
-	return refl;
+	return ocol;
 }
 
 //-------------------------------------リムライトの計算

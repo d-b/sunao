@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Outline
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -47,6 +47,8 @@
 	uniform float     _SHLight;
 	uniform float     _PointLight;
 	uniform bool      _LightLimitter;
+	uniform float     _MinimumLight;
+	uniform bool      _BlendOperation;
 
 	uniform bool      _EnableGammaFix;
 	uniform float     _GammaR;
@@ -168,6 +170,8 @@ VOUT vert (VIN v) {
 				Lighting += unity_LightColor[3].rgb * VLAtten.w * 0.6f;
 
 			#endif
+			
+			Lighting = max(Lighting , _MinimumLight);
 		#endif
 
 		#ifdef PASS_OL_FB
@@ -177,7 +181,15 @@ VOUT vert (VIN v) {
 			Lighting += _LightColor0 * _PointLight * 0.6f;
 		#endif
 
-		if (_LightLimitter) Lighting = saturate(Lighting);
+		if (_LightLimitter) {
+			float  MaxLight   = 1.0f;
+			       MaxLight   = max(MaxLight , Lighting.r);
+			       MaxLight   = max(MaxLight , Lighting.g);
+			       MaxLight   = max(MaxLight , Lighting.b);
+
+			Lighting = saturate(Lighting / MaxLight);
+		}
+
 		if (_MonochromeLit) Lighting = MonoColor(Lighting);
 
 		o.color *=  Lighting;
@@ -223,7 +235,7 @@ float4 frag (VOUT IN) : COLOR {
 		OUT.a = 1.0f;
 	#endif
 
-	clip(IN.mask - 0.2f);
+	clip(IN.mask - 0.1f);
 
 //----ガンマ修正
 	if (_EnableGammaFix) {
@@ -246,6 +258,13 @@ float4 frag (VOUT IN) : COLOR {
 	if (_LimitterEnable) {
 	       OUT.rgb      = min(OUT.rgb , _LimitterMax);
 	}
+
+//----SrcAlphaの代用
+	#ifdef TRANSPARENT
+		#ifdef PASS_OL_FA
+			if (_BlendOperation == 4) OUT.rgb *= OUT.a;
+		#endif
+	#endif
 
 //----フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Fragment
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -98,14 +98,15 @@ float4 frag (VOUT IN) : COLOR {
 	float3 tan_sy       = float3(IN.tanW.y , IN.tanB.y , Normal.y);
 	float3 tan_sz       = float3(IN.tanW.z , IN.tanB.z , Normal.z);
 
-	float3 NormalMap    = normalize(UnpackScaleNormal(tex2D(_BumpMap , SubUV) , _BumpScale));
+	float2 NormalMapUV  = MixingTransformTex(SubUV , _MainTex_ST , _BumpMap_ST);
+	float3 NormalMap    = normalize(UnpackScaleNormal(tex2D(_BumpMap , NormalMapUV) , _BumpScale));
 	       Normal.x     = dot(tan_sx , NormalMap);
 	       Normal.y     = dot(tan_sy , NormalMap);
 	       Normal.z     = dot(tan_sz , NormalMap);
 
 //-------------------------------------シェーディング
 	float3 ShadeMask    = UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMask , _MainTex , SubUV).rgb * _Shade;
-	float3 LightBoost   = 1.0f + (tex2D(_LightMask, SubUV).rgb * (_LightBoost - 1.0f));
+	float3 LightBoost   = 1.0f + (UNITY_SAMPLE_TEX2D_SAMPLER(_LightMask , _MainTex , SubUV).rgb * (_LightBoost - 1.0f));
 
 //----ディフューズ
 	float  Diffuse      = DiffuseCalc(Normal , IN.ldir , _ShadeGradient , _ShadeWidth);
@@ -180,7 +181,14 @@ float4 frag (VOUT IN) : COLOR {
 		       Lighting     = DiffColor * LightBoost;
 	#endif
 
-	if (_LightLimitter) Lighting = saturate(Lighting);
+	if (_LightLimitter) {
+		float  MaxLight   = 1.0f;
+		       MaxLight   = max(MaxLight , Lighting.r);
+		       MaxLight   = max(MaxLight , Lighting.g);
+		       MaxLight   = max(MaxLight , Lighting.b);
+
+		Lighting = saturate(Lighting / MaxLight);
+	}
 
 //-------------------------------------エミッション
 	float3 Emission     = (float3)0.0f;
@@ -232,16 +240,18 @@ float4 frag (VOUT IN) : COLOR {
 	}
 
 //-------------------------------------リフレクション
+	float  Smoothness   = 0.0f;
 	float3 SpecularMask = (float3)0.0f;
 	float3 ReflectMask  = (float3)0.0f;
+	float  MatCapSmooth = 0.0f;
+	float3 MatCapMask   = (float3)0.0f;
 	float3 Specular     = (float3)0.0f;
 	float3 Reflection   = (float3)0.0f;
 	float3 MatCapture   = (float3)0.0f;
 
 	if (_ReflectionEnable) {
-		float  Smoothness   = _GlossMapScale * tex2D(_MetallicGlossMap , SubUV).a;
-
 //----スペキュラ反射
+		       Smoothness   = tex2D(_MetallicGlossMap , SubUV).a * _GlossMapScale;
 		       SpecularMask = tex2D(_MetallicGlossMap , SubUV).rgb;
 		       SpecularMask = lerp(1.0f , SpecularMask , _SpecularMask);
 
@@ -276,9 +286,14 @@ float4 frag (VOUT IN) : COLOR {
 		#endif
 
 //----マットキャップ
+		       MatCapSmooth = UNITY_SAMPLE_TEX2D_SAMPLER(_MatCapMask , _MainTex , IN.uv).a;
+		       MatCapMask   = UNITY_SAMPLE_TEX2D_SAMPLER(_MatCapMask , _MainTex , IN.uv).rgb;
+		       MatCapSmooth = lerp(MatCapSmooth , tex2D(_MetallicGlossMap , SubUV).a , _MatCapMaskEnable);
+		       MatCapMask   = lerp(MatCapMask   , ReflectMask                        , _MatCapMaskEnable);
+
 		#ifdef PASS_FB
 			float2 MatCapUV     = float2(dot(IN.matcaph , Normal), dot(IN.matcapv , Normal)) * 0.5f + 0.5f;
-			       MatCapture   = UNITY_SAMPLE_TEX2D_SAMPLER(_MatCap , _MainTex , MatCapUV).rgb * _MatCapStrength;
+			       MatCapture   = tex2Dbias(_MatCap , float4(MatCapUV , 0.0f , 3.0f * (1.0f - MatCapSmooth))).rgb * _MatCapStrength;
 
 			if (_MatCapLit == 1) MatCapture *= saturate(LightBase + VLightBase);
 			if (_MatCapLit == 2) MatCapture *= saturate(IN.shmax);
@@ -287,10 +302,20 @@ float4 frag (VOUT IN) : COLOR {
 		#ifdef PASS_FA
 			if ((_MatCapLit  == 1) || (_MatCapLit  == 3)) {
 				float2 MatCapUV    = float2(dot(IN.matcaph , Normal), dot(IN.matcapv , Normal)) * 0.5f + 0.5f;
-				       MatCapture  = UNITY_SAMPLE_TEX2D_SAMPLER(_MatCap , _MainTex , MatCapUV).rgb * _MatCapStrength;
+				       MatCapture  = tex2Dbias(_MatCap , float4(MatCapUV , 0.0f , 3.0f * (1.0f - MatCapSmooth))).rgb * _MatCapStrength;
 				       MatCapture *= saturate(LightBase);
 			}
 		#endif
+
+//----トゥーンスペキュラ
+		if (_ToonGlossEnable) {
+			Specular = ToonCalc(Specular , Toon(_ToonGloss , 0.75f));
+		}
+
+//----
+		       Specular     = Specular   * SpecularMask * _GlossColor;
+		       Reflection   = Reflection * SpecularMask * _GlossColor;
+		       MatCapture   = MatCapture * MatCapMask   * _MatCapColor;
 
 		if (_SpecularTexColor ) Specular    *= Color;
 		if (_MetallicTexColor ) Reflection  *= Color;
@@ -320,8 +345,8 @@ float4 frag (VOUT IN) : COLOR {
 	       OUT.rgb      = Color * Lighting;
 	       OUT.rgb      = lerp(OUT.rgb , Color , _Unlit);
 	       OUT.rgb      = lerp(OUT.rgb , Reflection , _Metallic * ReflectMask);
-	       OUT.rgb     += Specular   * SpecularMask;
-	       OUT.rgb     += MatCapture * ReflectMask;
+	       OUT.rgb     += Specular;
+	       OUT.rgb     += MatCapture;
 
 //----リムライティング混合
 	if (_RimLitEnable) {
@@ -426,6 +451,13 @@ float4 frag (VOUT IN) : COLOR {
 	if (_LimitterEnable) {
 	       OUT.rgb  = min(OUT.rgb , _LimitterMax);
 	}
+
+//----SrcAlphaの代用
+	#ifdef TRANSPARENT
+		#ifdef PASS_FA
+			if (_BlendOperation == 4) OUT.rgb *= OUT.a;
+		#endif
+	#endif
 
 //-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
