@@ -446,8 +446,6 @@ float4 frag (VOUT IN) : COLOR {
 
 	#if WHEN_OPT(PROP_REFLECTION_ENABLE == 1)
 	OPT_IF(_ReflectionEnable)
-		float  Smoothness   = _GlossMapScale * tex2D(_MetallicGlossMap , SubUV).a;
-
 //----スペキュラ反射
 		       Smoothness   = tex2D(_MetallicGlossMap , SubUV).a * _GlossMapScale;
 		       SpecularMask = tex2D(_MetallicGlossMap , SubUV).rgb;

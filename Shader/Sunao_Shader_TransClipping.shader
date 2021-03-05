@@ -1,12 +1,12 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.4.0
+//              Sunao Shader    Ver 1.4.2
 //
-//                      Copyright (c) 2020 揚茄子研究所
+//                      Copyright (c) 2021 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
 //                              VRChat  : SUNAO_
 //
 // This software is released under the MIT License.
-// see LICENSE or http://sunao.orz.hm/agenasulab/ss/LICENSE
+// see LICENSE or http://suna.ooo/agenasulab/ss/LICENSE
 //--------------------------------------------------------------
 
 Shader "Sunao Shader/TransClipping" {
@@ -237,7 +237,7 @@ Shader "Sunao Shader/TransClipping" {
 
 		[SToggle]
 		_ParallaxEnable    ("Enable Parallax Emission"  , int) = 0
-		_ParallaxMap       ("Parallax Emission Mask"    , 2D) = "white" {}
+		_ParallaxMap       ("Parallax Emission Texture" , 2D) = "white" {}
 		[HDR]
 		_ParallaxColor     ("Emission Color"            , Color) = (1,1,1)
 		_ParallaxEmission  ("Emission Intensity"        , Range( 0.0,  2.0)) = 1.0
@@ -285,11 +285,22 @@ Shader "Sunao Shader/TransClipping" {
 		[NoScaleOffset]
 		_MetallicGlossMap  ("Reflection Mask"           , 2D) = "white" {}
 		[NoScaleOffset]
-		_MatCap            ("Material Capture"          , 2D) = "black" {}
+		_GlossColor        ("Reflection Color"          , Color) = (1,1,1,1)
 		_Specular          ("Specular Intensity"        , Range( 0.0,  2.0)) = 1.0
 		_Metallic          ("Metallic"                  , Range( 0.0,  1.0)) = 0.5
-		_MatCapStrength    ("MatCap Strength"           , Range( 0.0,  2.0)) = 1.0
 		_GlossMapScale     ("Smoothness"                , Range( 0.0,  1.0)) = 0.75
+		[NoScaleOffset]
+		_MatCap            ("MatCap Texture"            , 2D) = "black" {}
+		_MatCapColor       ("MatCap Color"              , Color) = (1,1,1,1)
+		[SToggle]
+		_MatCapMaskEnable  ("Use Reflection Mask"       , int) = 1
+		[NoScaleOffset]
+		_MatCapMask        ("MatCap Mask"               , 2D) = "white" {}
+		_MatCapStrength    ("MatCap Strength"           , Range( 0.0,  2.0)) = 1.0
+		[SToggle]
+		_ToonGlossEnable   ("Enable Toon Reflection"    , int) = 0
+		[IntRange]
+		_ToonGloss         ("Toon"                      , Range( 0.0,  9.0)) = 9.0
 		[SToggle]
 		_SpecularTexColor  ("Tex Color for Specular"    , int) = 0
 		[SToggle]
@@ -301,7 +312,7 @@ Shader "Sunao Shader/TransClipping" {
 		[SToggle]
 		_SpecularMask      ("Use Mask for Specular"     , int) = 1
 		[Enum(None , 0 , RealTime , 1 , SH , 2 , Both , 3)]
-		_ReflectLit        ("Light Color for Reflection", int) = 0
+		_ReflectLit        ("Light Color for Reflection", int) = 3
 		[Enum(None , 0 , RealTime , 1 , SH , 2 , Both , 3)]
 		_MatCapLit         ("Light Color for MatCap"    , int) = 3
 		[SToggle]
@@ -338,6 +349,8 @@ Shader "Sunao Shader/TransClipping" {
 		[SToggle]
 		_LightLimitter     ("Light Limitter"            , int) = 1
 		_MinimumLight      ("Minimum Light Limit"       , Range( 0.0,  1.0)) = 0.0
+		[Enum(Add , 0 , Max , 4)]
+		_BlendOperation    ("ForwardAdd Blend Mode"     , int) = 4
 
 		[SToggle]
 		_EnableGammaFix    ("Enable Gamma Fix"          , int) = 0
@@ -368,9 +381,9 @@ Shader "Sunao Shader/TransClipping" {
 
 		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 1
 
-		[HideInInspector] _VersionH        ("Version H"         , int) = 0
-		[HideInInspector] _VersionM        ("Version M"         , int) = 0
-		[HideInInspector] _VersionL        ("Version L"         , int) = 0
+		[HideInInspector] _VersionH        ("Version H"         , int) = 1
+		[HideInInspector] _VersionM        ("Version M"         , int) = 4
+		[HideInInspector] _VersionL        ("Version L"         , int) = 2
 
 	}
 
@@ -395,12 +408,6 @@ Shader "Sunao Shader/TransClipping" {
 			Blend SrcAlpha OneMinusSrcAlpha
 			ZWrite [_EnableZWrite]
 
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
-
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -408,33 +415,7 @@ Shader "Sunao Shader/TransClipping" {
 			#pragma multi_compile_fog
 			#pragma target 4.5
 
-			#define TRANSPARENT
-
 			#define PASS_FB
-
-			#include "./cginc/SunaoShader_Core.cginc"
-
-			ENDCG
-		}
-
-
-		Pass {
-			Tags {
-				"LightMode"  = "ForwardAdd"
-			}
-
-			Cull [_Culling]
-			Blend SrcAlpha One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fwdadd
-			#pragma multi_compile_fog
-			#pragma target 4.5
-
-			#define PASS_FA
 			#define TRANSPARENT
 
 			#include "./cginc/SunaoShader_Core.cginc"
@@ -451,11 +432,6 @@ Shader "Sunao Shader/TransClipping" {
 			Cull Front
 			Blend SrcAlpha OneMinusSrcAlpha
 			ZWrite [_EnableZWrite]
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp NotEqual
-			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -478,14 +454,36 @@ Shader "Sunao Shader/TransClipping" {
 				"LightMode"  = "ForwardAdd"
 			}
 
-			Cull Front
+			Cull [_Culling]
+			BlendOp [_BlendOperation]
 			Blend SrcAlpha One
 			ZWrite Off
 
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp NotEqual
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_fwdadd
+			#pragma multi_compile_fog
+			#pragma target 4.5
+
+			#define PASS_FA
+			#define TRANSPARENT
+
+			#include "./cginc/SunaoShader_Core.cginc"
+
+			ENDCG
+		}
+
+
+		Pass {
+			Tags {
+				"LightMode"  = "ForwardAdd"
 			}
+
+			Cull Front
+			BlendOp [_BlendOperation]
+			Blend SrcAlpha One
+			ZWrite Off
 
 			CGPROGRAM
 			#pragma vertex vert
