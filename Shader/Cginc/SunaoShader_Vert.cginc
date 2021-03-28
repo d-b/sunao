@@ -12,6 +12,8 @@ VOUT vert (VIN v) {
 	o.pos     = UnityObjectToClipPos(v.vertex);
 	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
 
+	o.vertex  = v.vertex;
+
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
@@ -74,9 +76,6 @@ VOUT vert (VIN v) {
 	#endif
 
 	o.ldir    = normalize(o.ldir);
-
-//-------------------------------------カメラ方向
-	o.view    = normalize(_WorldSpaceCameraPos - PosW);
 
 //-------------------------------------SHライト
 	#ifdef PASS_FB
@@ -207,10 +206,8 @@ VOUT vert (VIN v) {
 	o.tanW    = UnityObjectToWorldDir(v.tangent.xyz);
 	o.tanB    = cross(UnityObjectToWorldNormal(v.normal) , o.tanW) * v.tangent.w * unity_WorldTransformParams.w;
 
-//-------------------------------------MatCap
-	float3 MatCam = normalize(UNITY_MATRIX_V[1].xyz);
-	o.matcapv = normalize(MatCam - o.view * dot(o.view, MatCam));
-	o.matcaph = normalize(cross(o.view , o.matcapv));
+//-------------------------------------カメラ前方向
+	o.vfront  = normalize(UNITY_MATRIX_V[1].xyz);
 
 //-------------------------------------ポイントライト
 	#ifdef PASS_FA

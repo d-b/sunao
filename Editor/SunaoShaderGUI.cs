@@ -183,7 +183,7 @@ namespace SunaoShader {
 
 		int     Version_H         = 1;
 		int     Version_M         = 4;
-		int     Version_L         = 2;
+		int     Version_L         = 3;
 
 		int     VersionC          = 0;
 		int     VersionM          = 0;

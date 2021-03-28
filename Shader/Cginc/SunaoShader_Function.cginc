@@ -98,7 +98,8 @@ float  ToonCalc(float diffuse , float4 toon) {
 	float Diffuse;
 	float Gradient;
 
-	Gradient = frac((max(diffuse , 0.0000001f) + toon.z) * toon.x) - 0.5f;
+	diffuse  = max(diffuse , 0.000001f);
+	Gradient = frac((diffuse + toon.z - 0.0000001f) * toon.x) - 0.5f;
 	Gradient = saturate(Gradient * toon.w + 0.5f) + 0.5f;
 	Gradient = (frac(Gradient) - 0.5f) * toon.y;
 	Diffuse  = floor(diffuse * toon.x) * toon.y + Gradient;
