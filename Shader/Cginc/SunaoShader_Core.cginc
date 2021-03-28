@@ -286,6 +286,7 @@ struct VIN {
 struct VOUT {
 
 	float4 pos       : SV_POSITION;
+	float4 vertex    : VERTEX;
 	float2 uv        : TEXCOORD0;
 	float4 uvanm     : TEXCOORD1;
 	float4 decal     : TEXCOORD2;
@@ -295,22 +296,20 @@ struct VOUT {
 	float3 color     : COLOR0;
 	float4 tangent   : TANGENT;
 	float3 ldir      : LIGHTDIR0;
-	float3 view      : TEXCOORD5;
-	float4 toon      : TEXCOORD6;
-	float3 tanW      : TEXCOORD7;
-	float3 tanB      : TEXCOORD8;
-	float3 matcapv   : TEXCOORD9;
-	float3 matcaph   : TEXCOORD10;
-	float4 euv       : TEXCOORD11;
-	float3 eprm      : TEXCOORD12;
-	float4 peuv      : TEXCOORD13;
-	float2 pduv      : TEXCOORD14;
-	float3 peprm     : TEXCOORD15;
-	float3 pview     : TEXCOORD16;
-	float4 worldpos  : TEXCOORD17;
-	float4 objpos 	 : TEXCOORD18;
-	float4 screenpos : TEXCOORD19;
-	float  alpha     : TEXCOORD20;
+	float4 toon      : TEXCOORD5;
+	float3 tanW      : TEXCOORD6;
+	float3 tanB      : TEXCOORD7;
+	float3 vfront    : TEXCOORD8;
+	float4 euv       : TEXCOORD9;
+	float3 eprm      : TEXCOORD10;
+	float4 peuv      : TEXCOORD11;
+	float2 pduv      : TEXCOORD12;
+	float3 peprm     : TEXCOORD13;
+	float3 pview     : TEXCOORD14;
+	float4 worldpos  : TEXCOORD15;
+	float4 objpos    : TEXCOORD16;
+	float4 screenpos : TEXCOORD17;
+	float  alpha     : TEXCOORD18;
 
 	#ifdef PASS_FB
 		float3 shdir   : LIGHTDIR1;
@@ -319,13 +318,13 @@ struct VOUT {
 		float4 vldirX  : LIGHTDIR2;
 		float4 vldirY  : LIGHTDIR3;
 		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD21;
-		float4 vlatn   : TEXCOORD22;
+		float4 vlcorr  : TEXCOORD19;
+		float4 vlatn   : TEXCOORD20;
 	#endif
 
-	UNITY_FOG_COORDS(23)
+	UNITY_FOG_COORDS(21)
 	#ifdef PASS_FA
-		LIGHTING_COORDS(24 , 25)
+		LIGHTING_COORDS(22 , 23)
 	#endif
 
 };

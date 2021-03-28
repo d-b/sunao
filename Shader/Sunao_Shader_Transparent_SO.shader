@@ -1,5 +1,5 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.4.2
+//              Sunao Shader    Ver 1.4.3
 //
 //                      Copyright (c) 2021 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
@@ -382,7 +382,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 1
 		[HideInInspector] _VersionM        ("Version M"         , int) = 4
-		[HideInInspector] _VersionL        ("Version L"         , int) = 2
+		[HideInInspector] _VersionL        ("Version L"         , int) = 3
 
 	}
 
@@ -522,6 +522,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 				"LightMode" = "ShadowCaster"
 			}
 
+			Cull [_Culling]
 			ZWrite On
 			ZTest LEqual
 
@@ -532,6 +533,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 			#pragma target 4.5
 
 			#define PASS_SC
+			#define TRANSPARENT
 
 			#include "./cginc/SunaoShader_SC.cginc"
 

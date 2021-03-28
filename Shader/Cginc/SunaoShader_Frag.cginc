@@ -5,6 +5,8 @@
 
 
 float4 frag (VOUT IN) : COLOR {
+//----カメラ視点方向
+	float3 View         = normalize(_WorldSpaceCameraPos - mul(unity_ObjectToWorld , IN.vertex).xyz);
 
 //-------------------------------------メインカラー
 	float4 OUT          = float4(0.0f , 0.0f , 0.0f , 1.0f);
@@ -250,16 +252,35 @@ float4 frag (VOUT IN) : COLOR {
 	       ShadeColor   = lerp(ShadeColor , _CustomShadeColor.rgb , _CustomShadeColor.a);
 
 //-------------------------------------ライティング
+	float3 LightBase    = (float3)0.0f;
+
 	#ifdef PASS_FB
-		float3 LightBase    = _LightColor0 * _DirectionalLight;
-		float3 VLight0      = unity_LightColor[0].rgb * IN.vlatn.x * 0.6f;
-		float3 VLight1      = unity_LightColor[1].rgb * IN.vlatn.y * 0.6f;
-		float3 VLight2      = unity_LightColor[2].rgb * IN.vlatn.z * 0.6f;
-		float3 VLight3      = unity_LightColor[3].rgb * IN.vlatn.w * 0.6f;
-		float3 VLightBase   = saturate(VLight0 + VLight1 + VLight2 + VLight3);
+		       LightBase    = _LightColor0 * _DirectionalLight;
+		float3 VLight0      = unity_LightColor[0].rgb * IN.vlatn.x;
+		float3 VLight1      = unity_LightColor[1].rgb * IN.vlatn.y;
+		float3 VLight2      = unity_LightColor[2].rgb * IN.vlatn.z;
+		float3 VLight3      = unity_LightColor[3].rgb * IN.vlatn.w;
+		float3 VLightBase   = (float3)0.0f;
+
+		if (_BlendOperation == 4) {
+			   VLightBase   = saturate((VLight0 + VLight1 + VLight2 + VLight3) * 0.8f);
+		} else {
+			   VLightBase   = saturate((VLight0 + VLight1 + VLight2 + VLight3) * 0.6f);
+		}
 	#endif
 	#ifdef PASS_FA
-		float3 LightBase    = _LightColor0 * LIGHT_ATTENUATION(IN) * _PointLight * 0.6f;
+		       LightBase    = LIGHT_ATTENUATION(IN);
+		//思うようにならなかったので没。Sunao Shader 2でなんとかするかも
+		//if (_ToonEnable) {
+		//	   LightBase    = ToonCalc(LIGHT_ATTENUATION(IN) , IN.toon);
+		//	   LightBase    = lerp(LightBase , LIGHT_ATTENUATION(IN) , 0.15f);
+		//}
+			   LightBase   *= _LightColor0 * _PointLight;
+		if (_BlendOperation == 4) {
+			   LightBase   *= 0.8f;
+		} else {
+			   LightBase   *= 0.6f;
+		}
 	#endif
 
 //----モノクロライティング
@@ -304,8 +325,8 @@ float4 frag (VOUT IN) : COLOR {
 		       MaxLight   = max(MaxLight , Lighting.r);
 		       MaxLight   = max(MaxLight , Lighting.g);
 		       MaxLight   = max(MaxLight , Lighting.b);
-
-		Lighting = saturate(Lighting / MaxLight);
+		       MaxLight   = min(MaxLight , 1.5f);
+		       Lighting   = saturate(Lighting / MaxLight);
 	}
 
 //-------------------------------------エミッション
@@ -401,14 +422,14 @@ float4 frag (VOUT IN) : COLOR {
 
 		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 0)
 		OPT_IF(_ToonSpecMode == 0)
-			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.ldir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
+			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.ldir, View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
 
 			#ifdef PASS_FB
-				float3 SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.shdir, IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
-				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
-				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
-				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
-				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
+				float3 SHToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, IN.shdir, View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
+				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
+				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
+				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
+				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, IN.tanW, Bitangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
 
 				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
 			#endif
@@ -420,14 +441,14 @@ float4 frag (VOUT IN) : COLOR {
 
 		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 1)
 		OPT_IF(_ToonSpecMode == 1)
-			float3 RLToonSpec = ToonViewOffSpecularCalc(Normal, IN.ldir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
+			float3 RLToonSpec = ToonViewOffSpecularCalc(Normal, IN.ldir, View, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
 
 			#ifdef PASS_FB
-				float3 SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, IN.view, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
-				float3 VL0ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
-				float3 VL1ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
-				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
-				float3 VL3ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), IN.view, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
+				float3 SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, View, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
+				float3 VL0ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
+				float3 VL1ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
+				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
+				float3 VL3ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
 
 				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
 			#endif
@@ -452,12 +473,12 @@ float4 frag (VOUT IN) : COLOR {
 		       SpecularMask = tex2D(_MetallicGlossMap , SubUV).rgb;
 		       SpecularMask = lerp(1.0f , SpecularMask , _SpecularMask);
 
-		float3 RLSpecular   = SpecularCalc(Normal , IN.ldir , IN.view , Smoothness) * LightBase;
+		float3 RLSpecular   = SpecularCalc(Normal , IN.ldir , View , Smoothness) * LightBase;
 
 		#ifdef PASS_FB
 			float3 SHSpecular   = (float3)0.0f;
 			if (_SpecularSH) {
-			       SHSpecular   = SpecularCalc(Normal , IN.shdir , IN.view , Smoothness) * IN.shmax;
+			       SHSpecular   = SpecularCalc(Normal , IN.shdir , View , Smoothness) * IN.shmax;
 			}
 			       Specular     = (RLSpecular + SHSpecular) * _Specular * ((Smoothness * Smoothness * Smoothness) + 0.25f);
 		#endif
@@ -469,7 +490,7 @@ float4 frag (VOUT IN) : COLOR {
 		       ReflectMask  = tex2D(_MetallicGlossMap , SubUV).rgb;
 
 		#ifdef PASS_FB
-			       Reflection   = ReflectionCalc(Normal , IN.view , Smoothness);
+			       Reflection   = ReflectionCalc(Normal , View , Smoothness);
 
 			if (_ReflectLit == 1) Reflection *= saturate(LightBase + VLightBase);
 			if (_ReflectLit == 2) Reflection *= saturate(IN.shmax);
@@ -477,7 +498,7 @@ float4 frag (VOUT IN) : COLOR {
 		#endif
 		#ifdef PASS_FA
 			if ((_ReflectLit == 1) || (_ReflectLit == 3)) {
-			       Reflection   = ReflectionCalc(Normal , IN.view , Smoothness);
+			       Reflection   = ReflectionCalc(Normal , View , Smoothness);
 				   Reflection  *= saturate(LightBase);
 			}
 		#endif
@@ -488,8 +509,11 @@ float4 frag (VOUT IN) : COLOR {
 		       MatCapSmooth = lerp(MatCapSmooth , tex2D(_MetallicGlossMap , SubUV).a , _MatCapMaskEnable);
 		       MatCapMask   = lerp(MatCapMask   , ReflectMask                        , _MatCapMaskEnable);
 
+		float3 MatCapV      = normalize(IN.vfront - View * dot(View, IN.vfront));
+		float3 MatCapH      = normalize(cross(View , MatCapV));
+
 		#ifdef PASS_FB
-			float2 MatCapUV     = float2(dot(IN.matcaph , Normal), dot(IN.matcapv , Normal)) * 0.5f + 0.5f;
+			float2 MatCapUV     = float2(dot(MatCapH , Normal), dot(MatCapV , Normal)) * 0.5f + 0.5f;
 			       MatCapture   = tex2Dbias(_MatCap , float4(MatCapUV , 0.0f , 3.0f * (1.0f - MatCapSmooth))).rgb * _MatCapStrength;
 
 			if (_MatCapLit == 1) MatCapture *= saturate(LightBase + VLightBase);
@@ -498,7 +522,7 @@ float4 frag (VOUT IN) : COLOR {
 		#endif
 		#ifdef PASS_FA
 			if ((_MatCapLit  == 1) || (_MatCapLit  == 3)) {
-				float2 MatCapUV    = float2(dot(IN.matcaph , Normal), dot(IN.matcapv , Normal)) * 0.5f + 0.5f;
+				float2 MatCapUV    = float2(dot(MatCapH , Normal), dot(MatCapV , Normal)) * 0.5f + 0.5f;
 				       MatCapture  = tex2Dbias(_MatCap , float4(MatCapUV , 0.0f , 3.0f * (1.0f - MatCapSmooth))).rgb * _MatCapStrength;
 				       MatCapture *= saturate(LightBase);
 			}
@@ -525,7 +549,7 @@ float4 frag (VOUT IN) : COLOR {
 	#ifdef PASS_FB
 		#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
 		OPT_IF(_RimLitEnable)
-			       RimLight  = RimLightCalc(Normal , IN.view , _RimLit , _RimLitGradient);
+			       RimLight  = RimLightCalc(Normal , View , _RimLit , _RimLitGradient);
 			       RimLight *= _RimLitColor.rgb * _RimLitColor.a * UNITY_SAMPLE_TEX2D_SAMPLER(_RimLitMask , _MainTex , SubUV).rgb;
 			if (_RimLitLighthing) RimLight *= saturate(LightBase + IN.shmax + VLightBase);
 			if (_RimLitTexColor ) RimLight *= Color;
@@ -535,7 +559,7 @@ float4 frag (VOUT IN) : COLOR {
 	#ifdef PASS_FA
 		#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
 		OPT_IF(_RimLitEnable && _RimLitLighthing)
-			       RimLight  = RimLightCalc(Normal , IN.view , _RimLit , _RimLitGradient);
+			       RimLight  = RimLightCalc(Normal , View , _RimLit , _RimLitGradient);
 			       RimLight *= _RimLitColor.rgb * _RimLitColor.a * UNITY_SAMPLE_TEX2D_SAMPLER(_RimLitMask , _MainTex , SubUV).rgb;
 			       RimLight *= saturate(LightBase);
 			if (_RimLitTexColor ) RimLight *= Color;
@@ -665,7 +689,10 @@ float4 frag (VOUT IN) : COLOR {
 //----SrcAlphaの代用
 	#ifdef TRANSPARENT
 		#ifdef PASS_FA
-			if (_BlendOperation == 4) OUT.rgb *= OUT.a;
+			if (_BlendOperation == 4) {
+				OUT.a    = 1.055f * pow(OUT.a , 0.41666667f) - 0.055f;
+				OUT.rgb *= OUT.a;
+			}
 		#endif
 	#endif
 
