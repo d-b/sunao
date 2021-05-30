@@ -21,6 +21,8 @@ Shader "Sunao Shader/[Stencil Outline]/TransClipping" {
 		_Color             ("Color"                     , Color) = (1,1,1,1)
 		_Alpha             ("Alpha"                     , Range( 0.0,  2.0)) = 1.0
 		_Cutout            ("Cutout"                    , Range( 0.0,  1.0)) = 0.5
+		[Enum(UV2 , 0 , UV3 , 1 , UV4 , 2)]
+		_AltUVSet          ("Alternate UV Set"          , int) = 0
 
 		[Normal]
 		_BumpMap           ("Normal Map"                , 2D) = "bump" {}
@@ -118,7 +120,7 @@ Shader "Sunao Shader/[Stencil Outline]/TransClipping" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftDecalMode ("Decal Mode"   							, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
-		_HSVShiftShadeMode ("Shade Mode"   			  			, int) = 0
+		_HSVShiftShadeMode ("Shade Mode"   				  		, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftSpecularMode ("Specular Mode"          , int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
@@ -130,31 +132,25 @@ Shader "Sunao Shader/[Stencil Outline]/TransClipping" {
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftParallaxMode ("Parallax Mode"					, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
-		_HSVShiftStippleMode ("Stipple Mode"     				, int) = 0
-		[Enum(None , 0 , Mask , 1 , All , 2)]
-		_HSVShiftCrosshatchMode ("Crosshatch Mode"			, int) = 0
+		_HSVShiftAudioLinkMode ("AudioLink Mode"      	, int) = 0
 
 
 		[SToggle]
-		_StippleEnable     ("Enable Stippling"          , int) = 0
-		_StippleMask       ("Stipple Mask"              , 2D) = "white" {}
-		_StippleTexture    ("Stipple Texture"           , 2D) = "black" {}
-		_StippleEmissionMap ("Stipple Emission Mask"    , 2D) = "black" {}
-		_StippleSize  		 ("Stipple Size"              , Range( 0.0,  1.0)) = 0.5
-		_StippleAmount		 ("Stipple Amount"            , Range( 0.0,  1.0)) = 0.5
-		[Enum(Uniform , 0 , Wave , 1)]
-		_StippleMode       ("Stipple Mode"              , int) = 1
-		_StippleAnimation  ("Stipple Animation"         , Range(0.0, 1.0)) = 0.0
-		_StippleSpeed      ("Stipple Speed"             , Range(0.0, 50.0)) = 1.0
-		_StippleFrequency  ("Stipple Frequency"         , Range(0.0, 200.0)) = 30.0
+		_ALEnable          ("Enable Audio Link"         , int) = 0
+		_ALMask            ("Audio Link Mask"           , 2D) = "black" {}
+		[Enum(Bass , 0 , Low Mids , 1 , High Mids , 2 , Treble , 3 , Packed Map , 4 , UV Based , 5)]
+		_ALChannel				 ("Audio Link Channel"        , int) = 4
+		_ALTexture 				 ("Texture"										, 2D) = "black" {}
+		_ALBassTexture	   ("Bass Texture"              , 2D) = "black" {}
+		_ALLowMidsTexture  ("Low Mids Texture"          , 2D) = "black" {}
+		_ALHighMidsTexture ("High Mids Texture"         , 2D) = "black" {}
+		_ALTrebleTexture	 ("Treble Texture"            , 2D) = "black" {}
 		[SToggle]
-		_StippleDisableOutline ("Stipple Disable Outline", int) = 1
+		_ALAlbedoEnable 	 ("Albedo Enabled"            , int) = 0
+		_ALAlbedoOpacity   ("Albedo Opacity"					  , Range(0.0,  1.0)) = 1.0
 		[SToggle]
-		_CrosshatchEnable  ("Enable Crosshatching"      , int) = 0
-		_CrosshatchMask    ("Crosshatch Mask"           , 2D) = "white" {}
-		_CrosshatchTexture ("Crosshatch Texture"        , 2D) = "black" {}
-		_CrosshatchEmissionMap ("Crosshatch Emission Mask", 2D) = "black" {}
-		_CrosshatchAmount  ("Crosshatch Amount"         , Range( 0.0,  1.0)) = 0.5
+		_ALEmissionEnable  ("Emission Enabled"          , int) = 1
+		_ALEmissionIntensity ("Emission Intensity"  		, Range(0.0,  10.0)) = 1.0
 
 
 		_VertexColorThreshold ("Vertex Alpha 1", Range(0.0,  1.0)) = 0.9999
@@ -398,6 +394,7 @@ Shader "Sunao Shader/[Stencil Outline]/TransClipping" {
 			"RenderType"      = "TransparentCutout"
 			"Queue"           = "AlphaTest+50"
 		}
+
 
 		Pass {
 			Tags {

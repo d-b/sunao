@@ -20,6 +20,14 @@ VOUT vert (VIN v) {
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
+//-------------------------------------UV2
+	switch (_AltUVSet) {
+		case 0: o.uv2 = v.uv2; break;
+		case 1: o.uv2 = v.uv3; break;
+		case 2: o.uv2 = v.uv4; break;
+		default: o.uv2 = v.uv2; break;
+	}
+
 //-------------------------------------UVアニメーション
 	o.uvanm   = float4(0.0f , 0.0f , 1.0f , 1.0f);
 

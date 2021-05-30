@@ -25,6 +25,8 @@ float4 frag (VOUT IN) : COLOR {
 	float3 Color        = UNITY_SAMPLE_TEX2D(_MainTex , MainUV).rgb;
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
 
+	float4 ALColor      = float4(0.0f , 0.0f , 0.0f , 1.0f);
+
 //----Tangent map application
 	#if WHEN_OPT(PROP_TAN_ENABLE == 1)
 	OPT_IF(_TanEnable)
@@ -65,6 +67,52 @@ float4 frag (VOUT IN) : COLOR {
 		if (_HSVShiftSpecularMode == 2) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_unmasked);
 		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
 		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
+	OPT_FI
+	#endif
+
+//----AudioLink
+	#if WHEN_OPT(PROP_AL_ENABLE == 1)
+	OPT_IF(_ALEnable)
+		if (AudioLinkIsAvailableNonSurface()) {
+			float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+			float4 BassTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALBassTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+			float4 LowMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALLowMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+			float4 HighMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALHighMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+			float4 TrebleTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTrebleTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+
+			float AudioBass = AudioLinkData(ALPASS_AUDIOBASS).x;
+			float AudioLowMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
+			float AudioHighMids = AudioLinkData(ALPASS_AUDIOHIGHMIDS).x;
+			float AudioTreble = AudioLinkData(ALPASS_AUDIOTREBLE).x;
+
+			float BassBar = smoothstep((1 - AudioBass), (1 - AudioBass) + 0.01, ALMask.r);
+			float LowMidsBar = smoothstep((1 - AudioLowMids), (1 - AudioLowMids) + 0.01, ALMask.g);
+			float HighMidsBar = smoothstep((1 - AudioHighMids), (1 - AudioHighMids) + 0.01, ALMask.b);
+			float TrebleBar = smoothstep((1 - AudioTreble), (1 - AudioTreble) + 0.01, 1.0 - ALMask.a);
+
+			float BassAlpha = lerp(BassBar, ALMask.r, BassTexture.a);
+			float LowMidsAlpha = lerp(LowMidsBar, ALMask.g, LowMidsTexture.a);
+			float HighMidsAlpha = lerp(HighMidsBar, ALMask.b, HighMidsTexture.a);
+			float TrebleAlpha = lerp(TrebleBar, ALMask.a, TrebleTexture.a);
+
+			ALColor.rgb = BassTexture.rgb * BassAlpha * AudioBass
+									+ LowMidsTexture.rgb * LowMidsAlpha * AudioLowMids
+									+ HighMidsTexture.rgb * HighMidsAlpha * AudioHighMids
+									+ TrebleTexture.rgb * TrebleAlpha * AudioTreble;
+
+			#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+			OPT_IF(_HSVShiftEnable)
+				if (_HSVShiftAudioLinkMode == 1) ALColor.rgb = HSVAdjust(ALColor.rgb, hsvadj_masked);
+				if (_HSVShiftAudioLinkMode == 2) ALColor.rgb = HSVAdjust(ALColor.rgb, hsvadj_unmasked);
+			OPT_FI
+			#endif
+
+			#if WHEN_OPT(PROP_AL_ALBEDO_ENABLE == 1)
+			OPT_IF(_ALAlbedoEnable)
+				Color.rgb = saturate(Color.rgb + ALColor.rgb * _ALAlbedoOpacity);
+			OPT_FI
+			#endif
+		}
 	OPT_FI
 	#endif
 
@@ -136,49 +184,6 @@ float4 frag (VOUT IN) : COLOR {
 		}
 	OPT_FI
 	#endif
-
-//----Stippling & crosshatching
-	float dot_halftone = 0.0f;
-	float line_halftone = 0.0f;
-	float2 emission_scroll = float2(_EmissionScrX , _EmissionScrY) * _Time.y;
-	float4 stipple_color = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleTexture, _MainTex, TRANSFORM_TEX(SubUV, _StippleTexture));
-	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(SubUV, _StippleMask));
-	float4 stipple_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleEmissionMap, _MainTex, TRANSFORM_TEX((SubUV + emission_scroll), _StippleEmissionMap));
-	float4 crosshatch_color = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchTexture, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchTexture));
-	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(SubUV, _CrosshatchMask));
-	float4 crosshatch_emission_map = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchEmissionMap, _MainTex, TRANSFORM_TEX(SubUV + emission_scroll, _CrosshatchEmissionMap));
-
-	if (_StippleEnable) {
-		float stipple_size = 0.0f;
-		if(_StippleMode == 0) stipple_size = clamp(_StippleSize + sin(_Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
-		if(_StippleMode == 1) stipple_size = clamp(_StippleSize + sin(IN.objpos.y * _StippleFrequency + _Time.y * _StippleSpeed) * _StippleAnimation, 0.0f, 1.0f);
-
-		dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, stipple_size));
-
-    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
-    OPT_IF(_HSVShiftEnable)
-			if (_HSVShiftStippleMode == 1) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_masked);
-			if (_HSVShiftStippleMode == 2) stipple_color.rgb = HSVAdjust(stipple_color.rgb, hsvadj_unmasked);
-		OPT_FI
-		#endif
-
-		Color = lerp(Color, stipple_color.rgb, stipple_mask.rgb * dot_halftone);
-		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
-	}
-
-	if (_CrosshatchEnable) {
-		float line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
-
-    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
-    OPT_IF(_HSVShiftEnable)
-			if (_HSVShiftCrosshatchMode == 1) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_masked);
-			if (_HSVShiftCrosshatchMode == 2) crosshatch_color.rgb = HSVAdjust(crosshatch_color.rgb, hsvadj_unmasked);
-		OPT_FI
-		#endif
-
-		Color = lerp(Color, crosshatch_color.rgb, crosshatch_mask.rgb * line_halftone);
-		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
-	}
 
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
@@ -350,11 +355,11 @@ float4 frag (VOUT IN) : COLOR {
 		OPT_FI
 		#endif
 
-		if (_StippleEnable)
-			Emission = _Emission * IN.eprm.x * lerp(Emission, stipple_emission_map.rgb, stipple_mask.rgb * dot_halftone);
-
-		if (_CrosshatchEnable)
-			Emission = _Emission * IN.eprm.x * lerp(Emission, crosshatch_emission_map.rgb, crosshatch_mask.rgb * line_halftone);
+		#if WHEN_OPT(PROP_AL_ENABLE == 1 && PROP_AL_EMISSION_ENABLE == 1)
+		OPT_IF(_ALEnable && _ALEmissionEnable)
+			Emission.rgb += _Emission * ALColor.rgb * _ALEmissionIntensity;
+		OPT_FI
+		#endif
 
 		if (_EmissionLighting) {
 			#ifdef PASS_FB

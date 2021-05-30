@@ -51,18 +51,6 @@
 	uniform float 		_HSVShiftVal;
 	uniform uint 		  _HSVShiftOutlineMode;
 
-//----Stippling & Crosshatching
-	uniform bool _StippleEnable;
-	uniform bool _StippleDisableOutline;
-	uniform float _StippleSize;
-	uniform float _StippleAmount;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
-	uniform float4 _StippleMask_ST;
-	uniform bool _CrosshatchEnable;
-	uniform float _CrosshatchAmount;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
-	uniform float4 _CrosshatchMask_ST;
-
 //----Vertex Color Alpha
 	uniform float     _VertexColorThreshold;
 	uniform float3    _VertexColor01;
@@ -177,7 +165,7 @@ VOUT vert (VIN v) {
 
 //----頂点座標変換
 	float4 outv = (float4)0.0f;
-	if (_OutLineEnable && !(_StippleEnable && _StippleDisableOutline)) {
+	if (_OutLineEnable) {
 
 		float4 fixscale;
 		fixscale.x  = length(float3(unity_ObjectToWorld[0].x , unity_ObjectToWorld[1].x , unity_ObjectToWorld[2].x));
@@ -249,7 +237,7 @@ VOUT vert (VIN v) {
 				Lighting += unity_LightColor[3].rgb * VLAtten.w * 0.6f;
 
 			#endif
-			
+
 			Lighting = max(Lighting , _MinimumLight);
 		#endif
 
@@ -318,20 +306,6 @@ float4 frag (VOUT IN) : COLOR {
 		OUT.a     = saturate(UNITY_SAMPLE_TEX2D(_MainTex , IN.uv).a * _Color.a * _Alpha);
 		OUT.a    *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask , _MainTex , IN.uv).rgb) , _AlphaMaskStrength);
 	#endif
-
-//----Stippling & crosshatching
-	float dot_halftone = DotHalftone(IN.worldpos, lerp(1.0f, 10.0f, _StippleAmount), lerp(0.0f, 0.015f, _StippleSize));
-	float line_halftone = LineHalftone(IN.worldpos, lerp(0.0f, 4000.0f, _CrosshatchAmount));
-	float4 stipple_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_StippleMask, _MainTex, TRANSFORM_TEX(IN.uv, _StippleMask));
-	float4 crosshatch_mask = UNITY_SAMPLE_TEX2D_SAMPLER(_CrosshatchMask, _MainTex, TRANSFORM_TEX(IN.uv, _CrosshatchMask));
-
-	if (_StippleEnable) {
-		OUT.a *= lerp(1.0f, dot_halftone, 1.0f - stipple_mask.a);
-	}
-
-	if (_CrosshatchEnable) {
-		OUT.a *= lerp(1.0f, line_halftone, 1.0f - crosshatch_mask.a);
-	}
 
 //----Vertex Color Alpha
 	OUT.a *= IN.alpha;

@@ -21,6 +21,7 @@ namespace SunaoShader {
 		MaterialProperty Color;
 		MaterialProperty Alpha;
 		MaterialProperty Cutout;
+		MaterialProperty AltUVSet;
 		MaterialProperty BumpMap;
 		MaterialProperty OcclusionMap;
 		MaterialProperty AlphaMask;
@@ -91,25 +92,20 @@ namespace SunaoShader {
 		MaterialProperty HSVShiftOutlineMode;
 		MaterialProperty HSVShiftRimMode;
 		MaterialProperty HSVShiftParallaxMode;
-		MaterialProperty HSVShiftStippleMode;
-		MaterialProperty HSVShiftCrosshatchMode;
+		MaterialProperty HSVShiftAudioLinkMode;
 
-		MaterialProperty StippleEnable;
-		MaterialProperty StippleMask;
-		MaterialProperty StippleTexture;
-		MaterialProperty StippleEmissionMap;
-		MaterialProperty StippleSize;
-		MaterialProperty StippleAmount;
-		MaterialProperty StippleMode;
-		MaterialProperty StippleAnimation;
-		MaterialProperty StippleSpeed;
-		MaterialProperty StippleFrequency;
-		MaterialProperty StippleDisableOutline;
-		MaterialProperty CrosshatchEnable;
-		MaterialProperty CrosshatchMask;
-		MaterialProperty CrosshatchTexture;
-		MaterialProperty CrosshatchEmissionMap;
-		MaterialProperty CrosshatchAmount;
+		MaterialProperty ALEnable;
+		MaterialProperty ALMask;
+		MaterialProperty ALChannel;
+		MaterialProperty ALTexture;
+		MaterialProperty ALBassTexture;
+		MaterialProperty ALLowMidsTexture;
+		MaterialProperty ALHighMidsTexture;
+		MaterialProperty ALTrebleTexture;
+		MaterialProperty ALAlbedoEnable;
+		MaterialProperty ALAlbedoOpacity;
+		MaterialProperty ALEmissionEnable;
+		MaterialProperty ALEmissionIntensity;
 
 		MaterialProperty VertexColorThreshold;
 		MaterialProperty VertexColor01;
@@ -327,6 +323,7 @@ namespace SunaoShader {
 			Color             = FindProperty("_Color"             , Prop , false);
 			Alpha             = FindProperty("_Alpha"             , Prop , false);
 			Cutout            = FindProperty("_Cutout"            , Prop , false);
+			AltUVSet          = FindProperty("_AltUVSet"          , Prop , false);
 			BumpMap           = FindProperty("_BumpMap"           , Prop , false);
 			OcclusionMap      = FindProperty("_OcclusionMap"      , Prop , false);
 			AlphaMask         = FindProperty("_AlphaMask"         , Prop , false);
@@ -399,25 +396,20 @@ namespace SunaoShader {
 			HSVShiftOutlineMode = FindProperty("_HSVShiftOutlineMode" , Prop , false);
 			HSVShiftRimMode	= FindProperty("_HSVShiftRimMode" , Prop , false);
 			HSVShiftParallaxMode	= FindProperty("_HSVShiftParallaxMode" , Prop , false);
-			HSVShiftStippleMode	= FindProperty("_HSVShiftStippleMode" , Prop , false);
-			HSVShiftCrosshatchMode	= FindProperty("_HSVShiftCrosshatchMode" , Prop , false);
+			HSVShiftAudioLinkMode	= FindProperty("_HSVShiftAudioLinkMode" , Prop , false);
 
-			StippleEnable     = FindProperty("_StippleEnable"     , Prop , false);
-			StippleMask       = FindProperty("_StippleMask"       , Prop , false);
-			StippleTexture    = FindProperty("_StippleTexture"    , Prop , false);
-			StippleEmissionMap = FindProperty("_StippleEmissionMap", Prop, false);
-			StippleSize    		= FindProperty("_StippleSize"       , Prop , false);
-			StippleAmount     = FindProperty("_StippleAmount"     , Prop , false);
-			StippleMode       = FindProperty("_StippleMode"       , Prop , false);
-			StippleAnimation  = FindProperty("_StippleAnimation"  , Prop , false);
-			StippleSpeed      = FindProperty("_StippleSpeed"      , Prop , false);
-			StippleFrequency  = FindProperty("_StippleFrequency"  , Prop , false);
-			StippleDisableOutline = FindProperty("_StippleDisableOutline", Prop, false);
-			CrosshatchEnable  = FindProperty("_CrosshatchEnable"  , Prop , false);
-			CrosshatchMask    = FindProperty("_CrosshatchMask"    , Prop , false);
-			CrosshatchTexture = FindProperty("_CrosshatchTexture" , Prop , false);
-			CrosshatchEmissionMap = FindProperty("_CrosshatchEmissionMap", Prop, false);
-			CrosshatchAmount  = FindProperty("_CrosshatchAmount"  , Prop , false);
+			ALEnable 					= FindProperty("_ALEnable"          , Prop , false);
+			ALMask 						= FindProperty("_ALMask"            , Prop , false);
+			ALChannel 				= FindProperty("_ALChannel"         , Prop , false);
+			ALTexture					= FindProperty("_ALTexture"         , Prop , false);
+			ALBassTexture 		= FindProperty("_ALBassTexture"     , Prop , false);
+			ALLowMidsTexture 	= FindProperty("_ALLowMidsTexture"  , Prop , false);
+			ALHighMidsTexture = FindProperty("_ALHighMidsTexture" , Prop , false);
+			ALTrebleTexture 	= FindProperty("_ALTrebleTexture"   , Prop , false);
+			ALAlbedoEnable 		= FindProperty("_ALAlbedoEnable"    , Prop , false);
+			ALAlbedoOpacity		= FindProperty("_ALAlbedoOpacity"   , Prop , false);
+			ALEmissionEnable 	= FindProperty("_ALEmissionEnable"  , Prop , false);
+			ALEmissionIntensity = FindProperty("_ALEmissionIntensity" , Prop , false);
 
 			VertexColorThreshold = FindProperty("_VertexColorThreshold", Prop, false);
 			VertexColor01     = FindProperty("_VertexColor01"     , Prop , false);
@@ -697,6 +689,8 @@ namespace SunaoShader {
 					if (MainFoldout) {
 						mat.SetInt("_MainFO" , 1);
 
+						ME.ShaderProperty(AltUVSet , new GUIContent("Alternate UV Set"));
+
 						ME.ShaderProperty(Bright , new GUIContent("Brightness"));
 
 						if (BumpMap.textureValue      != null) {
@@ -897,47 +891,30 @@ namespace SunaoShader {
 					ME.ShaderProperty(HSVShiftOutlineMode, new GUIContent("Outline Mode"));
 					ME.ShaderProperty(HSVShiftRimMode, new GUIContent("Rim Mode"));
 					ME.ShaderProperty(HSVShiftParallaxMode, new GUIContent("Parallax Mode"));
-					ME.ShaderProperty(HSVShiftStippleMode, new GUIContent("Stipple Mode"));
-					ME.ShaderProperty(HSVShiftCrosshatchMode, new GUIContent("Crosshatch Mode"));
+					ME.ShaderProperty(HSVShiftAudioLinkMode, new GUIContent("AudioLink Mode"));
 				}
 			}
 
 
-			GUILayout.Label("Stippling & Crosshatching", EditorStyles.boldLabel);
+			GUILayout.Label("Audio Link", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
 				using (new EditorGUILayout.VerticalScope("box")) {
 
-					GUILayout.Label("Stippling", EditorStyles.boldLabel);
+					GUILayout.Label("Beat Detection", EditorStyles.boldLabel);
 
-					ME.ShaderProperty(StippleEnable, new GUIContent("Enable Stippling"));
-					ME.TexturePropertySingleLine(new GUIContent("Stipple Mask"), StippleMask);
-					ME.TextureScaleOffsetProperty(StippleMask);
-					ME.TexturePropertySingleLine(new GUIContent("Stipple Texture"), StippleTexture);
-					ME.TextureScaleOffsetProperty(StippleTexture);
-					ME.TexturePropertySingleLine(new GUIContent("Stipple Emission Mask"), StippleEmissionMap);
-					ME.TextureScaleOffsetProperty(StippleEmissionMap);
-					ME.ShaderProperty(StippleSize, new GUIContent("Stipple Size"));
-					ME.ShaderProperty(StippleAmount, new GUIContent("Stipple Amount"));
-					ME.ShaderProperty(StippleMode, new GUIContent("Stipple Mode"));
-					ME.ShaderProperty(StippleAnimation, new GUIContent("Stipple Animation"));
-					ME.ShaderProperty(StippleSpeed, new GUIContent("Stipple Speed"));
-					ME.ShaderProperty(StippleFrequency, new GUIContent("Stipple Frequency"));
-					ME.ShaderProperty(StippleDisableOutline, new GUIContent("Disable Outline"));
-				}
-
-				using (new EditorGUILayout.VerticalScope("box")) {
-
-					GUILayout.Label("Crosshatching", EditorStyles.boldLabel);
-
-					ME.ShaderProperty(CrosshatchEnable, new GUIContent("Enable Crosshatching"));
-					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Mask"), CrosshatchMask);
-					ME.TextureScaleOffsetProperty(CrosshatchMask);
-					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Texture"), CrosshatchTexture);
-					ME.TextureScaleOffsetProperty(CrosshatchTexture);
-					ME.TexturePropertySingleLine(new GUIContent("Crosshatch Emission Mask"), CrosshatchEmissionMap);
-					ME.TextureScaleOffsetProperty(CrosshatchEmissionMap);
-					ME.ShaderProperty(CrosshatchAmount, new GUIContent("Crosshatch Amount"));
+					ME.ShaderProperty(ALEnable, new GUIContent("Enable Audio Link"));
+					ME.TexturePropertySingleLine(new GUIContent("Audio Link Mask"), ALMask);
+					ME.TextureScaleOffsetProperty(ALMask);
+					ME.ShaderProperty(ALChannel, new GUIContent("Audio Link Channel"));
+					ME.TexturePropertySingleLine(new GUIContent("Bass Texture"), ALBassTexture);
+					ME.TexturePropertySingleLine(new GUIContent("LowMids Texture"), ALLowMidsTexture);
+					ME.TexturePropertySingleLine(new GUIContent("HighMids Texture"), ALHighMidsTexture);
+					ME.TexturePropertySingleLine(new GUIContent("Treble Texture"), ALTrebleTexture);
+					ME.ShaderProperty(ALAlbedoEnable, new GUIContent("Albedo Enabled"));
+					ME.ShaderProperty(ALAlbedoOpacity, new GUIContent("Albedo Opacity"));
+					ME.ShaderProperty(ALEmissionEnable, new GUIContent("Emission Enabled"));
+					ME.ShaderProperty(ALEmissionIntensity, new GUIContent("Emission Intensity"));
 				}
 			}
 

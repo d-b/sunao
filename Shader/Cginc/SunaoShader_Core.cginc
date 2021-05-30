@@ -3,12 +3,12 @@
 //                      Copyright (c) 2021 揚茄子研究所
 //--------------------------------------------------------------
 
-
 //-------------------------------------Include
 
 	#include "UnityCG.cginc"
 	#include "AutoLight.cginc"
 	#include "Lighting.cginc"
+	#include "AudioLink.cginc"
 	#include "SunaoShader_Macro.cginc"
 	#include "SunaoShader_Function.cginc"
 
@@ -20,6 +20,7 @@
 	uniform float4    _Color;
 	uniform float     _Cutout;
 	uniform float     _Alpha;
+	uniform uint      _AltUVSet;
 	uniform sampler2D _BumpMap;
 	uniform float4    _BumpMap_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_OcclusionMap);
@@ -94,32 +95,22 @@
 	uniform uint 		  _HSVShiftOutlineMode;
 	uniform uint 		  _HSVShiftRimMode;
 	uniform uint 		  _HSVShiftParallaxMode;
-	uniform uint 		  _HSVShiftStippleMode;
-	uniform uint 		  _HSVShiftCrosshatchMode;
+	uniform uint 		  _HSVShiftAudioLinkMode;
 
-//----Stippling & Crosshatching
-	uniform bool      _StippleEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleMask);
-	uniform float4 		_StippleMask_ST;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleTexture);
-	uniform float4    _StippleTexture_ST;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_StippleEmissionMap);
-	uniform float4    _StippleEmissionMap_ST;
-	uniform float 		_StippleSize;
-	uniform float 		_StippleAmount;
-	uniform uint 		  _StippleMode;
-	uniform float 		_StippleAnimation;
-	uniform float 		_StippleSpeed;
-	uniform float 		_StippleFrequency;
-	uniform bool      _StippleDisableOutline;
-	uniform bool      _CrosshatchEnable;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchMask);
-	uniform float4 		_CrosshatchMask_ST;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchTexture);
-	uniform float4 		_CrosshatchTexture_ST;
-	UNITY_DECLARE_TEX2D_NOSAMPLER(_CrosshatchEmissionMap);
-	uniform float4    _CrosshatchEmissionMap_ST;
-	uniform float 		_CrosshatchAmount;
+//----AudioLink
+	uniform bool      _ALEnable;
+	UNITY_DECLARE_TEX2D(_ALMask);
+	uniform float4 		_ALMask_ST;
+	uniform uint 		  _ALChannel;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALBassTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALLowMidsTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALHighMidsTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALTrebleTexture);
+	uniform bool      _ALAlbedoEnable;
+	uniform float     _ALAlbedoOpacity;
+	uniform bool      _ALEmissionEnable;
+	uniform float     _ALEmissionIntensity;
 
 //----Vertex Color Alpha
 	uniform float     _VertexColorThreshold;
@@ -274,7 +265,10 @@
 
 struct VIN {
 	float4 vertex  : POSITION;
-	float2 uv      : TEXCOORD;
+	float2 uv      : TEXCOORD0;
+	float2 uv2     : TEXCOORD1;
+	float2 uv3     : TEXCOORD2;
+	float2 uv4     : TEXCOORD3;
 	float3 normal  : NORMAL;
 	float4 tangent : TANGENT;
 	float3 color   : COLOR;
@@ -288,28 +282,29 @@ struct VOUT {
 	float4 pos       : SV_POSITION;
 	float4 vertex    : VERTEX;
 	float2 uv        : TEXCOORD0;
-	float4 uvanm     : TEXCOORD1;
-	float4 decal     : TEXCOORD2;
-	float4 decal2    : TEXCOORD3;
-	float4 decanm    : TEXCOORD4;
+	float2 uv2       : TEXCOORD1;
+	float4 uvanm     : TEXCOORD2;
+	float4 decal     : TEXCOORD3;
+	float4 decal2    : TEXCOORD4;
+	float4 decanm    : TEXCOORD5;
 	float3 normal    : NORMAL;
 	float3 color     : COLOR0;
 	float4 tangent   : TANGENT;
 	float3 ldir      : LIGHTDIR0;
-	float4 toon      : TEXCOORD5;
-	float3 tanW      : TEXCOORD6;
-	float3 tanB      : TEXCOORD7;
-	float3 vfront    : TEXCOORD8;
-	float4 euv       : TEXCOORD9;
-	float3 eprm      : TEXCOORD10;
-	float4 peuv      : TEXCOORD11;
-	float2 pduv      : TEXCOORD12;
-	float3 peprm     : TEXCOORD13;
-	float3 pview     : TEXCOORD14;
-	float4 worldpos  : TEXCOORD15;
-	float4 objpos    : TEXCOORD16;
-	float4 screenpos : TEXCOORD17;
-	float  alpha     : TEXCOORD18;
+	float4 toon      : TEXCOORD6;
+	float3 tanW      : TEXCOORD7;
+	float3 tanB      : TEXCOORD8;
+	float3 vfront    : TEXCOORD9;
+	float4 euv       : TEXCOORD10;
+	float3 eprm      : TEXCOORD11;
+	float4 peuv      : TEXCOORD12;
+	float2 pduv      : TEXCOORD13;
+	float3 peprm     : TEXCOORD14;
+	float3 pview     : TEXCOORD15;
+	float4 worldpos  : TEXCOORD16;
+	float4 objpos    : TEXCOORD17;
+	float4 screenpos : TEXCOORD18;
+	float  alpha     : TEXCOORD19;
 
 	#ifdef PASS_FB
 		float3 shdir   : LIGHTDIR1;
@@ -318,13 +313,13 @@ struct VOUT {
 		float4 vldirX  : LIGHTDIR2;
 		float4 vldirY  : LIGHTDIR3;
 		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD19;
-		float4 vlatn   : TEXCOORD20;
+		float4 vlcorr  : TEXCOORD20;
+		float4 vlatn   : TEXCOORD21;
 	#endif
 
-	UNITY_FOG_COORDS(21)
+	UNITY_FOG_COORDS(22)
 	#ifdef PASS_FA
-		LIGHTING_COORDS(22 , 23)
+		LIGHTING_COORDS(23 , 24)
 	#endif
 
 };

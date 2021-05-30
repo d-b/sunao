@@ -196,7 +196,7 @@ float3 ReflectionCalc(float3 normal , float3 view , float scale) {
 	refl0 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_LOD        (unity_SpecCube0                  , dir, (1.0f - scale) * 7.0f) , unity_SpecCube0_HDR);
 	refl1 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0 , dir, (1.0f - scale) * 7.0f) , unity_SpecCube1_HDR);
 	ocol  = lerp(refl1 , refl0 , unity_SpecCube0_BoxMin.w);
-	
+
 	return ocol;
 }
 
@@ -306,35 +306,9 @@ float4x4 RotationMatrix(float3 axis, float angle) {
                     0.0,                                0.0,                                0.0,                                1.0);
 }
 
-//-------------------------------------Calculate corrected view direction to avoid poles
-float3 CalcViewDir(float3 worldPos) {
-	float3 camDir = normalize(mul(UNITY_MATRIX_V, float4(0, 1, 0, 0)).xyz);
-	float3 viewDir = normalize(_WorldSpaceCameraPos - worldPos);
-	if (dot(camDir, float3(0.0f, 0.0f, 1.0f)) >= 0.8f) {
-		float val = (dot(camDir, float3(0.0f, 0.0f, 1.0f)) - 0.8f)/0.2f;
-		float3 target = mul(RotationMatrix(float3(1.0f, 0.0, 0), UNITY_PI * 0.5), viewDir);
-		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
-	}
-	if (dot(camDir, float3(0.0f, 0.0f, -1.0f)) >= 0.8f) {
-		float val = (dot(camDir, float3(0.0f, 0.0f, -1.0f)) - 0.8f)/0.2f;
-		float3 target = mul(RotationMatrix(float3(1.0f, 0.0, 0), -UNITY_PI * 0.5), viewDir);
-		return lerp(viewDir, target, smoothstep(0.0, 0.5, val));
-	}
-	return viewDir;
-}
-
 //-------------------------------------True when rendering mirror copy
 bool IsInMirror() {
 	return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-}
-
-//-------------------------------------3-space to spherical coordinates
-float2 SphereUV(float3 coords) {
-	float3 nc = normalize(coords);
-	float lat = acos(nc.y);
-	float lon = atan2(nc.z, nc.x);
-	float2 coord = 1.0 - (float2(lon, lat) * float2(1.0/UNITY_PI, 1.0/UNITY_PI));
-	return (coord + float4(0, 1-unity_StereoEyeIndex,1,1.0).xy) * float4(0, 1-unity_StereoEyeIndex,1,1.0).zw;
 }
 
 //-------------------------------------Apply rotation to UV
@@ -344,28 +318,4 @@ float2 RotateUV(float2 uv, float rotation) {
 		cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
 		cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
 	);
-}
-
-//-------------------------------------Stipple based halftones
-float DotHalftone(float4 worldPos, float halftoneDotAmount, float scalar) {
-	float2 uv = SphereUV(CalcViewDir(worldPos));
-	uv.xy *= halftoneDotAmount;
-	float2 nearest = 2 * frac(100 * uv) - 1;
-	float dist = length(nearest);
-	float dotSize = 100 * scalar;
-	float dotMask = step(dotSize, dist);
-
-	return lerp(1, 1-dotMask, smoothstep(0, 0.4, 1/distance(worldPos, _WorldSpaceCameraPos)));;
-}
-
-//-------------------------------------Crosshatch based halftones
-float LineHalftone(float4 worldPos, float scalar) {
-	float2 uv = SphereUV(CalcViewDir(worldPos));
-	uv = RotateUV(uv, -0.785398);
-	uv.x = sin(uv.x * scalar);
-
-	float2 steppedUV = smoothstep(0,0.2,uv.x);
-	float lineMask = lerp(1, steppedUV, smoothstep(0, 0.4, 1/distance(worldPos, _WorldSpaceCameraPos)));
-
-	return saturate(lineMask);
 }
