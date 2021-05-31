@@ -896,17 +896,17 @@ namespace SunaoShader {
 			}
 
 
-			GUILayout.Label("Audio Link", EditorStyles.boldLabel);
+			GUILayout.Label("AudioLink", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
 				using (new EditorGUILayout.VerticalScope("box")) {
 
 					GUILayout.Label("Beat Detection", EditorStyles.boldLabel);
 
-					ME.ShaderProperty(ALEnable, new GUIContent("Enable Audio Link"));
-					ME.TexturePropertySingleLine(new GUIContent("Audio Link Mask"), ALMask);
+					ME.ShaderProperty(ALEnable, new GUIContent("Enable AudioLink"));
+					ME.TexturePropertySingleLine(new GUIContent("AudioLink Mask"), ALMask);
 					ME.TextureScaleOffsetProperty(ALMask);
-					ME.ShaderProperty(ALChannel, new GUIContent("Audio Link Channel"));
+					ME.ShaderProperty(ALChannel, new GUIContent("AudioLink Channel"));
 					if (ALChannel.floatValue == 4.0f) {
 						ME.TexturePropertySingleLine(new GUIContent("Bass Texture"), ALBassTexture);
 						ME.TexturePropertySingleLine(new GUIContent("LowMids Texture"), ALLowMidsTexture);

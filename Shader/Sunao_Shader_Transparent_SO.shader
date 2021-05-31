@@ -104,7 +104,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 
 		[SToggle]
-		_MirrorControlEnable ("Enable Mirror Control" , int) = 0
+		_MirrorControlEnable ("Enable Mirror Control"   , int) = 0
 		_RealCopyAlpha	   ("Real Copy Alpha"           , Range( 0.0,  1.0)) = 1.0
 		_MirrorCopyAlpha	 ("Mirror Copy Alpha"         , Range( 0.0,  1.0)) = 1.0
 
@@ -136,10 +136,10 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 
 		[SToggle]
-		_ALEnable          ("Enable Audio Link"         , int) = 0
-		_ALMask            ("Audio Link Mask"           , 2D) = "black" {}
+		_ALEnable          ("Enable AudioLink"          , int) = 0
+		_ALMask            ("AudioLink Mask"            , 2D) = "black" {}
 		[Enum(Bass , 0 , Low Mids , 1 , High Mids , 2 , Treble , 3 , Packed Map , 4)]
-		_ALChannel				 ("Audio Link Channel"        , int) = 4
+		_ALChannel				 ("AudioLink Channel"         , int) = 4
 		_ALTexture 				 ("Texture"										, 2D) = "black" {}
 		_ALBassTexture	   ("Bass Texture"              , 2D) = "black" {}
 		_ALLowMidsTexture  ("Low Mids Texture"          , 2D) = "black" {}
@@ -172,20 +172,20 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		_VertexAlpha08  	 ("Vertex Alpha 8"            , Range(0.0,  1.0)) = 1.0
 		_VertexColor09  	 ("Vertex Color 9"            , Color) = (0,0,0)
 		_VertexAlpha09  	 ("Vertex Alpha 9"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor10  	 ("Vertex Color 10"            , Color) = (0,0,0)
-		_VertexAlpha10  	 ("Vertex Alpha 10"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor11  	 ("Vertex Color 11"            , Color) = (0,0,0)
-		_VertexAlpha11  	 ("Vertex Alpha 11"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor12  	 ("Vertex Color 12"            , Color) = (0,0,0)
-		_VertexAlpha12  	 ("Vertex Alpha 12"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor13  	 ("Vertex Color 13"            , Color) = (0,0,0)
-		_VertexAlpha13  	 ("Vertex Alpha 13"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor14  	 ("Vertex Color 14"            , Color) = (0,0,0)
-		_VertexAlpha14  	 ("Vertex Alpha 14"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor15  	 ("Vertex Color 15"            , Color) = (0,0,0)
-		_VertexAlpha15  	 ("Vertex Alpha 15"            , Range(0.0,  1.0)) = 1.0
-		_VertexColor16  	 ("Vertex Color 16"            , Color) = (0,0,0)
-		_VertexAlpha16  	 ("Vertex Alpha 16"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor10  	 ("Vertex Color 10"           , Color) = (0,0,0)
+		_VertexAlpha10  	 ("Vertex Alpha 10"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor11  	 ("Vertex Color 11"           , Color) = (0,0,0)
+		_VertexAlpha11  	 ("Vertex Alpha 11"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor12  	 ("Vertex Color 12"           , Color) = (0,0,0)
+		_VertexAlpha12  	 ("Vertex Alpha 12"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor13  	 ("Vertex Color 13"           , Color) = (0,0,0)
+		_VertexAlpha13  	 ("Vertex Alpha 13"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor14  	 ("Vertex Color 14"           , Color) = (0,0,0)
+		_VertexAlpha14  	 ("Vertex Alpha 14"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor15  	 ("Vertex Color 15"           , Color) = (0,0,0)
+		_VertexAlpha15  	 ("Vertex Alpha 15"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor16  	 ("Vertex Color 16"           , Color) = (0,0,0)
+		_VertexAlpha16  	 ("Vertex Alpha 16"           , Range(0.0,  1.0)) = 1.0
 
 
 		[SToggle]
