@@ -138,7 +138,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[SToggle]
 		_ALEnable          ("Enable Audio Link"         , int) = 0
 		_ALMask            ("Audio Link Mask"           , 2D) = "black" {}
-		[Enum(Bass , 0 , Low Mids , 1 , High Mids , 2 , Treble , 3 , Packed Map , 4 , UV Based , 5)]
+		[Enum(Bass , 0 , Low Mids , 1 , High Mids , 2 , Treble , 3 , Packed Map , 4)]
 		_ALChannel				 ("Audio Link Channel"        , int) = 4
 		_ALTexture 				 ("Texture"										, 2D) = "black" {}
 		_ALBassTexture	   ("Bass Texture"              , 2D) = "black" {}

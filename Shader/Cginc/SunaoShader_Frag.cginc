@@ -74,31 +74,57 @@ float4 frag (VOUT IN) : COLOR {
 	#if WHEN_OPT(PROP_AL_ENABLE == 1)
 	OPT_IF(_ALEnable)
 		if (AudioLinkIsAvailableNonSurface()) {
-			float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
-			float4 BassTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALBassTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
-			float4 LowMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALLowMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
-			float4 HighMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALHighMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
-			float4 TrebleTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTrebleTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+			#if WHEN_OPT(PROP_AL_CHANNEL < 4)
+			OPT_IF(_ALChannel < 4)
+				float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 Texture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
 
-			float AudioBass = AudioLinkData(ALPASS_AUDIOBASS).x;
-			float AudioLowMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
-			float AudioHighMids = AudioLinkData(ALPASS_AUDIOHIGHMIDS).x;
-			float AudioTreble = AudioLinkData(ALPASS_AUDIOTREBLE).x;
+				float Mask = 0.0;
+				switch (_ALChannel) {
+					case 0: Mask = ALMask.r; break;
+					case 1: Mask = ALMask.g; break;
+					case 2: Mask = ALMask.b; break;
+					case 3: Mask = ALMask.a; break;
+				}
 
-			float BassBar = smoothstep((1 - AudioBass), (1 - AudioBass) + 0.01, ALMask.r);
-			float LowMidsBar = smoothstep((1 - AudioLowMids), (1 - AudioLowMids) + 0.01, ALMask.g);
-			float HighMidsBar = smoothstep((1 - AudioHighMids), (1 - AudioHighMids) + 0.01, ALMask.b);
-			float TrebleBar = smoothstep((1 - AudioTreble), (1 - AudioTreble) + 0.01, 1.0 - ALMask.a);
+				float Audio = AudioLinkData(int2(0, _ALChannel)).x;
 
-			float BassAlpha = lerp(BassBar, ALMask.r, BassTexture.a);
-			float LowMidsAlpha = lerp(LowMidsBar, ALMask.g, LowMidsTexture.a);
-			float HighMidsAlpha = lerp(HighMidsBar, ALMask.b, HighMidsTexture.a);
-			float TrebleAlpha = lerp(TrebleBar, ALMask.a, TrebleTexture.a);
+				float Bar = smoothstep((1 - Audio), (1 - Audio) + 0.01, Mask);
+				float Alpha = lerp(Bar, Mask, Texture.a);
 
-			ALColor.rgb = BassTexture.rgb * BassAlpha * AudioBass
-									+ LowMidsTexture.rgb * LowMidsAlpha * AudioLowMids
-									+ HighMidsTexture.rgb * HighMidsAlpha * AudioHighMids
-									+ TrebleTexture.rgb * TrebleAlpha * AudioTreble;
+				ALColor.rgb = Texture.rgb * Alpha * Audio;
+			OPT_FI
+			#endif
+
+			#if WHEN_OPT(PROP_AL_CHANNEL == 4)
+			OPT_IF(_ALChannel == 4)
+				float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 BassTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALBassTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 LowMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALLowMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 HighMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALHighMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 TrebleTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTrebleTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+
+				float AudioBass = AudioLinkData(ALPASS_AUDIOBASS).x;
+				float AudioLowMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
+				float AudioHighMids = AudioLinkData(ALPASS_AUDIOHIGHMIDS).x;
+				float AudioTreble = AudioLinkData(ALPASS_AUDIOTREBLE).x;
+
+				float BassBar = smoothstep((1 - AudioBass), (1 - AudioBass) + 0.01, ALMask.r);
+				float LowMidsBar = smoothstep((1 - AudioLowMids), (1 - AudioLowMids) + 0.01, ALMask.g);
+				float HighMidsBar = smoothstep((1 - AudioHighMids), (1 - AudioHighMids) + 0.01, ALMask.b);
+				float TrebleBar = smoothstep((1 - AudioTreble), (1 - AudioTreble) + 0.01, ALMask.a);
+
+				float BassAlpha = lerp(BassBar, ALMask.r, BassTexture.a);
+				float LowMidsAlpha = lerp(LowMidsBar, ALMask.g, LowMidsTexture.a);
+				float HighMidsAlpha = lerp(HighMidsBar, ALMask.b, HighMidsTexture.a);
+				float TrebleAlpha = lerp(TrebleBar, ALMask.a, TrebleTexture.a);
+
+				ALColor.rgb = BassTexture.rgb * BassAlpha * AudioBass
+										+ LowMidsTexture.rgb * LowMidsAlpha * AudioLowMids
+										+ HighMidsTexture.rgb * HighMidsAlpha * AudioHighMids
+										+ TrebleTexture.rgb * TrebleAlpha * AudioTreble;
+			OPT_FI
+			#endif
 
 			#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
 			OPT_IF(_HSVShiftEnable)

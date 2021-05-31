@@ -907,10 +907,14 @@ namespace SunaoShader {
 					ME.TexturePropertySingleLine(new GUIContent("Audio Link Mask"), ALMask);
 					ME.TextureScaleOffsetProperty(ALMask);
 					ME.ShaderProperty(ALChannel, new GUIContent("Audio Link Channel"));
-					ME.TexturePropertySingleLine(new GUIContent("Bass Texture"), ALBassTexture);
-					ME.TexturePropertySingleLine(new GUIContent("LowMids Texture"), ALLowMidsTexture);
-					ME.TexturePropertySingleLine(new GUIContent("HighMids Texture"), ALHighMidsTexture);
-					ME.TexturePropertySingleLine(new GUIContent("Treble Texture"), ALTrebleTexture);
+					if (ALChannel.floatValue == 4.0f) {
+						ME.TexturePropertySingleLine(new GUIContent("Bass Texture"), ALBassTexture);
+						ME.TexturePropertySingleLine(new GUIContent("LowMids Texture"), ALLowMidsTexture);
+						ME.TexturePropertySingleLine(new GUIContent("HighMids Texture"), ALHighMidsTexture);
+						ME.TexturePropertySingleLine(new GUIContent("Treble Texture"), ALTrebleTexture);
+					} else {
+						ME.TexturePropertySingleLine(new GUIContent("Texture"), ALTexture);
+					}
 					ME.ShaderProperty(ALAlbedoEnable, new GUIContent("Albedo Enabled"));
 					ME.ShaderProperty(ALAlbedoOpacity, new GUIContent("Albedo Opacity"));
 					ME.ShaderProperty(ALEmissionEnable, new GUIContent("Emission Enabled"));
