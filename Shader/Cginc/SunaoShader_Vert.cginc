@@ -17,6 +17,8 @@ VOUT vert (VIN v) {
 
 	o.vertex  = v.vertex;
 
+	o.vertex  = v.vertex;
+
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
