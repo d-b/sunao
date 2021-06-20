@@ -46,6 +46,8 @@ namespace SunaoShader {
 		MaterialProperty DecalRotation;
 		MaterialProperty DecalMode;
 		MaterialProperty DecalMirror;
+		MaterialProperty DecalBright;
+		MaterialProperty DecalEmission;
 		MaterialProperty DecalScrollX;
 		MaterialProperty DecalScrollY;
 		MaterialProperty DecalAnimation;
@@ -152,6 +154,7 @@ namespace SunaoShader {
 
 		MaterialProperty Culling;
 		MaterialProperty EnableZWrite;
+		MaterialProperty IgnoreProjector;
 		MaterialProperty DirectionalLight;
 		MaterialProperty SHLight;
 		MaterialProperty PointLight;
@@ -183,7 +186,7 @@ namespace SunaoShader {
 
 		int     Version_H         = 1;
 		int     Version_M         = 4;
-		int     Version_L         = 3;
+		int     Version_L         = 4;
 
 		int     VersionC          = 0;
 		int     VersionM          = 0;
@@ -264,6 +267,8 @@ namespace SunaoShader {
 			DecalRotation     = FindProperty("_DecalRotation"     , Prop , false);
 			DecalMode         = FindProperty("_DecalMode"         , Prop , false);
 			DecalMirror       = FindProperty("_DecalMirror"       , Prop , false);
+			DecalBright       = FindProperty("_DecalBright"       , Prop , false);
+			DecalEmission     = FindProperty("_DecalEmission"     , Prop , false);
 			DecalScrollX      = FindProperty("_DecalScrollX"      , Prop , false);
 			DecalScrollY      = FindProperty("_DecalScrollY"      , Prop , false);
 			DecalAnimation    = FindProperty("_DecalAnimation"    , Prop , false);
@@ -371,6 +376,7 @@ namespace SunaoShader {
 
 			Culling           = FindProperty("_Culling"           , Prop , false);
 			EnableZWrite      = FindProperty("_EnableZWrite"      , Prop , false);
+			IgnoreProjector   = FindProperty("_IgnoreProjector"   , Prop , false);
 			DirectionalLight  = FindProperty("_DirectionalLight"  , Prop , false);
 			SHLight           = FindProperty("_SHLight"           , Prop , false);
 			PointLight        = FindProperty("_PointLight"        , Prop , false);
@@ -531,6 +537,10 @@ namespace SunaoShader {
 							mat.SetInt("_DecalFO" , 1);
 
 							ME.ShaderProperty(DecalMode        , new GUIContent("Decal Mode"       ));
+							if ((int)DecalMode.floatValue == 3) ME.ShaderProperty(DecalBright   , new GUIContent("Brightness Offset" ));
+							if ((int)DecalMode.floatValue == 4) ME.ShaderProperty(DecalEmission , new GUIContent("Emission Intensity"));
+							if ((int)DecalMode.floatValue == 5) ME.ShaderProperty(DecalEmission , new GUIContent("Emission Intensity"));
+
 							ME.ShaderProperty(DecalMirror      , new GUIContent("Decal Mirror Mode"));
 
 							ME.ShaderProperty(DecalScrollX     , new GUIContent("Scroll X"         ));
@@ -562,8 +572,8 @@ namespace SunaoShader {
 				using (new EditorGUILayout.VerticalScope("box")) {
 
 					ME.ShaderProperty(StencilNumb , new GUIContent("Stencil Number"));
-					if (mat.GetInt("_StencilNumb") <   0) mat.SetInt("_StencilNumb" ,   0);
-					if (mat.GetInt("_StencilNumb") > 255) mat.SetInt("_StencilNumb" , 255);
+					if ((int)StencilNumb.floatValue <   0) mat.SetInt("_StencilNumb" ,   0);
+					if ((int)StencilNumb.floatValue > 255) mat.SetInt("_StencilNumb" , 255);
 	
 					if (Shader_StencilRW) {
 						ME.ShaderProperty(StencilCompMode , new GUIContent("Stencil Compare Mode"));
@@ -934,18 +944,18 @@ namespace SunaoShader {
 
 					using (new EditorGUILayout.VerticalScope("box")) {
 
-						GUILayout.Label("Culling Mode" , EditorStyles.boldLabel);
+						GUILayout.Label("Shader Modes" , EditorStyles.boldLabel);
 
-						ME.ShaderProperty(Culling , new GUIContent("Culling Mode"));
-
-					}
-
-					using (new EditorGUILayout.VerticalScope("box")) {
-
-						GUILayout.Label("Z Write"      , EditorStyles.boldLabel);
-
-						ME.ShaderProperty(EnableZWrite , new GUIContent("Enable Z Write"));
-
+						ME.ShaderProperty(Culling         , new GUIContent("Culling Mode"    ));
+						ME.ShaderProperty(EnableZWrite    , new GUIContent("Enable Z Write"  ));
+						/*  うまく動かんっぽい。Unityの仕様？
+						ME.ShaderProperty(IgnoreProjector , new GUIContent("Ignore Projector"));
+						if (IgnoreProjector.floatValue >= 0.5f) {
+							mat.SetOverrideTag("IgnoreProjector", "True" );
+						} else {
+							mat.SetOverrideTag("IgnoreProjector", "False");
+						}
+						*/
 					}
 
 					using (new EditorGUILayout.VerticalScope("box")) {

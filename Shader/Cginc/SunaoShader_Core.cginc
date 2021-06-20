@@ -46,6 +46,8 @@
 	uniform float     _DecalRotation;
 	uniform uint      _DecalMode;
 	uniform uint      _DecalMirror;
+	uniform float     _DecalEmission;
+	uniform float     _DecalBright;
 	uniform float     _DecalScrollX;
 	uniform float     _DecalScrollY;
 	uniform float     _DecalAnimation;

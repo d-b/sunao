@@ -1,5 +1,5 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.4.3
+//              Sunao Shader    Ver 1.4.4
 //
 //                      Copyright (c) 2021 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
@@ -55,10 +55,13 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		_DecalSizeY        ("Size Y"                    , Range( 0.0, 1.0)) = 0.5
 		_DecalRotation     ("Rotation"                  , Range(-180.0, 180.0)) = 0.0
 
-		[Enum(Override , 0 , Add , 1 , Multiply , 2 , Multiply(Mono) , 3)]
+		[Enum(Override , 0 , Add , 1 , Multiply , 2 , Multiply(Mono) , 3 , Emissive(Add) , 4 , Emissive(Override) , 5)]
 		_DecalMode         ("Decal Mode"                , int) = 0
 		[Enum(Normal , 0 , Fixed , 1 , Mirror1 , 2 , Mirror2 , 3 , Copy(Mirror) , 4 , Copy(Fixed) , 5)]
 		_DecalMirror       ("Decal Mirror Mode"         , int) = 0
+
+		_DecalBright       ("Brightness Offset"         , Range( -1.0,  1.0)) = 0.0
+		_DecalEmission     ("Emission Intensity"        , Range(  0.0, 10.0)) = 1.0
 
 		_DecalScrollX      ("Scroll X"                  , Range(-10.0, 10.0)) = 0.0
 		_DecalScrollY      ("Scroll Y"                  , Range(-10.0, 10.0)) = 0.0
@@ -229,6 +232,9 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[SToggle]
 		_EnableZWrite      ("Enable Z Write"            , int) = 1
 
+		//[SToggle]
+		//_IgnoreProjector   ("Ignore Projector"          , int) = 0
+
 		_DirectionalLight  ("Directional Light"         , Range( 0.0,  2.0)) = 1.0
 		_SHLight           ("SH Light"                  , Range( 0.0,  2.0)) = 1.0
 		_PointLight        ("Point Light"               , Range( 0.0,  2.0)) = 1.0
@@ -268,7 +274,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 1
 		[HideInInspector] _VersionM        ("Version M"         , int) = 4
-		[HideInInspector] _VersionL        ("Version L"         , int) = 3
+		[HideInInspector] _VersionL        ("Version L"         , int) = 4
 
 	}
 
@@ -279,7 +285,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		LOD 0
 
 		Tags {
-			"IgnoreProjector" = "True"
+			"IgnoreProjector" = "False"
 			"RenderType"      = "Transparent"
 			"Queue"           = "Transparent"
 		}

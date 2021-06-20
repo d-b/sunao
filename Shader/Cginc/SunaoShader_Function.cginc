@@ -127,11 +127,20 @@ float3 SpecularCalc(float3 normal , float3 ldir , float3 view , float scale) {
 }
 
 //-------------------------------------環境マッピングの計算
-float3 ReflectionCalc(float3 normal , float3 view , float scale) {
-	float3 dir = reflect(-view , normal);
+float3 ReflectionCalc(float3 wpos , float3 normal , float3 view , float scale) {
+	float3 dir   = reflect(-view , normal);
 	float3 ocol;
 	float3 refl0;
 	float3 refl1;
+
+	#if UNITY_SPECCUBE_BOX_PROJECTION
+		if (unity_SpecCube0_ProbePosition.w > 0) {
+			float3 rbox   = ((dir > 0 ? unity_SpecCube0_BoxMax.xyz : unity_SpecCube0_BoxMin.xyz) - wpos) / dir;
+			float  rsize  = min(min(rbox.x, rbox.y), rbox.z);
+			       dir    = dir * rsize + (wpos - unity_SpecCube0_ProbePosition);
+		}
+	#endif
+
 	refl0 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_LOD        (unity_SpecCube0                  , dir, (1.0f - scale) * 7.0f) , unity_SpecCube0_HDR);
 	refl1 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0 , dir, (1.0f - scale) * 7.0f) , unity_SpecCube1_HDR);
 	ocol  = lerp(refl1 , refl0 , unity_SpecCube0_BoxMin.w);

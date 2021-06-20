@@ -5,8 +5,11 @@
 
 
 float4 frag (VOUT IN) : COLOR {
+//----ワールド座標
+	float3 WorldPos     = mul(unity_ObjectToWorld , IN.vertex).xyz;
+
 //----カメラ視点方向
-	float3 View         = normalize(_WorldSpaceCameraPos - mul(unity_ObjectToWorld , IN.vertex).xyz);
+	float3 View         = normalize(_WorldSpaceCameraPos - WorldPos);
 
 //-------------------------------------メインカラー
 	float4 OUT          = float4(0.0f , 0.0f , 0.0f , 1.0f);
@@ -25,9 +28,9 @@ float4 frag (VOUT IN) : COLOR {
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
 
 //----デカール
-	if (_DecalEnable) {
+	float4 DecalColor   = float4(0.0f , 0.0f , 0.0f , 1.0f);
 
-		float4   DecalColor    = float4(0.0f , 0.0f , 0.0f , 1.0f);
+	if (_DecalEnable) {
 
 		float2   DecalUV       = (float2)0.0f;
 		float2x2 DecalRot      = float2x2(IN.decal.z, -IN.decal.w, IN.decal.w, IN.decal.z);
@@ -62,27 +65,40 @@ float4 frag (VOUT IN) : COLOR {
 		if (_DecalMirror == 3) DecalColor.a = DecalColor.a *         saturate(IN.tangent.w);
 
 		#ifdef TRANSPARENT
-			if (_DecalMode == 0) {
+			if ((_DecalMode == 0) | (_DecalMode == 5)) {
 				Color        = lerp(Color , lerp(DecalColor.rgb , Color , OUT.a) , DecalColor.a);
 			}
-			if (_DecalMode == 1) {
+			if  (_DecalMode == 1) {
 				Color        = lerp(Color ,                       Color * OUT.a  , DecalColor.a);
 				DecalColor.a = MonoColor(DecalColor.rgb) * DecalColor.a;
 			}
-			if (_DecalMode == 2) {
-				DecalColor.a = (1.0f - MonoColor(DecalColor.rgb)) * DecalColor.a;
+			if ((_DecalMode == 2) | (_DecalMode == 3)) {
+				DecalColor.a = DecalColor.a * OUT.a;
+			}
+			if  (_DecalMode == 4) {
+				DecalColor.a = MonoColor(DecalColor.rgb) * DecalColor.a * _DecalEmission;
 			}
 		#endif
 
 		         OUT.a         = max(OUT.a , DecalColor.a);
 
-		if (_DecalMode == 0) Color = lerp(Color ,          DecalColor.rgb , DecalColor.a);
-		if (_DecalMode == 1) Color = saturate(    Color  + DecalColor.rgb * DecalColor.a);
-		if (_DecalMode == 2) Color = lerp(Color , Color  * DecalColor.rgb , DecalColor.a);
-		if (_DecalMode == 3) {
-			float DecalMixCol = max(Color.r , max(Color.g , Color.b));
+		if ((_DecalMode == 0) | (_DecalMode == 5)) {
+			Color = lerp(Color ,          DecalColor.rgb , DecalColor.a);
+		}
+		if  (_DecalMode == 1) {
+			Color = saturate(    Color  + DecalColor.rgb * DecalColor.a);
+		}
+		if  (_DecalMode == 2) {
+			Color = lerp(Color , Color  * DecalColor.rgb , DecalColor.a);
+		}
+		if  (_DecalMode == 3) {
+			float DecalMixCol = saturate(max(Color.r , max(Color.g , Color.b)) + _DecalBright);
 			Color = lerp(Color , DecalMixCol * DecalColor.rgb , DecalColor.a);
 		}
+		if ((_DecalMode == 4) | (_DecalMode == 5)) {
+			DecalColor.rgb = DecalColor.rgb * DecalColor.a;
+		}
+
 	}
 
 //----オクルージョン
@@ -293,7 +309,7 @@ float4 frag (VOUT IN) : COLOR {
 		       ReflectMask  = tex2D(_MetallicGlossMap , SubUV).rgb;
 
 		#ifdef PASS_FB
-			       Reflection   = ReflectionCalc(Normal , View , Smoothness);
+			       Reflection   = ReflectionCalc(WorldPos , Normal , View , Smoothness);
 
 			if (_ReflectLit == 1) Reflection *= saturate(LightBase + VLightBase);
 			if (_ReflectLit == 2) Reflection *= saturate(IN.shmax);
@@ -301,7 +317,7 @@ float4 frag (VOUT IN) : COLOR {
 		#endif
 		#ifdef PASS_FA
 			if ((_ReflectLit == 1) || (_ReflectLit == 3)) {
-			       Reflection   = ReflectionCalc(Normal , View , Smoothness);
+			       Reflection   = ReflectionCalc(WorldPos , Normal , View , Smoothness);
 				   Reflection  *= saturate(LightBase);
 			}
 		#endif
@@ -378,6 +394,14 @@ float4 frag (VOUT IN) : COLOR {
 		if (_RimLitMode == 1) OUT.rgb *= RimLight;
 		if (_RimLitMode == 2) OUT.rgb  = saturate(OUT.rgb - RimLight);
 	}
+
+//----デカールエミッション混合
+	#ifdef PASS_FB
+		if (_DecalEnable) {
+			if (_DecalMode == 4) OUT.rgb += DecalColor.rgb * _DecalEmission;
+			if (_DecalMode == 5) OUT.rgb += DecalColor.rgb * _DecalEmission;
+		}
+	#endif
 
 //----エミッション混合
 	if (EmissionFlag) {
