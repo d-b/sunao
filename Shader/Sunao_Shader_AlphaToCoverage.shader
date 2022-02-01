@@ -1,5 +1,5 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.5.4
+//              Sunao Shader    Ver 1.5.3
 //
 //                      Copyright (c) 2022 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
@@ -9,14 +9,14 @@
 // see LICENSE or http://suna.ooo/agenasulab/ss/LICENSE
 //--------------------------------------------------------------
 
-Shader "Sunao Shader/[Stencil]/Write" {
+Shader "Sunao Shader/AlphaToCoverage" {
 
 
 	Properties {
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 1
 		[HideInInspector] _VersionM        ("Version M"         , int) = 5
-		[HideInInspector] _VersionL        ("Version L"         , int) = 4
+		[HideInInspector] _VersionL        ("Version L"         , int) = 3
 
 		[SToggle]
 		_OptimizerEnable   ("Enable Optimizer"  				, int) = 0
@@ -370,7 +370,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 		[HideInInspector] _VertexAlphaFO   ("Vertex Alpha FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
-		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 7
+		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 2
 	}
 
 
@@ -378,6 +378,8 @@ Shader "Sunao Shader/[Stencil]/Write" {
 	SubShader {
 
 		LOD 0
+
+		AlphaToMask On
 
 		Tags {
 			"IgnoreProjector" = "False"
@@ -392,13 +394,6 @@ Shader "Sunao Shader/[Stencil]/Write" {
 
 			Cull [_Culling]
 			ZWrite [_EnableZWrite]
-			AlphaToMask [_AlphaToMask]
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -410,7 +405,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_FB
-			#define CUTOUT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./Cginc/SunaoShader_Core.cginc"
 
@@ -423,13 +418,6 @@ Shader "Sunao Shader/[Stencil]/Write" {
 
 			Cull Front
 			ZWrite [_EnableZWrite]
-			AlphaToMask [_AlphaToMask]
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -441,7 +429,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_OL_FB
-			#define CUTOUT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./Cginc/SunaoShader_OL.cginc"
 
@@ -453,14 +441,8 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			Tags { "LightMode"  = "ForwardAdd" }
 
 			Cull [_Culling]
-			Blend One OneMinusSrcAlpha , Zero One
+			Blend One One
 			ZWrite Off
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -472,7 +454,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_FA
-			#define CUTOUT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./Cginc/SunaoShader_Core.cginc"
 
@@ -484,14 +466,8 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			Tags { "LightMode"  = "ForwardAdd" }
 
 			Cull Front
-			Blend One OneMinusSrcAlpha , Zero One
+			Blend One One
 			ZWrite Off
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -503,7 +479,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_OL_FA
-			#define CUTOUT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./Cginc/SunaoShader_OL.cginc"
 
@@ -512,11 +488,12 @@ Shader "Sunao Shader/[Stencil]/Write" {
 
 
 		Pass {
-			Tags { "LightMode"  = "ShadowCaster" }
+			Tags { "LightMode" = "ShadowCaster" }
 
-			Cull Off
+			Cull [_Culling]
 			ZWrite On
 			ZTest LEqual
+			AlphaToMask Off
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -527,7 +504,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_SC
-			#define CUTOUT
+			#define ALPHA_TO_COVERAGE
 
 			#include "./Cginc/SunaoShader_SC.cginc"
 

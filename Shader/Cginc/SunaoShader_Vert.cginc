@@ -10,11 +10,13 @@ VOUT vert (VIN v) {
 
 	UNITY_INITIALIZE_OUTPUT(VOUT , o);
 	UNITY_SETUP_INSTANCE_ID(v);
+	UNITY_INITIALIZE_OUTPUT(VOUT, o);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 //-------------------------------------頂点座標変換
 	o.pos     = UnityObjectToClipPos(v.vertex);
 	o.wpos    = mul(unity_ObjectToWorld , v.vertex).xyz;
+	o.scrpos  = ComputeScreenPos(o.pos);
 
 	o.vertex  = v.vertex;
 
@@ -51,6 +53,24 @@ VOUT vert (VIN v) {
 //-------------------------------------頂点カラー
 	o.color   = (float3)1.0f;
 	if (_VertexColor) o.color = v.color;
+
+//-------------------------------------vertex alpha
+	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor04, _VertexAlpha04, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor05, _VertexAlpha05, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor06, _VertexAlpha06, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor07, _VertexAlpha07, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor08, _VertexAlpha08, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor09, _VertexAlpha09, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor10, _VertexAlpha10, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor11, _VertexAlpha11, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor12, _VertexAlpha12, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor13, _VertexAlpha13, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor14, _VertexAlpha14, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor15, _VertexAlpha15, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor16, _VertexAlpha16, _VertexColorThreshold);
 
 //-------------------------------------デカール
 

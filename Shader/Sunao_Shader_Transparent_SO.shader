@@ -18,6 +18,9 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[HideInInspector] _VersionM        ("Version M"         , int) = 5
 		[HideInInspector] _VersionL        ("Version L"         , int) = 4
 
+		[SToggle]
+		_OptimizerEnable   ("Enable Optimizer"  				, int) = 0
+
 		[NoScaleOffset]
 		_MainTex           ("Main Texture"              , 2D) = "white" {}
 		_Color             ("Color"                     , Color) = (1,1,1,1)
@@ -108,6 +111,91 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		_Unlit             ("Unlighting"                , Range( 0.0,  1.0)) = 0.0
 		[SToggle]
 		_MonochromeLit     ("Monochrome Lighting"       , int) = 0
+
+
+		[SToggle]
+		_MirrorControlEnable ("Enable Mirror Control"   , int) = 0
+		_RealCopyAlpha	   ("Real Copy Alpha"           , Range( 0.0,  1.0)) = 1.0
+		_MirrorCopyAlpha	 ("Mirror Copy Alpha"         , Range( 0.0,  1.0)) = 1.0
+
+
+		[SToggle]
+		_HSVShiftEnable    ("Enable HSV Shift"          , int) = 0
+		_HSVShiftMask      ("HSV Shift Mask"            , 2D) = "white" {}
+		_HSVShiftHue  		 ("Hue Shift"                 , Range( 0.0,  1.0)) = 0.0
+		_HSVShiftSat	  	 ("Sat Shift"                 , Range( 0.0,  3.0)) = 1.0
+		_HSVShiftVal	  	 ("Val Shift"                 , Range( 0.0,  3.0)) = 1.0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftBaseMode	("Base Mode"   								, int) = 1
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftDecalMode ("Decal Mode"   							, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftShadeMode ("Shade Mode"   			  			, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftSpecularMode ("Specular Mode"          , int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftEmissionMode	("Emission Mode" 					, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftOutlineMode ("Outline Mode"        		, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftRimMode ("Rim Mode"        						, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftParallaxMode ("Parallax Mode"					, int) = 0
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftAudioLinkMode ("AudioLink Mode"      	, int) = 0
+
+
+		[SToggle]
+		_ALEnable          ("Enable AudioLink"          , int) = 0
+		_ALMask            ("AudioLink Mask"            , 2D) = "black" {}
+		[Enum(Bass , 0 , Low Mids , 1 , High Mids , 2 , Treble , 3 , Packed Map , 4)]
+		_ALChannel				 ("AudioLink Channel"         , int) = 4
+		_ALTexture 				 ("Texture"										, 2D) = "black" {}
+		_ALBassTexture	   ("Bass Texture"              , 2D) = "black" {}
+		_ALLowMidsTexture  ("Low Mids Texture"          , 2D) = "black" {}
+		_ALHighMidsTexture ("High Mids Texture"         , 2D) = "black" {}
+		_ALTrebleTexture	 ("Treble Texture"            , 2D) = "black" {}
+		[SToggle]
+		_ALAlbedoEnable 	 ("Albedo Enabled"            , int) = 0
+		_ALAlbedoOpacity   ("Albedo Opacity"					  , Range(0.0,  1.0)) = 1.0
+		[SToggle]
+		_ALEmissionEnable  ("Emission Enabled"          , int) = 1
+		_ALEmissionIntensity ("Emission Intensity"  		, Range(0.0,  10.0)) = 1.0
+
+
+		_VertexColorThreshold ("Vertex Alpha 1", Range(0.0,  1.0)) = 0.9999
+		_VertexColor01  	 ("Vertex Color 1"            , Color) = (0,0,0)
+		_VertexAlpha01  	 ("Vertex Alpha 1"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor02  	 ("Vertex Color 2"            , Color) = (0,0,0)
+		_VertexAlpha02  	 ("Vertex Alpha 2"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor03  	 ("Vertex Color 3"            , Color) = (0,0,0)
+		_VertexAlpha03  	 ("Vertex Alpha 3"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor04  	 ("Vertex Color 4"            , Color) = (0,0,0)
+		_VertexAlpha04  	 ("Vertex Alpha 4"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor05  	 ("Vertex Color 5"            , Color) = (0,0,0)
+		_VertexAlpha05  	 ("Vertex Alpha 5"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor06  	 ("Vertex Color 6"            , Color) = (0,0,0)
+		_VertexAlpha06  	 ("Vertex Alpha 6"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor07  	 ("Vertex Color 7"            , Color) = (0,0,0)
+		_VertexAlpha07  	 ("Vertex Alpha 7"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor08  	 ("Vertex Color 8"            , Color) = (0,0,0)
+		_VertexAlpha08  	 ("Vertex Alpha 8"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor09  	 ("Vertex Color 9"            , Color) = (0,0,0)
+		_VertexAlpha09  	 ("Vertex Alpha 9"            , Range(0.0,  1.0)) = 1.0
+		_VertexColor10  	 ("Vertex Color 10"           , Color) = (0,0,0)
+		_VertexAlpha10  	 ("Vertex Alpha 10"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor11  	 ("Vertex Color 11"           , Color) = (0,0,0)
+		_VertexAlpha11  	 ("Vertex Alpha 11"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor12  	 ("Vertex Color 12"           , Color) = (0,0,0)
+		_VertexAlpha12  	 ("Vertex Alpha 12"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor13  	 ("Vertex Color 13"           , Color) = (0,0,0)
+		_VertexAlpha13  	 ("Vertex Alpha 13"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor14  	 ("Vertex Color 14"           , Color) = (0,0,0)
+		_VertexAlpha14  	 ("Vertex Alpha 14"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor15  	 ("Vertex Color 15"           , Color) = (0,0,0)
+		_VertexAlpha15  	 ("Vertex Alpha 15"           , Range(0.0,  1.0)) = 1.0
+		_VertexColor16  	 ("Vertex Color 16"           , Color) = (0,0,0)
+		_VertexAlpha16  	 ("Vertex Alpha 16"           , Range(0.0,  1.0)) = 1.0
 
 
 		[SToggle]
@@ -279,6 +367,7 @@ Shader "Sunao Shader/[Stencil Outline]/Transparent" {
 		[HideInInspector] _ParallaxFO      ("Parallax FO"       , int) = 0
 		[HideInInspector] _ReflectionFO    ("Reflection FO"     , int) = 0
 		[HideInInspector] _RimLightingFO   ("Rim Lighting FO"   , int) = 0
+		[HideInInspector] _VertexAlphaFO   ("Vertex Alpha FO"   , int) = 0
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
 		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 4

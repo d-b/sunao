@@ -157,7 +157,7 @@ float3 ReflectionCalc(float3 wpos , float3 normal , float3 view , float scale) {
 	refl0 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_LOD        (unity_SpecCube0                  , dir, (1.0f - scale) * 7.0f) , unity_SpecCube0_HDR);
 	refl1 = DecodeHDR(UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0 , dir, (1.0f - scale) * 7.0f) , unity_SpecCube1_HDR);
 	ocol  = lerp(refl1 , refl0 , unity_SpecCube0_BoxMin.w);
-	
+
 	return ocol;
 }
 
@@ -170,4 +170,157 @@ float  RimLightCalc(float3 normal , float3 view , float power , float gradient) 
 	orim  = saturate(orim + ((power * 0.5f) - 0.5f) * 2.0f);
 
 	return orim;
+}
+
+// --------------------------------------------------------
+// ------------------------------------Additional functions
+// --------------------------------------------------------
+
+//-------------------------------------Multiply quaternions
+float4 MultQuat(float4 q1, float4 q2)
+{
+  return float4(
+    q1.w * q2.x + q1.x * q2.w + q1.z * q2.y - q1.y * q2.z,
+    q1.w * q2.y + q1.y * q2.w + q1.x * q2.z - q1.z * q2.x,
+    q1.w * q2.z + q1.z * q2.w + q1.y * q2.x - q1.x * q2.y,
+    q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z
+  );
+}
+
+//-------------------------------------Rotate by quaternion
+float3 QuatRotate(float4 q, float3 v)
+{
+  return v + 2.0 * cross(cross(v, q.xyz) + q.w * v, q.xyz);
+}
+
+//-------------------------------------RGB to HSV
+float3 RGB2HSV(float3 c) {
+  half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
+  half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+//-------------------------------------HSV to RGB
+float3 HSV2RGB(float3 c) {
+  half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+//-------------------------------------Adjust a colour by HSV offset
+float3 HSVAdjust(float3 color, float3 adjustment) {
+  float3 hsv = RGB2HSV(color);
+  hsv.x += fmod(adjustment.x, 360);
+  hsv.y = saturate(hsv.y * adjustment.y);
+  hsv.z *= adjustment.z;
+  return HSV2RGB(hsv);
+}
+
+//-------------------------------------Linear to SRGB
+float LIN2SRGB(float color) {
+    if (color > 0.0031308)
+        return 1.055 * (pow(color, (1.0 / 2.4))) - 0.055;
+    else
+        return 12.92 * color;
+}
+
+//-------------------------------------RGB linear to SRGB
+float3 LIN2SRGB(float3 color) {
+  return float3(LIN2SRGB(color.r), LIN2SRGB(color.g), LIN2SRGB(color.b));
+}
+
+//-------------------------------------Vertex colour based alpha
+float VertexAlpha(float3 color, float3 comperand, float alpha, float threshold) {
+	if (min(length(color), length(comperand)) > 0.0) {
+		return lerp(1.0, alpha, step(threshold, 1.0 - length(color - LIN2SRGB(comperand))));
+	} else {
+		return 1.0;
+	}
+}
+
+//-------------------------------------GGX Anisotropic NDF
+float D_GGX_Anisotropic(float at, float ab, float TdotH, float BdotH, float NdotH) {
+  // Burley 2012, "Physically-Based Shading at Disney"
+
+  // The values at and ab are perceptualRoughness^2, a2 is therefore perceptualRoughness^4
+  // The dot product below computes perceptualRoughness^8. We cannot fit in fp16 without clamping
+  // the roughness to too high values so we perform the dot product and the division in fp32
+  float a2 = at * ab;
+  float3 d = float3(ab * TdotH, at * BdotH, a2 * NdotH);
+  float d2 = dot(d, d);
+  float b2 = a2 / d2;
+  return a2 * b2 * b2 * (1.0 / UNITY_PI);
+}
+
+//-------------------------------------GGX Anisotropic visibility function
+float V_SmithGGXCorrelated_Anisotropic(float at, float ab, float TdotV, float BdotV, float TdotL, float BdotL, float NdotV, float NdotL) {
+  // Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"
+  float lambdaV = NdotL * length(float3(at * TdotV, ab * BdotV, NdotV));
+  float lambdaL = NdotV * length(float3(at * TdotL, ab * BdotL, NdotL));
+  return 0.5 / (lambdaV + lambdaL);
+}
+
+//-------------------------------------GGX Anisotropic model
+float3 ToonAnisoSpecularCalc(float3 normal, float3 tangent, float3 bitangent, float3 ldir, float3 view, float roughnessT, float roughnessB) {
+  float3 hv = normalize(ldir + view);
+
+  float NdotL = saturate(dot(normal, ldir));
+  float NdotH = saturate(dot(normal, hv));
+
+  float TdotH = dot(tangent, hv);
+  float BdotH = dot(bitangent, hv);
+
+  float D = D_GGX_Anisotropic(roughnessT, roughnessB, TdotH, BdotH, NdotH);
+
+  return saturate(D * NdotL);
+}
+
+//-------------------------------------View + offset based specular
+float3 ToonViewOffSpecularCalc(float3 normal, float3 ldir, float3 view, float sharpness, float offset) {
+  float NdotL = dot(ldir + view, normal);
+  float NdotVO = dot(view + float3(0.0, offset, 0.0), normal);
+
+  return saturate(pow(sqrt(1.0 - NdotVO * NdotVO), sharpness) * NdotL);
+}
+
+//-------------------------------------Stereo correct UV by screen position
+float2 CalcScreenUV(half4 screenPos) {
+    float2 uv = screenPos / (screenPos.w + 0.0000000001); //0.0x1 Stops division by 0 warning in console.
+    #if UNITY_SINGLE_PASS_STEREO
+        uv.xy *= float2(_ScreenParams.x * 2, _ScreenParams.y);
+    #else
+        uv.xy *= _ScreenParams.xy;
+    #endif
+
+    return uv;
+}
+
+//-------------------------------------Dithering pattern
+inline float Dither8x8Bayer( int x, int y ) {
+    const float dither[ 64 ] = {
+    1, 49, 13, 61,  4, 52, 16, 64,
+    33, 17, 45, 29, 36, 20, 48, 32,
+    9, 57,  5, 53, 12, 60,  8, 56,
+    41, 25, 37, 21, 44, 28, 40, 24,
+    3, 51, 15, 63,  2, 50, 14, 62,
+    35, 19, 47, 31, 34, 18, 46, 30,
+    11, 59,  7, 55, 10, 58,  6, 54,
+    43, 27, 39, 23, 42, 26, 38, 22};
+    int r = y * 8 + x;
+    return dither[r] / 64;
+}
+
+//-------------------------------------Dithering value by screen position
+float CalcDither(float2 screenPos) {
+    float dither = Dither8x8Bayer(fmod(screenPos.x, 8), fmod(screenPos.y, 8));
+    return dither;
+}
+
+//-------------------------------------True when rendering mirror copy
+bool IsInMirror() {
+	return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
 }

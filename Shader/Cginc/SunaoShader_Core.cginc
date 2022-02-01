@@ -9,6 +9,7 @@
 	#include "UnityCG.cginc"
 	#include "AutoLight.cginc"
 	#include "Lighting.cginc"
+	#include "SunaoShader_Macro.cginc"
 	#include "SunaoShader_Function.cginc"
 
 //-------------------------------------変数宣言
@@ -76,6 +77,78 @@
 	uniform float     _LightBoost;
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
+
+//----Mirror control
+	uniform bool      _MirrorControlEnable;
+	uniform float     _MirrorCopyAlpha;
+	uniform float     _RealCopyAlpha;
+
+//----Hue Shift
+	uniform bool      _HSVShiftEnable;
+	UNITY_DECLARE_TEX2D(_HSVShiftMask);
+	uniform float4 		_HSVShiftMask_ST;
+	uniform float 		_HSVShiftHue;
+	uniform float 		_HSVShiftSat;
+	uniform float 		_HSVShiftVal;
+	uniform uint 		  _HSVShiftBaseMode;
+	uniform uint 		  _HSVShiftDecalMode;
+	uniform uint 		  _HSVShiftShadeMode;
+	uniform uint 		  _HSVShiftSpecularMode;
+	uniform uint 		  _HSVShiftEmissionMode;
+	uniform uint 		  _HSVShiftOutlineMode;
+	uniform uint 		  _HSVShiftRimMode;
+	uniform uint 		  _HSVShiftParallaxMode;
+	uniform uint 		  _HSVShiftAudioLinkMode;
+
+//----AudioLink
+	uniform bool      _ALEnable;
+	UNITY_DECLARE_TEX2D(_ALMask);
+	uniform float4 		_ALMask_ST;
+	uniform uint 		  _ALChannel;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALBassTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALLowMidsTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALHighMidsTexture);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ALTrebleTexture);
+	uniform bool      _ALAlbedoEnable;
+	uniform float     _ALAlbedoOpacity;
+	uniform bool      _ALEmissionEnable;
+	uniform float     _ALEmissionIntensity;
+
+//----Vertex Color Alpha
+	uniform float     _VertexColorThreshold;
+	uniform float3    _VertexColor01;
+	uniform float     _VertexAlpha01;
+	uniform float3    _VertexColor02;
+	uniform float     _VertexAlpha02;
+	uniform float3    _VertexColor03;
+	uniform float     _VertexAlpha03;
+	uniform float3    _VertexColor04;
+	uniform float     _VertexAlpha04;
+	uniform float3    _VertexColor05;
+	uniform float     _VertexAlpha05;
+	uniform float3    _VertexColor06;
+	uniform float     _VertexAlpha06;
+	uniform float3    _VertexColor07;
+	uniform float     _VertexAlpha07;
+	uniform float3    _VertexColor08;
+	uniform float     _VertexAlpha08;
+	uniform float3    _VertexColor09;
+	uniform float     _VertexAlpha09;
+	uniform float3    _VertexColor10;
+	uniform float     _VertexAlpha10;
+	uniform float3    _VertexColor11;
+	uniform float     _VertexAlpha11;
+	uniform float3    _VertexColor12;
+	uniform float     _VertexAlpha12;
+	uniform float3    _VertexColor13;
+	uniform float     _VertexAlpha13;
+	uniform float3    _VertexColor14;
+	uniform float     _VertexAlpha14;
+	uniform float3    _VertexColor15;
+	uniform float     _VertexAlpha15;
+	uniform float3    _VertexColor16;
+	uniform float     _VertexAlpha16;
 
 //----Outline
 	uniform bool      _OutLineEnable;
@@ -199,7 +272,7 @@ struct VIN {
 	float3 normal  : NORMAL;
 	float4 tangent : TANGENT;
 	float3 color   : COLOR;
-	
+
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -211,6 +284,7 @@ struct VOUT {
 	nointerpolation float4 pos     : SV_POSITION;
 	                float4 vertex  : VERTEX;
 	                float3 wpos    : WORLDPOS;
+	                float4 scrpos  : SCREENPOS;
 	nointerpolation float3 campos  : CAMERAPOS0;
 	                float2 uv      : TEXCOORD0;
 	nointerpolation float4 uvanm   : TEXANIM;
@@ -219,6 +293,7 @@ struct VOUT {
 	nointerpolation float4 decanm  : DECAL2;
 	                float3 normal  : NORMAL;
 	                float3 color   : COLOR0;
+	                float  alpha   : COLOR1;
 	                float4 tangent : TANGENT0;
 	                float3 bitan   : TANGENT1;
 	                float3 ldir    : LIGHT0;
@@ -233,8 +308,8 @@ struct VOUT {
 
 	#ifdef PASS_FB
 		nointerpolation float3 shdir   : LIGHT1;
-		nointerpolation float3 shmax   : COLOR1;
-		nointerpolation float3 shmin   : COLOR2;
+		nointerpolation float3 shmax   : COLOR2;
+		nointerpolation float3 shmin   : COLOR3;
 		                float4 vldirX  : LIGHT2;
 		                float4 vldirY  : LIGHT3;
 		                float4 vldirZ  : LIGHT4;

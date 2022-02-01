@@ -20,6 +20,8 @@ namespace SunaoShader {
 		int     Version_M         = 5;
 		int     Version_L         = 4;
 
+		MaterialProperty OptimizerEnable;
+
 		MaterialProperty MainTex;
 		MaterialProperty Color;
 		MaterialProperty Alpha;
@@ -81,6 +83,72 @@ namespace SunaoShader {
 		MaterialProperty Unlit;
 		MaterialProperty MonochromeLit;
 
+		MaterialProperty MirrorControlEnable;
+		MaterialProperty MirrorCopyAlpha;
+		MaterialProperty RealCopyAlpha;
+
+		MaterialProperty HSVShiftEnable;
+		MaterialProperty HSVShiftMask;
+		MaterialProperty HSVShiftHue;
+		MaterialProperty HSVShiftSat;
+		MaterialProperty HSVShiftVal;
+		MaterialProperty HSVShiftBaseMode;
+		MaterialProperty HSVShiftDecalMode;
+		MaterialProperty HSVShiftShadeMode;
+		MaterialProperty HSVShiftSpecularMode;
+		MaterialProperty HSVShiftEmissionMode;
+		MaterialProperty HSVShiftOutlineMode;
+		MaterialProperty HSVShiftRimMode;
+		MaterialProperty HSVShiftParallaxMode;
+		MaterialProperty HSVShiftAudioLinkMode;
+
+		MaterialProperty ALEnable;
+		MaterialProperty ALMask;
+		MaterialProperty ALChannel;
+		MaterialProperty ALTexture;
+		MaterialProperty ALBassTexture;
+		MaterialProperty ALLowMidsTexture;
+		MaterialProperty ALHighMidsTexture;
+		MaterialProperty ALTrebleTexture;
+		MaterialProperty ALAlbedoEnable;
+		MaterialProperty ALAlbedoOpacity;
+		MaterialProperty ALEmissionEnable;
+		MaterialProperty ALEmissionIntensity;
+
+		MaterialProperty VertexColorThreshold;
+		MaterialProperty VertexColor01;
+		MaterialProperty VertexAlpha01;
+		MaterialProperty VertexColor02;
+		MaterialProperty VertexAlpha02;
+		MaterialProperty VertexColor03;
+		MaterialProperty VertexAlpha03;
+		MaterialProperty VertexColor04;
+		MaterialProperty VertexAlpha04;
+		MaterialProperty VertexColor05;
+		MaterialProperty VertexAlpha05;
+		MaterialProperty VertexColor06;
+		MaterialProperty VertexAlpha06;
+		MaterialProperty VertexColor07;
+		MaterialProperty VertexAlpha07;
+		MaterialProperty VertexColor08;
+		MaterialProperty VertexAlpha08;
+		MaterialProperty VertexColor09;
+		MaterialProperty VertexAlpha09;
+		MaterialProperty VertexColor10;
+		MaterialProperty VertexAlpha10;
+		MaterialProperty VertexColor11;
+		MaterialProperty VertexAlpha11;
+		MaterialProperty VertexColor12;
+		MaterialProperty VertexAlpha12;
+		MaterialProperty VertexColor13;
+		MaterialProperty VertexAlpha13;
+		MaterialProperty VertexColor14;
+		MaterialProperty VertexAlpha14;
+		MaterialProperty VertexColor15;
+		MaterialProperty VertexAlpha15;
+		MaterialProperty VertexColor16;
+		MaterialProperty VertexAlpha16;
+
 		MaterialProperty OutLineEnable;
 		MaterialProperty OutLineMask;
 		MaterialProperty OutLineColor;
@@ -126,7 +194,7 @@ namespace SunaoShader {
 		MaterialProperty ParallaxAnimX;
 		MaterialProperty ParallaxAnimY;
 		MaterialProperty ParallaxLighting;
-		MaterialProperty IgnoreTexAlphaPE;	 
+		MaterialProperty IgnoreTexAlphaPE;
 		MaterialProperty ParallaxInTheDark;
 
 		MaterialProperty ReflectionEnable;
@@ -189,6 +257,7 @@ namespace SunaoShader {
 		bool    ParallaxFoldout   = false;
 		bool    ReflectionFoldout = false;
 		bool    RimLightFoldout   = false;
+		bool    VertexAlphaFoldout= false;
 		bool    OtherFoldout      = false;
 
 		bool    OnceRun           = true;
@@ -201,7 +270,7 @@ namespace SunaoShader {
 			var mat = (Material)ME.target;
 
 			bool Shader_Opaque      = mat.shader.name.Contains("Opaque"           );
-			bool Shader_Transparent = mat.shader.name.Contains("Transparent"      );
+			bool Shader_Transparent = mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("AlphaToCoverage") || mat.shader.name.Contains("TransClipping");
 			bool Shader_Cutout      = mat.shader.name.Contains("Cutout"           );
 			bool Shader_StencilOut  = mat.shader.name.Contains("[Stencil Outline]");
 			bool Shader_Stencil     = mat.shader.name.Contains("[Stencil]"        );
@@ -241,6 +310,7 @@ namespace SunaoShader {
 
 			if ((Shader_Type) != (Previous_Type)) OnceRun = true;
 
+			OptimizerEnable   = FindProperty("_OptimizerEnable"   , Prop , false);
 
 			MainTex           = FindProperty("_MainTex"           , Prop , false);
 			Color             = FindProperty("_Color"             , Prop , false);
@@ -304,6 +374,72 @@ namespace SunaoShader {
 			LightBoost        = FindProperty("_LightBoost"        , Prop , false);
 			Unlit             = FindProperty("_Unlit"             , Prop , false);
 			MonochromeLit     = FindProperty("_MonochromeLit"     , Prop , false);
+
+			MirrorControlEnable = FindProperty("_MirrorControlEnable", Prop, false);
+			MirrorCopyAlpha   = FindProperty("_MirrorCopyAlpha"   , Prop , false);
+			RealCopyAlpha     = FindProperty("_RealCopyAlpha"     , Prop , false);
+
+			HSVShiftEnable    = FindProperty("_HSVShiftEnable"    , Prop , false);
+			HSVShiftMask      = FindProperty("_HSVShiftMask"      , Prop , false);
+			HSVShiftHue       = FindProperty("_HSVShiftHue"       , Prop , false);
+			HSVShiftSat       = FindProperty("_HSVShiftSat"       , Prop , false);
+			HSVShiftVal       = FindProperty("_HSVShiftVal"       , Prop , false);
+			HSVShiftBaseMode = FindProperty("_HSVShiftBaseMode" , Prop , false);
+			HSVShiftDecalMode = FindProperty("_HSVShiftDecalMode" , Prop , false);
+			HSVShiftShadeMode = FindProperty("_HSVShiftShadeMode" , Prop , false);
+			HSVShiftSpecularMode = FindProperty("_HSVShiftSpecularMode" , Prop , false);
+			HSVShiftEmissionMode = FindProperty("_HSVShiftEmissionMode" , Prop , false);
+			HSVShiftOutlineMode = FindProperty("_HSVShiftOutlineMode" , Prop , false);
+			HSVShiftRimMode	= FindProperty("_HSVShiftRimMode" , Prop , false);
+			HSVShiftParallaxMode	= FindProperty("_HSVShiftParallaxMode" , Prop , false);
+			HSVShiftAudioLinkMode	= FindProperty("_HSVShiftAudioLinkMode" , Prop , false);
+
+			ALEnable 					= FindProperty("_ALEnable"          , Prop , false);
+			ALMask 						= FindProperty("_ALMask"            , Prop , false);
+			ALChannel 				= FindProperty("_ALChannel"         , Prop , false);
+			ALTexture					= FindProperty("_ALTexture"         , Prop , false);
+			ALBassTexture 		= FindProperty("_ALBassTexture"     , Prop , false);
+			ALLowMidsTexture 	= FindProperty("_ALLowMidsTexture"  , Prop , false);
+			ALHighMidsTexture = FindProperty("_ALHighMidsTexture" , Prop , false);
+			ALTrebleTexture 	= FindProperty("_ALTrebleTexture"   , Prop , false);
+			ALAlbedoEnable 		= FindProperty("_ALAlbedoEnable"    , Prop , false);
+			ALAlbedoOpacity		= FindProperty("_ALAlbedoOpacity"   , Prop , false);
+			ALEmissionEnable 	= FindProperty("_ALEmissionEnable"  , Prop , false);
+			ALEmissionIntensity = FindProperty("_ALEmissionIntensity" , Prop , false);
+
+			VertexColorThreshold = FindProperty("_VertexColorThreshold", Prop, false);
+			VertexColor01     = FindProperty("_VertexColor01"     , Prop , false);
+			VertexAlpha01     = FindProperty("_VertexAlpha01"     , Prop , false);
+			VertexColor02     = FindProperty("_VertexColor02"     , Prop , false);
+			VertexAlpha02     = FindProperty("_VertexAlpha02"     , Prop , false);
+			VertexColor03     = FindProperty("_VertexColor03"     , Prop , false);
+			VertexAlpha03     = FindProperty("_VertexAlpha03"     , Prop , false);
+			VertexColor04     = FindProperty("_VertexColor04"     , Prop , false);
+			VertexAlpha04     = FindProperty("_VertexAlpha04"     , Prop , false);
+			VertexColor05     = FindProperty("_VertexColor05"     , Prop , false);
+			VertexAlpha05     = FindProperty("_VertexAlpha05"     , Prop , false);
+			VertexColor06     = FindProperty("_VertexColor06"     , Prop , false);
+			VertexAlpha06     = FindProperty("_VertexAlpha06"     , Prop , false);
+			VertexColor07     = FindProperty("_VertexColor07"     , Prop , false);
+			VertexAlpha07     = FindProperty("_VertexAlpha07"     , Prop , false);
+			VertexColor08     = FindProperty("_VertexColor08"     , Prop , false);
+			VertexAlpha08     = FindProperty("_VertexAlpha08"     , Prop , false);
+			VertexColor09     = FindProperty("_VertexColor09"     , Prop , false);
+			VertexAlpha09     = FindProperty("_VertexAlpha09"     , Prop , false);
+			VertexColor10     = FindProperty("_VertexColor10"     , Prop , false);
+			VertexAlpha10     = FindProperty("_VertexAlpha10"     , Prop , false);
+			VertexColor11     = FindProperty("_VertexColor11"     , Prop , false);
+			VertexAlpha11     = FindProperty("_VertexAlpha11"     , Prop , false);
+			VertexColor12     = FindProperty("_VertexColor12"     , Prop , false);
+			VertexAlpha12     = FindProperty("_VertexAlpha12"     , Prop , false);
+			VertexColor13     = FindProperty("_VertexColor13"     , Prop , false);
+			VertexAlpha13     = FindProperty("_VertexAlpha13"     , Prop , false);
+			VertexColor14     = FindProperty("_VertexColor14"     , Prop , false);
+			VertexAlpha14     = FindProperty("_VertexAlpha14"     , Prop , false);
+			VertexColor15     = FindProperty("_VertexColor15"     , Prop , false);
+			VertexAlpha15     = FindProperty("_VertexAlpha15"     , Prop , false);
+			VertexColor16     = FindProperty("_VertexColor16"     , Prop , false);
+			VertexAlpha16     = FindProperty("_VertexAlpha16"     , Prop , false);
 
 			OutLineEnable     = FindProperty("_OutLineEnable"     , Prop , false);
 			OutLineMask       = FindProperty("_OutLineMask"       , Prop , false);
@@ -471,6 +607,55 @@ namespace SunaoShader {
 				}
 			}
 
+			GUILayout.Label("Shader Optimizer", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+        if (OptimizerEnable.hasMixedValue) {
+          EditorGUI.BeginChangeCheck();
+          GUILayout.Button("Lock (" + ME.targets.Length + " materials)");
+          if (EditorGUI.EndChangeCheck()) {
+            foreach (Material m in ME.targets) {
+                m.SetFloat("_OptimizerEnable", 1);
+                if (!ShaderOptimizer.Lock(m, Prop))
+                	m.SetFloat("_OptimizerEnable", 0);
+            }
+          }
+        } else {
+          EditorGUI.BeginChangeCheck();
+          if (OptimizerEnable.floatValue == 0) GUILayout.Button("Lock");
+          else GUILayout.Button("Unlock");
+
+          if (EditorGUI.EndChangeCheck())
+          {
+            if (OptimizerEnable.floatValue == 0)
+            {
+            	// Optimizer disabled, lock materials
+              foreach (Material m in ME.targets) {
+              	m.SetFloat("_OptimizerEnable", 1);
+                if (!ShaderOptimizer.Lock(m, Prop))
+                  m.SetFloat("_OptimizerEnable", 0);
+              }
+            }
+            else
+            {
+            	// Optimizer enabled, unlock materials
+              foreach (Material m in ME.targets) {
+              	m.SetFloat("_OptimizerEnable", 0);
+              	if (!ShaderOptimizer.Unlock(m))
+              		m.SetFloat("_OptimizerEnable", 1);
+              }
+            }
+          }
+        }
+      }
+
+      if (OptimizerEnable.floatValue != 0) {
+	      EditorGUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
+				GUILayout.Label("Sunao Shader " + Version_H + "." + Version_M + "." + Version_L , EditorStyles.boldLabel);
+				EditorGUILayout.EndHorizontal();
+				return;
+      }
 
 			GUILayout.Label("Main", EditorStyles.boldLabel);
 
@@ -534,7 +719,7 @@ namespace SunaoShader {
 
 						ME.ShaderProperty(UVScrollX   , new GUIContent("Scroll X"          ));
 						ME.ShaderProperty(UVScrollY   , new GUIContent("Scroll Y"          ));
-						
+
 						ME.ShaderProperty(UVAnimation , new GUIContent("Animation Speed"   ));
 						if (UVAnimation.floatValue > 0.0f) {
 							ME.ShaderProperty(UVAnimX        , new GUIContent("Animation X Size"));
@@ -542,7 +727,7 @@ namespace SunaoShader {
 						}
 						if (UVAnimX.floatValue < 1.0f) mat.SetInt("_UVAnimX" , 1);
 						if (UVAnimY.floatValue < 1.0f) mat.SetInt("_UVAnimY" , 1);
-						
+
 						ME.ShaderProperty(UVAnimOtherTex , new GUIContent("Animation Other Texture Maps"));
 
 					} else {
@@ -612,7 +797,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(StencilNumb , new GUIContent("Stencil Number"));
 					if ((int)StencilNumb.floatValue <   0) mat.SetInt("_StencilNumb" ,   0);
 					if ((int)StencilNumb.floatValue > 255) mat.SetInt("_StencilNumb" , 255);
-	
+
 					if (Shader_StencilRW) {
 						ME.ShaderProperty(StencilCompMode , new GUIContent("Stencil Compare Mode"));
 					}
@@ -675,6 +860,68 @@ namespace SunaoShader {
 					ME.ShaderProperty(Unlit , new GUIContent("Unlighting"));
 					ME.ShaderProperty(MonochromeLit , new GUIContent("Monochrome Lighting"));
 
+				}
+			}
+
+
+			GUILayout.Label("Mirror Control", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				ME.ShaderProperty(MirrorControlEnable, new GUIContent("Enable Mirror Control"));
+				ME.ShaderProperty(RealCopyAlpha, new GUIContent("Real Copy Alpha"));
+				ME.ShaderProperty(MirrorCopyAlpha, new GUIContent("Mirror Copy Alpha"));
+			}
+
+
+			GUILayout.Label("HSV Adjustment", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					GUILayout.Label("HSV Shift", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(HSVShiftEnable, new GUIContent("Enable HSV Shift"));
+					ME.TexturePropertySingleLine(new GUIContent("HSV Shift Mask"), HSVShiftMask);
+					ME.TextureScaleOffsetProperty(HSVShiftMask);
+					ME.ShaderProperty(HSVShiftHue, new GUIContent("Hue Shift"));
+					ME.ShaderProperty(HSVShiftSat, new GUIContent("Sat Shift"));
+					ME.ShaderProperty(HSVShiftVal, new GUIContent("Val Shift"));
+					ME.ShaderProperty(HSVShiftBaseMode, new GUIContent("Base Mode"));
+					ME.ShaderProperty(HSVShiftDecalMode, new GUIContent("Decal Mode"));
+					ME.ShaderProperty(HSVShiftShadeMode, new GUIContent("Shade Mode"));
+					ME.ShaderProperty(HSVShiftSpecularMode, new GUIContent("Specular Mode"));
+					ME.ShaderProperty(HSVShiftEmissionMode, new GUIContent("Emission Mode"));
+					ME.ShaderProperty(HSVShiftOutlineMode, new GUIContent("Outline Mode"));
+					ME.ShaderProperty(HSVShiftRimMode, new GUIContent("Rim Mode"));
+					ME.ShaderProperty(HSVShiftParallaxMode, new GUIContent("Parallax Mode"));
+					ME.ShaderProperty(HSVShiftAudioLinkMode, new GUIContent("AudioLink Mode"));
+				}
+			}
+
+
+			GUILayout.Label("AudioLink", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+				using (new EditorGUILayout.VerticalScope("box")) {
+
+					GUILayout.Label("Beat Detection", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(ALEnable, new GUIContent("Enable AudioLink"));
+					ME.TexturePropertySingleLine(new GUIContent("AudioLink Mask"), ALMask);
+					ME.TextureScaleOffsetProperty(ALMask);
+					ME.ShaderProperty(ALChannel, new GUIContent("AudioLink Channel"));
+					if (ALChannel.floatValue == 4.0f) {
+						ME.TexturePropertySingleLine(new GUIContent("Bass Texture"), ALBassTexture);
+						ME.TexturePropertySingleLine(new GUIContent("LowMids Texture"), ALLowMidsTexture);
+						ME.TexturePropertySingleLine(new GUIContent("HighMids Texture"), ALHighMidsTexture);
+						ME.TexturePropertySingleLine(new GUIContent("Treble Texture"), ALTrebleTexture);
+					} else {
+						ME.TexturePropertySingleLine(new GUIContent("Texture"), ALTexture);
+					}
+					ME.ShaderProperty(ALAlbedoEnable, new GUIContent("Albedo Enabled"));
+					ME.ShaderProperty(ALAlbedoOpacity, new GUIContent("Albedo Opacity"));
+					ME.ShaderProperty(ALEmissionEnable, new GUIContent("Emission Enabled"));
+					ME.ShaderProperty(ALEmissionIntensity, new GUIContent("Emission Intensity"));
 				}
 			}
 
@@ -961,6 +1208,114 @@ namespace SunaoShader {
 			}
 
 
+			GUILayout.Label("Vertex Alpha", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+
+				if (mat.GetInt("_VertexAlphaFO") == 1) VertexAlphaFoldout = true;
+
+					EditorGUI.indentLevel ++;
+
+					if (VertexAlphaFoldout) {
+						VertexAlphaFoldout = EditorGUILayout.Foldout(VertexAlphaFoldout , ""              , EditorStyles.boldFont);
+					} else {
+						VertexAlphaFoldout = EditorGUILayout.Foldout(VertexAlphaFoldout , "Show Settings" , EditorStyles.boldFont);
+					}
+
+					EditorGUI.indentLevel --;
+
+				if (VertexAlphaFoldout) {
+					mat.SetInt("_VertexAlphaFO" , 1);
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 1", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor01, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha01, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 2", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor02, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha02, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 3", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor03, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha03, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 4", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor04, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha04, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 5", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor05, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha05, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 6", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor06, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha06, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 7", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor07, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha07, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 8", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor08, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha08, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 9", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor09, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha09, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 10", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor10, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha10, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 11", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor11, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha11, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 12", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor12, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha12, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 13", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor13, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha13, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 14", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor14, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha14, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 15", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor15, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha15, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color 16", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColor16, new GUIContent("Color"));
+						ME.ShaderProperty(VertexAlpha16, new GUIContent("Alpha"));
+					}
+					using (new EditorGUILayout.VerticalScope("box")) {
+						GUILayout.Label("Vertex Color Threshold", EditorStyles.boldLabel);
+						ME.ShaderProperty(VertexColorThreshold, new GUIContent("Threshold"));
+					}
+				} else {
+					mat.SetInt("_VertexAlphaFO" , 0);
+				}
+			}
+
+
 			GUILayout.Label("Other", EditorStyles.boldLabel);
 
 			using (new EditorGUILayout.VerticalScope("box")) {
@@ -1041,7 +1396,7 @@ namespace SunaoShader {
 						GUILayout.Label("Render Queue" , EditorStyles.boldLabel);
 
 						ME.RenderQueueField();
-					
+
 					}
 
 				} else {

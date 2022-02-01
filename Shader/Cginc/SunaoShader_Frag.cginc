@@ -23,7 +23,7 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	float2 SubUV        = IN.uv;
 	if (_UVAnimOtherTex) SubUV = MainUV;
 
-	#if defined(TRANSPARENT) || defined(CUTOUT)
+	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 	       OUT.a        = saturate(UNITY_SAMPLE_TEX2D(_MainTex , MainUV).a * _Color.a * _Alpha);
 	       OUT.a       *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask  , _MainTex , SubUV).rgb) , _AlphaMaskStrength);
 	#endif
@@ -123,10 +123,20 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
 
+//----Apply vertex alpha
+	OUT.a *= IN.alpha;
+
 //-------------------------------------カットアウト
 	#ifdef CUTOUT
 	       clip(OUT.a - _Cutout);
 	       if (_AlphaToMask) OUT.a = saturate((OUT.a - _Cutout) * 10.0f);
+	#endif
+
+//-------------------------------------AlphaToCoverage
+	#ifdef ALPHA_TO_COVERAGE
+		float2 screenUV = CalcScreenUV(IN.scrpos);
+		float dither = CalcDither(screenUV.xy);
+		OUT.a = OUT.a - (dither * (1.0 - OUT.a) * 0.15);
 	#endif
 
 //-------------------------------------ノーマルマップ
