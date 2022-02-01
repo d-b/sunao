@@ -1,7 +1,7 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.4.4
+//              Sunao Shader    Ver 1.5.3
 //
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
 //                              VRChat  : SUNAO_
 //
@@ -13,6 +13,10 @@ Shader "Sunao Shader/[Stencil]/Write" {
 
 
 	Properties {
+
+		[HideInInspector] _VersionH        ("Version H"         , int) = 1
+		[HideInInspector] _VersionM        ("Version M"         , int) = 5
+		[HideInInspector] _VersionL        ("Version L"         , int) = 3
 
 		[NoScaleOffset]
 		_MainTex           ("Main Texture"              , 2D) = "white" {}
@@ -26,6 +30,15 @@ Shader "Sunao Shader/[Stencil]/Write" {
 		_OcclusionMap      ("Occlusion"                 , 2D) = "white" {}
 		[NoScaleOffset]
 		_AlphaMask         ("Alpha Mask"                , 2D) = "white" {}
+
+		_SubTex            ("Sub Texture"               , 2D) = "black" {}
+		_SubColor          ("Sub Color"                 , Color) = (1,1,1,1)
+		_SubTexEnable      ("Enable Sub Texture"        , int) = 0
+		_SubTexBlend       ("Sub Texture Blending"      , Range( 0.0,  1.0)) = 0.5
+		[Enum(Override , 0 , Multiply , 1 , Add , 2 , Minus , 3)]
+		_SubTexBlendMode   ("Sub Texture Blend Mode"    , int) = 0
+		[Enum(Both , 0 , Front , 1 , Back , 2)]
+		_SubTexCulling     ("Sub Texture Assign"        , int) = 0
 
 		_Bright            ("Brightness"                , Range( 0.0,  1.0)) = 1.0
 		_BumpScale         ("Normal Map Scale"          , Range(-2.0,  2.0)) = 1.0
@@ -232,17 +245,15 @@ Shader "Sunao Shader/[Stencil]/Write" {
 		[SToggle]
 		_EnableZWrite      ("Enable Z Write"            , int) = 1
 
-		//[SToggle]
-		//_IgnoreProjector   ("Ignore Projector"          , int) = 0
+		[SToggle]
+		_AlphaToMask       ("Cutout MSAA"               , int) = 0
 
 		_DirectionalLight  ("Directional Light"         , Range( 0.0,  2.0)) = 1.0
 		_SHLight           ("SH Light"                  , Range( 0.0,  2.0)) = 1.0
 		_PointLight        ("Point Light"               , Range( 0.0,  2.0)) = 1.0
 		[SToggle]
-		_LightLimitter     ("Light Limitter"            , int) = 1
+		_LightLimitter     ("Light Limiter"             , int) = 1
 		_MinimumLight      ("Minimum Light Limit"       , Range( 0.0,  1.0)) = 0.0
-		[Enum(Add , 0 , Max , 4)]
-		_BlendOperation    ("ForwardAdd Blend Mode"     , int) = 4
 
 		[SToggle]
 		_EnableGammaFix    ("Enable Gamma Fix"          , int) = 0
@@ -256,7 +267,7 @@ Shader "Sunao Shader/[Stencil]/Write" {
 		_BlightOffset      ("Brightness Offset"         , Range(-5.0,  5.0)) = 0.0
 
 		[SToggle]
-		_LimitterEnable    ("Enable Limitter"           , int) = 0
+		_LimitterEnable    ("Enable Limiter"            , int) = 0
 		_LimitterMax       ("Limitter Max"              , Range( 0.0,  5.0)) = 1.0
 
 
@@ -271,11 +282,6 @@ Shader "Sunao Shader/[Stencil]/Write" {
 		[HideInInspector] _OtherSettingsFO ("Other Settings FO" , int) = 0
 
 		[HideInInspector] _SunaoShaderType ("ShaderType"        , int) = 7
-
-		[HideInInspector] _VersionH        ("Version H"         , int) = 1
-		[HideInInspector] _VersionM        ("Version M"         , int) = 4
-		[HideInInspector] _VersionL        ("Version L"         , int) = 4
-
 	}
 
 
@@ -288,17 +294,16 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			"IgnoreProjector" = "False"
 			"RenderType"      = "TransparentCutout"
 			"Queue"           = "AlphaTest"
+			"VRCFallback"     = "ToonCutoutDoubleSided"
 		}
 
 
 		Pass {
-			Tags {
-				"LightMode"  = "ForwardBase"
-			}
+			Tags { "LightMode"  = "ForwardBase" }
 
 			Cull [_Culling]
 			ZWrite [_EnableZWrite]
-			AlphaToMask On
+			AlphaToMask [_AlphaToMask]
 
 			Stencil {
 				Ref  [_StencilNumb]
@@ -312,23 +317,24 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma target 4.5
+			#pragma only_renderers d3d11 metal
+			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_FB
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_Core.cginc"
+			#include "./Cginc/SunaoShader_Core.cginc"
 
 			ENDCG
 		}
 
 
 		Pass {
-			Tags {
-				"LightMode"  = "ForwardBase"
-			}
+			Tags { "LightMode"  = "ForwardBase" }
 
 			Cull Front
 			ZWrite [_EnableZWrite]
+			AlphaToMask [_AlphaToMask]
 
 			Stencil {
 				Ref  [_StencilNumb]
@@ -342,56 +348,23 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma target 4.5
+			#pragma only_renderers d3d11 metal
+			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_OL_FB
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_OL.cginc"
+			#include "./Cginc/SunaoShader_OL.cginc"
 
 			ENDCG
 		}
 
 
 		Pass {
-			Tags {
-				"LightMode"  = "ForwardAdd"
-			}
-
-			Cull Front
-			BlendOp [_BlendOperation]
-			Blend One One
-			ZWrite Off
-
-			Stencil {
-				Ref  [_StencilNumb]
-				Comp Always
-				Pass Replace
-			}
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fwdadd
-			#pragma multi_compile_fog
-			#pragma target 4.5
-
-			#define PASS_OL_FA
-			#define CUTOUT
-
-			#include "./cginc/SunaoShader_OL.cginc"
-
-			ENDCG
-		}
-
-
-		Pass {
-			Tags {
-				"LightMode"  = "ForwardAdd"
-			}
+			Tags { "LightMode"  = "ForwardAdd" }
 
 			Cull [_Culling]
-			BlendOp [_BlendOperation]
-			Blend One One
+			Blend One OneMinusSrcAlpha , Zero One
 			ZWrite Off
 
 			Stencil {
@@ -406,21 +379,51 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma multi_compile_fwdadd
 			#pragma multi_compile_fog
 			#pragma target 4.5
+			#pragma only_renderers d3d11 metal
+			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_FA
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_Core.cginc"
+			#include "./Cginc/SunaoShader_Core.cginc"
 
 			ENDCG
 		}
 
 
+		Pass {
+			Tags { "LightMode"  = "ForwardAdd" }
+
+			Cull Front
+			Blend One OneMinusSrcAlpha , Zero One
+			ZWrite Off
+
+			Stencil {
+				Ref  [_StencilNumb]
+				Comp Always
+				Pass Replace
+			}
+
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_fwdadd
+			#pragma multi_compile_fog
+			#pragma target 4.5
+			#pragma only_renderers d3d11 metal
+			#pragma fragmentoption ARB_precision_hint_fastest
+
+			#define PASS_OL_FA
+			#define CUTOUT
+
+			#include "./Cginc/SunaoShader_OL.cginc"
+
+			ENDCG
+		}
+
 
 		Pass {
-			Tags {
-				"LightMode" = "ShadowCaster"
-			}
+			Tags { "LightMode"  = "ShadowCaster" }
 
 			Cull [_Culling]
 			ZWrite On
@@ -431,17 +434,19 @@ Shader "Sunao Shader/[Stencil]/Write" {
 			#pragma fragment frag
 			#pragma multi_compile_shadowcaster
 			#pragma target 4.5
+			#pragma only_renderers d3d11 metal
+			#pragma fragmentoption ARB_precision_hint_fastest
 
 			#define PASS_SC
 			#define CUTOUT
 
-			#include "./cginc/SunaoShader_SC.cginc"
+			#include "./Cginc/SunaoShader_SC.cginc"
 
 			ENDCG
 		}
 	}
 
-	FallBack "Diffuse"
+	FallBack "Unlit/Transparent"
 
 	CustomEditor "SunaoShader.GUI"
 }

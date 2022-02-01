@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader ShadowCaster
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -24,12 +24,17 @@
 	uniform uint      _UVAnimX;
 	uniform uint      _UVAnimY;
 	uniform bool      _UVAnimOtherTex;
+	uniform bool      _OutLineEnable;
+	uniform sampler2D _OutLineMask;
+	uniform float     _OutLineSize;
+	uniform bool      _OutLineFixScale;
 
 //-------------------------------------頂点シェーダ入力構造体
 
 struct VIN {
 	float4 vertex  : POSITION;
 	float2 uv      : TEXCOORD0;
+	float3 normal  : NORMAL;
 };
 
 //-------------------------------------頂点シェーダ出力構造体
@@ -47,9 +52,6 @@ VOUT vert (VIN v) {
 
 	VOUT o;
 
-//-------------------------------------頂点座標変換
-	o.pos = UnityObjectToClipPos(v.vertex);
-
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
@@ -65,10 +67,20 @@ VOUT vert (VIN v) {
 		o.uvanm.xy += floor(frac(UVAnimSpeed * _Time.y) * float2(_UVAnimX , _UVAnimY));
 	}
 
+//-------------------------------------頂点座標計算
+	if (_OutLineEnable) {
+		float3 VertexAdd;
+		VertexAdd     = v.normal * GetScale(_OutLineSize , _OutLineFixScale);
+		VertexAdd    *= MonoColor(tex2Dlod(_OutLineMask , float4(o.uv , 0.0f , 0.0f)).rgb);
+		v.vertex.xyz += VertexAdd;
+	}
+
+
 	TRANSFER_SHADOW_CASTER(o)
 
 	return o;
 }
+
 
 //-------------------------------------フラグメントシェーダ
 

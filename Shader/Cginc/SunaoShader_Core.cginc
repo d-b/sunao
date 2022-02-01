@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Core
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -23,6 +23,14 @@
 	uniform float4    _BumpMap_ST;
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_OcclusionMap);
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_AlphaMask);
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_SubTex);
+	uniform float4    _SubTex_ST;
+	uniform float4    _SubTex_TexelSize;
+	uniform float4    _SubColor;
+	uniform bool      _SubTexEnable;
+	uniform float     _SubTexBlend;
+	uniform uint      _SubTexBlendMode;
+	uniform uint      _SubTexCulling;
 	uniform float     _Bright;
 	uniform float     _BumpScale;
 	uniform float     _OcclusionStrength;
@@ -68,6 +76,16 @@
 	uniform float     _LightBoost;
 	uniform float     _Unlit;
 	uniform bool      _MonochromeLit;
+
+//----Outline
+	uniform bool      _OutLineEnable;
+	uniform sampler2D _OutLineMask;
+	uniform float4    _OutLineColor;
+	uniform float     _OutLineSize;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_OutLineTexture);
+	uniform bool      _OutLineLighthing;
+	uniform bool      _OutLineTexColor;
+	uniform bool      _OutLineFixScale;
 
 //----Emission
 	uniform bool      _EmissionEnable;
@@ -150,6 +168,8 @@
 	uniform bool      _IgnoreTexAlphaRL;
 
 //----Other
+	uniform uint      _Culling;
+	uniform bool      _AlphaToMask;
 	uniform float     _DirectionalLight;
 	uniform float     _PointLight;
 	uniform float     _SHLight;
@@ -175,9 +195,12 @@
 struct VIN {
 	float4 vertex  : POSITION;
 	float2 uv      : TEXCOORD;
+	float2 uv1     : TEXCOORD1;
 	float3 normal  : NORMAL;
 	float4 tangent : TANGENT;
 	float3 color   : COLOR;
+	
+	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 
@@ -185,51 +208,52 @@ struct VIN {
 
 struct VOUT {
 
-	float4 pos     : SV_POSITION;
-	float4 vertex  : VERTEX;
-	float2 uv      : TEXCOORD0;
-	float4 uvanm   : TEXCOORD1;
-	float4 decal   : TEXCOORD2;
-	float4 decal2  : TEXCOORD3;
-	float4 decanm  : TEXCOORD4;
-	float3 normal  : NORMAL;
-	float3 color   : COLOR0;
-	float4 tangent : TANGENT;
-	float3 ldir    : LIGHTDIR0;
-	float4 toon    : TEXCOORD5;
-	float3 tanW    : TEXCOORD6;
-	float3 tanB    : TEXCOORD7;
-	float3 vfront  : TEXCOORD8;
-	float4 euv     : TEXCOORD9;
-	float3 eprm    : TEXCOORD10;
-	float4 peuv    : TEXCOORD11;
-	float2 pduv    : TEXCOORD12;
-	float3 peprm   : TEXCOORD13;
-	float3 pview   : TEXCOORD14;
+	nointerpolation float4 pos     : SV_POSITION;
+	                float4 vertex  : VERTEX;
+	                float3 wpos    : WORLDPOS;
+	nointerpolation float3 campos  : CAMERAPOS0;
+	                float2 uv      : TEXCOORD0;
+	nointerpolation float4 uvanm   : TEXANIM;
+	                float4 decal   : DECAL0;
+	                float4 decal2  : DECAL1;
+	nointerpolation float4 decanm  : DECAL2;
+	                float3 normal  : NORMAL;
+	                float3 color   : COLOR0;
+	                float4 tangent : TANGENT0;
+	                float3 bitan   : TANGENT1;
+	                float3 ldir    : LIGHT0;
+	nointerpolation float4 toon    : TOON;
+	nointerpolation float3 vfront  : VFRONT;
+	                float4 euv     : EMISSION0;
+	nointerpolation float3 eprm    : EMISSION1;
+	                float4 peuv    : EMISSION2;
+	                float2 pduv    : EMISSION3;
+	nointerpolation float3 peprm   : EMISSION4;
+	                float3 pview   : EMISSION5;
 
 	#ifdef PASS_FB
-		float3 shdir   : LIGHTDIR1;
-		float3 shmax   : COLOR1;
-		float3 shmin   : COLOR2;
-		float4 vldirX  : LIGHTDIR2;
-		float4 vldirY  : LIGHTDIR3;
-		float4 vldirZ  : LIGHTDIR4;
-		float4 vlcorr  : TEXCOORD15;
-		float4 vlatn   : TEXCOORD16;
+		nointerpolation float3 shdir   : LIGHT1;
+		nointerpolation float3 shmax   : COLOR1;
+		nointerpolation float3 shmin   : COLOR2;
+		                float4 vldirX  : LIGHT2;
+		                float4 vldirY  : LIGHT3;
+		                float4 vldirZ  : LIGHT4;
+		                float4 vlcorr  : LIGHT5;
+		                float4 vlatn   : LIGHT6;
 	#endif
 
-	UNITY_FOG_COORDS(17)
+	UNITY_FOG_COORDS(1)
 	#ifdef PASS_FA
-		LIGHTING_COORDS(18 , 19)
+		UNITY_LIGHTING_COORDS(2 , 3)
 	#endif
-
+	
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 
 //-------------------------------------頂点シェーダ
 
 	#include "SunaoShader_Vert.cginc"
-
 
 //-------------------------------------フラグメントシェーダ
 

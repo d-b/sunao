@@ -1,8 +1,21 @@
 //--------------------------------------------------------------
 //              Sunao Shader Function
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //--------------------------------------------------------------
 
+//-------------------------------------スケール取得
+float3 GetScale(float ratio , bool fixscale) {
+
+	float3 Scale;
+	       Scale.x  = length(float3(unity_ObjectToWorld[0].x , unity_ObjectToWorld[1].x , unity_ObjectToWorld[2].x));
+	       Scale.y  = length(float3(unity_ObjectToWorld[0].y , unity_ObjectToWorld[1].y , unity_ObjectToWorld[2].y));
+	       Scale.z  = length(float3(unity_ObjectToWorld[0].z , unity_ObjectToWorld[1].z , unity_ObjectToWorld[2].z));
+	       Scale    = 0.01f / Scale;
+	       Scale   *= ratio;
+	if (fixscale) Scale *= 10.0f;
+
+	return Scale;
+}
 
 //-------------------------------------モノクロカラーに変換
 float  MonoColor(float3 col) {

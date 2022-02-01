@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader Outline
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //--------------------------------------------------------------
 
 
@@ -43,12 +43,12 @@
 	uniform bool      _OutLineFixScale;
 
 //----Other
+	uniform bool      _AlphaToMask;
 	uniform float     _DirectionalLight;
 	uniform float     _SHLight;
 	uniform float     _PointLight;
 	uniform bool      _LightLimitter;
 	uniform float     _MinimumLight;
-	uniform bool      _BlendOperation;
 
 	uniform bool      _EnableGammaFix;
 	uniform float     _GammaR;
@@ -67,9 +67,12 @@
 
 struct VIN {
 	float4 vertex  : POSITION;
-	float2 uv      : TEXCOORD;
+	float2 uv      : TEXCOORD0;
+	float2 uv1     : TEXCOORD1;
 	float3 normal  : NORMAL;
 	float3 color   : COLOR;
+
+	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 
@@ -77,23 +80,34 @@ struct VIN {
 
 struct VOUT {
 	float4 pos     : SV_POSITION;
+	float3 wpos    : WPOSITION;
 	float2 uv      : TEXCOORD0;
-	float3 color   : TEXCOORD1;
-	float  mask    : TEXCOORD2;
+	float3 color   : COLOR0;
+	float3 light   : LIGHT0;
+	float  mask    : MASK0;
 
-	LIGHTING_COORDS(3 , 4)
-	UNITY_FOG_COORDS(5)
+	UNITY_FOG_COORDS(1)
+	#ifdef PASS_FA
+		UNITY_LIGHTING_COORDS(2 , 3)
+	#endif
+
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 
-//-------------------------------------頂点シェーダ
+//----------------------------------------------------------------------
+//                頂点シェーダ
+//----------------------------------------------------------------------
 
 VOUT vert (VIN v) {
 
 	VOUT o;
 
-//----UV
-	o.uv    = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
+	UNITY_SETUP_INSTANCE_ID(v);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+//-------------------------------------UV
+	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
 	if (_UVAnimOtherTex) {
 		float4 UVScr = float4(0.0f , 0.0f , 1.0f , 1.0f);
@@ -113,160 +127,168 @@ VOUT vert (VIN v) {
 		o.uv += float2(_UVScrollX , _UVScrollY) * _Time.y;
 	}
 
-//----アウトラインマスク
-	o.mask  = MonoColor(tex2Dlod(_OutLineMask , float4(o.uv , 0.0f , 0.0f)).rgb);
+//-------------------------------------アウトラインマスク
+	o.mask    = MonoColor(tex2Dlod(_OutLineMask , float4(o.uv , 0.0f , 0.0f)).rgb) * saturate(_OutLineSize * 10000.0f);
 
-//----頂点座標変換
-	float4 outv = (float4)0.0f;
+//-------------------------------------頂点座標変換
 	if (_OutLineEnable) {
-
-		float4 fixscale;
-		fixscale.x  = length(float3(unity_ObjectToWorld[0].x , unity_ObjectToWorld[1].x , unity_ObjectToWorld[2].x));
-		fixscale.y  = length(float3(unity_ObjectToWorld[0].y , unity_ObjectToWorld[1].y , unity_ObjectToWorld[2].y));
-		fixscale.z  = length(float3(unity_ObjectToWorld[0].z , unity_ObjectToWorld[1].z , unity_ObjectToWorld[2].z));
-		fixscale.w  = 1.0f;
-		fixscale    = 0.01f / fixscale;
-
-		if (_OutLineFixScale) fixscale *= 10.0f;
-
-		outv  = v.vertex;
-		outv += float4(v.normal , 0) * fixscale * _OutLineSize * o.mask;
+		float3 VertexAdd;
+		VertexAdd     = v.normal.xyz * GetScale(_OutLineSize , _OutLineFixScale);
+		VertexAdd    *= o.mask;
+		v.vertex.xyz += VertexAdd;
+	} else {
+		v.vertex.xyz  = (float3)0.0f;
 	}
-	o.pos   = UnityObjectToClipPos(outv);
-	float3 PosW = mul(unity_ObjectToWorld , v.vertex).xyz;
 
-//----カラー & ライティング
-	o.color = _OutLineColor.rgb;
+	o.pos     = UnityObjectToClipPos(v.vertex);
+	o.wpos    = mul(unity_ObjectToWorld , v.vertex).xyz;
+
+//-------------------------------------カラー
+	o.color   = _OutLineColor.rgb;
 
 	if (_OutLineTexColor) {
 		if (_VertexColor) o.color *= v.color;
 		                  o.color *= _Bright;
 	}
 
+//-------------------------------------ライティング
+	o.light   = (float3)0.0f;
+
 	if (_OutLineLighthing) {
-		float3 Lighting = (float3)0.0f;
 
 		#ifdef PASS_OL_FB
-			Lighting  =                ShadeSH9(float4(-1.0f ,  0.0f ,  0.0f , 1.0f));
-			Lighting  = max(Lighting , ShadeSH9(float4( 1.0f ,  0.0f ,  0.0f , 1.0f)));
-			Lighting  = max(Lighting , ShadeSH9(float4( 0.0f , -1.0f ,  0.0f , 1.0f)));
-			Lighting  = max(Lighting , ShadeSH9(float4( 0.0f ,  1.0f ,  0.0f , 1.0f)));
-			Lighting  = max(Lighting , ShadeSH9(float4( 0.0f ,  0.0f , -1.0f , 1.0f)));
-			Lighting  = max(Lighting , ShadeSH9(float4( 0.0f ,  0.0f ,  1.0f , 1.0f)));
-			Lighting *= _SHLight;
+			o.light  =                  ShadeSH9(float4(-1.0f ,  0.0f ,  0.0f , 1.0f));
+			o.light  = max(o.light , ShadeSH9(float4( 1.0f ,  0.0f ,  0.0f , 1.0f)));
+			o.light  = max(o.light , ShadeSH9(float4( 0.0f , -1.0f ,  0.0f , 1.0f)));
+			o.light  = max(o.light , ShadeSH9(float4( 0.0f ,  1.0f ,  0.0f , 1.0f)));
+			o.light  = max(o.light , ShadeSH9(float4( 0.0f ,  0.0f , -1.0f , 1.0f)));
+			o.light  = max(o.light , ShadeSH9(float4( 0.0f ,  0.0f ,  1.0f , 1.0f)));
+			o.light *= _SHLight;
+
+			o.light += _LightColor0 * _DirectionalLight;
 
 			#if VERTEXLIGHT_ON
-
-				float4 VLDirX = unity_4LightPosX0 - PosW.x;
-				float4 VLDirY = unity_4LightPosY0 - PosW.y;
-				float4 VLDirZ = unity_4LightPosZ0 - PosW.z;
+				float4 VLDirX = unity_4LightPosX0 - o.wpos.x;
+				float4 VLDirY = unity_4LightPosY0 - o.wpos.y;
+				float4 VLDirZ = unity_4LightPosZ0 - o.wpos.z;
 
 				float4 VLLength = VLightLength(VLDirX , VLDirY , VLDirZ);
 
 				float4 VLAtten  = VLightAtten(VLLength) * _PointLight;
-				Lighting += unity_LightColor[0].rgb * VLAtten.x * 0.6f;
-				Lighting += unity_LightColor[1].rgb * VLAtten.y * 0.6f;
-				Lighting += unity_LightColor[2].rgb * VLAtten.z * 0.6f;
-				Lighting += unity_LightColor[3].rgb * VLAtten.w * 0.6f;
-
+				       VLAtten  *= 0.5f;
+				       o.light += unity_LightColor[0].rgb * VLAtten.x;
+				       o.light += unity_LightColor[1].rgb * VLAtten.y;
+				       o.light += unity_LightColor[2].rgb * VLAtten.z;
+				       o.light += unity_LightColor[3].rgb * VLAtten.w;
 			#endif
 			
-			Lighting = max(Lighting , _MinimumLight);
+			o.light = max(o.light , _MinimumLight);
 		#endif
-
-		#ifdef PASS_OL_FB
-			Lighting += _LightColor0 * _DirectionalLight;
-		#endif
-		#ifdef PASS_OL_FA
-			Lighting += _LightColor0 * _PointLight * 0.6f;
-		#endif
-
-		if (_LightLimitter) {
-			float  MaxLight   = 1.0f;
-			       MaxLight   = max(MaxLight , Lighting.r);
-			       MaxLight   = max(MaxLight , Lighting.g);
-			       MaxLight   = max(MaxLight , Lighting.b);
-
-			Lighting = saturate(Lighting / MaxLight);
-		}
-
-		if (_MonochromeLit) Lighting = MonoColor(Lighting);
-
-		o.color *=  Lighting;
 	}
 
-//----ポイントライト
-	TRANSFER_VERTEX_TO_FRAGMENT(o);
+//-------------------------------------ポイントライト
+	#ifdef PASS_FA
+		UNITY_TRANSFER_LIGHTING(o , v.uv1);
+	#endif
 
-//----フォグ
+//-------------------------------------フォグ
 	UNITY_TRANSFER_FOG(o,o.pos);
-
 
 	return o;
 }
 
 
-//-------------------------------------フラグメントシェーダ
+//----------------------------------------------------------------------
+//                フラグメントシェーダ
+//----------------------------------------------------------------------
 
 float4 frag (VOUT IN) : COLOR {
 
-//----カラー計算
-	float4 OUT          = float4(0.0f , 0.0f , 0.0f , 1.0f);
+	UNITY_SETUP_INSTANCE_ID(IN);
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
-	OUT.rgb = UNITY_SAMPLE_TEX2D_SAMPLER(_OutLineTexture , _MainTex , IN.uv) * IN.color;
-
-	#ifdef PASS_OL_FA
-		if (_OutLineLighthing) OUT.rgb *= LIGHT_ATTENUATION(IN);
-	#endif
-
-	if (_OutLineTexColor) {
-	       OUT.rgb     *= UNITY_SAMPLE_TEX2D(_MainTex , IN.uv);
-	}
+//-------------------------------------カラー計算
+	float4 OUT       = UNITY_SAMPLE_TEX2D_SAMPLER(_OutLineTexture , _MainTex , IN.uv);
+	       OUT.rgb  *= IN.color;
+	if (_OutLineTexColor) OUT.rgb *= UNITY_SAMPLE_TEX2D(_MainTex , IN.uv);
 
 	#if defined(TRANSPARENT) || defined(CUTOUT)
-		OUT.a     = saturate(UNITY_SAMPLE_TEX2D(_MainTex , IN.uv).a * _Color.a * _Alpha);
-		OUT.a    *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask , _MainTex , IN.uv).rgb) , _AlphaMaskStrength);
+		OUT.a        = saturate(UNITY_SAMPLE_TEX2D(_MainTex , IN.uv).a * _Color.a * _Alpha);
+		OUT.a       *= lerp(1.0f , MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask , _MainTex , IN.uv).rgb) , _AlphaMaskStrength);
 	#endif
 
-//----カットアウト
-
+//-------------------------------------カットアウト
 	#ifdef CUTOUT
 		clip(OUT.a - _Cutout);
-		OUT.a = 1.0f;
+		if (_AlphaToMask) {
+			OUT.a = saturate((OUT.a - _Cutout) * 10.0f);
+		} else {
+			OUT.a = 1.0f;
+		}
 	#endif
 
 	clip(IN.mask - 0.1f);
 
-//----ガンマ修正
+//-------------------------------------ライティング
+	float3 Lighting  = (float3)1.0f;
+
+	#ifdef PASS_OL_FB
+		if (_OutLineLighthing) Lighting = IN.light;
+	#endif
+	#ifdef PASS_OL_FA
+		if (_OutLineLighthing) {
+			UNITY_LIGHT_ATTENUATION(Atten , IN , IN.wpos);
+			Lighting  = _LightColor0 * _PointLight * Atten * 0.6f;
+		}
+	#endif
+
+	if (_LightLimitter) {
+		float  MaxLight = 1.0f;
+		       MaxLight = max(MaxLight , Lighting.r);
+		       MaxLight = max(MaxLight , Lighting.g);
+		       MaxLight = max(MaxLight , Lighting.b);
+		       MaxLight = min(MaxLight , 1.25f);
+		       Lighting = saturate(Lighting / MaxLight);
+	}
+	if (_MonochromeLit) Lighting = MonoColor(Lighting);
+	float  LightPower   = saturate(MonoColor(Lighting));
+
+	OUT.rgb         *= Lighting;
+
+//-------------------------------------ガンマ修正
 	if (_EnableGammaFix) {
-		_GammaR = max(_GammaR , 0.00001f);
-		_GammaG = max(_GammaG , 0.00001f);
-		_GammaB = max(_GammaB , 0.00001f);
+		_GammaR  = max(_GammaR , 0.00001f);
+		_GammaG  = max(_GammaG , 0.00001f);
+		_GammaB  = max(_GammaB , 0.00001f);
 
-	       OUT.r        = pow(OUT.r , 1.0f / (1.0f / _GammaR));
-	       OUT.g        = pow(OUT.g , 1.0f / (1.0f / _GammaG));
-	       OUT.b        = pow(OUT.b , 1.0f / (1.0f / _GammaB));
+		OUT.r    = pow(OUT.r , 1.0f / (1.0f / _GammaR));
+		OUT.g    = pow(OUT.g , 1.0f / (1.0f / _GammaG));
+		OUT.b    = pow(OUT.b , 1.0f / (1.0f / _GammaB));
 	}
 
-//----明度修正
+//-------------------------------------明度修正
 	if (_EnableBlightFix) {
-	       OUT.rgb     *= _BlightOutput;
-	       OUT.rgb      = max(OUT.rgb + _BlightOffset , 0.0f);
+		OUT.rgb *= _BlightOutput;
+		OUT.rgb  = max(OUT.rgb + _BlightOffset , 0.0f);
 	}
 
-//----出力リミッタ
+//-------------------------------------出力リミッタ
 	if (_LimitterEnable) {
-	       OUT.rgb      = min(OUT.rgb , _LimitterMax);
+		OUT.rgb  = min(OUT.rgb , _LimitterMax);
 	}
 
-//----SrcAlphaの代用
-	#ifdef TRANSPARENT
-		#ifdef PASS_OL_FA
-			if (_BlendOperation == 4) OUT.rgb *= OUT.a;
+//-------------------------------------BlendOpの代用
+	#ifdef PASS_OL_FA
+		#ifndef TRANSPARENT
+	       OUT.a    = LightPower;
+		#endif
+		#ifdef TRANSPARENT
+	       OUT.rgb *= OUT.a;
+	       OUT.a    = LightPower * pow(OUT.a , 1.8f);
 		#endif
 	#endif
 
-//----フォグ
+//-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
 
 

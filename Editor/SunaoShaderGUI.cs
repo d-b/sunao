@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //              Sunao Shader GUI
-//                      Copyright (c) 2021 揚茄子研究所
+//                      Copyright (c) 2022 揚茄子研究所
 //
 // This software is released under the MIT License.
 // see LICENSE or http://sunao.orz.hm/agenasulab/ss/LICENSE
@@ -16,6 +16,10 @@ namespace SunaoShader {
 
 	public class GUI : ShaderGUI {
 
+		int     Version_H         = 1;
+		int     Version_M         = 5;
+		int     Version_L         = 3;
+
 		MaterialProperty MainTex;
 		MaterialProperty Color;
 		MaterialProperty Alpha;
@@ -23,6 +27,12 @@ namespace SunaoShader {
 		MaterialProperty BumpMap;
 		MaterialProperty OcclusionMap;
 		MaterialProperty AlphaMask;
+		MaterialProperty SubTex;
+		MaterialProperty SubColor;
+		MaterialProperty SubTexEnable;
+		MaterialProperty SubTexBlend;
+		MaterialProperty SubTexBlendMode;
+		MaterialProperty SubTexCulling;
 		MaterialProperty Bright;
 		MaterialProperty BumpScale;
 		MaterialProperty OcclusionStrength;
@@ -154,13 +164,12 @@ namespace SunaoShader {
 
 		MaterialProperty Culling;
 		MaterialProperty EnableZWrite;
-		MaterialProperty IgnoreProjector;
+		MaterialProperty AlphaToMask;
 		MaterialProperty DirectionalLight;
 		MaterialProperty SHLight;
 		MaterialProperty PointLight;
 		MaterialProperty LightLimitter;
 		MaterialProperty MinimumLight;
-		MaterialProperty BlendOperation;
 		MaterialProperty EnableGammaFix;
 		MaterialProperty GammaR;
 		MaterialProperty GammaG;
@@ -183,10 +192,6 @@ namespace SunaoShader {
 		bool    OtherFoldout      = false;
 
 		bool    OnceRun           = true;
-
-		int     Version_H         = 1;
-		int     Version_M         = 4;
-		int     Version_L         = 4;
 
 		int     VersionC          = 0;
 		int     VersionM          = 0;
@@ -244,6 +249,12 @@ namespace SunaoShader {
 			BumpMap           = FindProperty("_BumpMap"           , Prop , false);
 			OcclusionMap      = FindProperty("_OcclusionMap"      , Prop , false);
 			AlphaMask         = FindProperty("_AlphaMask"         , Prop , false);
+			SubTex            = FindProperty("_SubTex"            , Prop , false);
+			SubColor          = FindProperty("_SubColor"          , Prop , false);
+			SubTexEnable      = FindProperty("_SubTexEnable"      , Prop , false);
+			SubTexBlend       = FindProperty("_SubTexBlend"       , Prop , false);
+			SubTexBlendMode   = FindProperty("_SubTexBlendMode"   , Prop , false);
+			SubTexCulling     = FindProperty("_SubTexCulling"     , Prop , false);
 			Bright            = FindProperty("_Bright"            , Prop , false);
 			BumpScale         = FindProperty("_BumpScale"         , Prop , false);
 			OcclusionStrength = FindProperty("_OcclusionStrength" , Prop , false);
@@ -376,13 +387,12 @@ namespace SunaoShader {
 
 			Culling           = FindProperty("_Culling"           , Prop , false);
 			EnableZWrite      = FindProperty("_EnableZWrite"      , Prop , false);
-			IgnoreProjector   = FindProperty("_IgnoreProjector"   , Prop , false);
+			AlphaToMask       = FindProperty("_AlphaToMask"       , Prop , false);
 			DirectionalLight  = FindProperty("_DirectionalLight"  , Prop , false);
 			SHLight           = FindProperty("_SHLight"           , Prop , false);
 			PointLight        = FindProperty("_PointLight"        , Prop , false);
 			LightLimitter     = FindProperty("_LightLimitter"     , Prop , false);
 			MinimumLight      = FindProperty("_MinimumLight"      , Prop , false);
-			BlendOperation    = FindProperty("_BlendOperation"    , Prop , false);
 			EnableGammaFix    = FindProperty("_EnableGammaFix"    , Prop , false);
 			GammaR            = FindProperty("_GammaR"            , Prop , false);
 			GammaG            = FindProperty("_GammaG"            , Prop , false);
@@ -478,6 +488,18 @@ namespace SunaoShader {
 
 					if (MainFoldout) {
 						mat.SetInt("_MainFO" , 1);
+
+						using (new EditorGUILayout.VerticalScope("box")) {
+							ME.TexturePropertySingleLine (new GUIContent("Sub Texture") , SubTex , SubColor);
+							if (SubTex.textureValue != null) {
+								mat.SetInt("_SubTexEnable" , 1);
+								ME.ShaderProperty(SubTexBlend     , new GUIContent("Sub Tex Blending"  ));
+								ME.ShaderProperty(SubTexBlendMode , new GUIContent("Sub Tex Blend Mode"));
+								ME.ShaderProperty(SubTexCulling   , new GUIContent("Sub Tex Assign"    ));
+							} else {
+								mat.SetInt("_SubTexEnable" , 0);
+							}
+						}
 
 						ME.ShaderProperty(Bright , new GUIContent("Brightness"));
 
@@ -948,14 +970,9 @@ namespace SunaoShader {
 
 						ME.ShaderProperty(Culling         , new GUIContent("Culling Mode"    ));
 						ME.ShaderProperty(EnableZWrite    , new GUIContent("Enable Z Write"  ));
-						/*  うまく動かんっぽい。Unityの仕様？
-						ME.ShaderProperty(IgnoreProjector , new GUIContent("Ignore Projector"));
-						if (IgnoreProjector.floatValue >= 0.5f) {
-							mat.SetOverrideTag("IgnoreProjector", "True" );
-						} else {
-							mat.SetOverrideTag("IgnoreProjector", "False");
+						if (Shader_Cutout || Shader_Stencil) {
+							ME.ShaderProperty(AlphaToMask  , new GUIContent("Enable Cutout MSAA"));
 						}
-						*/
 					}
 
 					using (new EditorGUILayout.VerticalScope("box")) {
@@ -965,10 +982,8 @@ namespace SunaoShader {
 						ME.ShaderProperty(DirectionalLight , new GUIContent("Directional Light Intensity"));
 						ME.ShaderProperty(SHLight          , new GUIContent("SH Light Intensity"         ));
 						ME.ShaderProperty(PointLight       , new GUIContent("Point/Spot Light Intensity" ));
-						ME.ShaderProperty(LightLimitter    , new GUIContent("Light Intensity Limitter"   ));
+						ME.ShaderProperty(LightLimitter    , new GUIContent("Light Intensity Limiter"    ));
 						ME.ShaderProperty(MinimumLight     , new GUIContent("Minimum Light Limit"        ));
-						ME.ShaderProperty(BlendOperation   , new GUIContent("ForwardAdd Blend Mode"      ));
-
 					}
 
 					using (new EditorGUILayout.VerticalScope("box")) {
@@ -981,7 +996,6 @@ namespace SunaoShader {
 							ME.ShaderProperty(GammaG , new GUIContent("Gamma G"));
 							ME.ShaderProperty(GammaB , new GUIContent("Gamma B"));
 						}
-
 					}
 
 					using (new EditorGUILayout.VerticalScope("box")) {
@@ -998,11 +1012,11 @@ namespace SunaoShader {
 
 					using (new EditorGUILayout.VerticalScope("box")) {
 
-						GUILayout.Label("Output Limitter" , EditorStyles.boldLabel);
+						GUILayout.Label("Output Limiter" , EditorStyles.boldLabel);
 
-						ME.ShaderProperty(LimitterEnable    , new GUIContent("Enable Output Limitter"));
+						ME.ShaderProperty(LimitterEnable    , new GUIContent("Enable Output Limiter"));
 						if (LimitterEnable.floatValue >= 0.5f) {
-							ME.ShaderProperty(LimitterMax    , new GUIContent("Limitter Max"));
+							ME.ShaderProperty(LimitterMax    , new GUIContent("Limiter Max"));
 						}
 					}
 
