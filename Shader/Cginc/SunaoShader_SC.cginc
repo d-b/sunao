@@ -7,6 +7,7 @@
 //-------------------------------------Include
 
 	#include "UnityCG.cginc"
+	#include "UnityShaderVariables.cginc"
 	#include "SunaoShader_Function.cginc"
 
 //-------------------------------------変数宣言
@@ -30,12 +31,48 @@
 	uniform bool      _OutLineFixScale;
 	uniform uint      _Culling;
 
+//----Vertex Color Alpha
+	uniform float     _VertexColorThreshold;
+	uniform float3    _VertexColor01;
+	uniform float     _VertexAlpha01;
+	uniform float3    _VertexColor02;
+	uniform float     _VertexAlpha02;
+	uniform float3    _VertexColor03;
+	uniform float     _VertexAlpha03;
+	uniform float3    _VertexColor04;
+	uniform float     _VertexAlpha04;
+	uniform float3    _VertexColor05;
+	uniform float     _VertexAlpha05;
+	uniform float3    _VertexColor06;
+	uniform float     _VertexAlpha06;
+	uniform float3    _VertexColor07;
+	uniform float     _VertexAlpha07;
+	uniform float3    _VertexColor08;
+	uniform float     _VertexAlpha08;
+	uniform float3    _VertexColor09;
+	uniform float     _VertexAlpha09;
+	uniform float3    _VertexColor10;
+	uniform float     _VertexAlpha10;
+	uniform float3    _VertexColor11;
+	uniform float     _VertexAlpha11;
+	uniform float3    _VertexColor12;
+	uniform float     _VertexAlpha12;
+	uniform float3    _VertexColor13;
+	uniform float     _VertexAlpha13;
+	uniform float3    _VertexColor14;
+	uniform float     _VertexAlpha14;
+	uniform float3    _VertexColor15;
+	uniform float     _VertexAlpha15;
+	uniform float3    _VertexColor16;
+	uniform float     _VertexAlpha16;
+
 //-------------------------------------頂点シェーダ入力構造体
 
 struct VIN {
 	float4 vertex      : POSITION;
 	float2 uv          : TEXCOORD0;
 	float3 normal      : NORMAL;
+	float3 color       : COLOR;
 
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -46,6 +83,7 @@ struct VOUT {
 	float2 uv          : TEXCOORD0;
 	float4 uvanm       : TEXCOORD1;
 	float  vadd        : VERTEXADD;
+	float  alpha       : TEXCOORD3;	
 
 	V2F_SHADOW_CASTER;
 
@@ -100,6 +138,23 @@ VOUT vert (VIN v) {
 		       o.vadd        = saturate(OutlineScale * 10000.0f);
 	}
 
+//-------------------------------------Vertex Alpha
+	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor04, _VertexAlpha04, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor05, _VertexAlpha05, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor06, _VertexAlpha06, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor07, _VertexAlpha07, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor08, _VertexAlpha08, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor09, _VertexAlpha09, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor10, _VertexAlpha10, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor11, _VertexAlpha11, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor12, _VertexAlpha12, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor13, _VertexAlpha13, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor14, _VertexAlpha14, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor15, _VertexAlpha15, _VertexColorThreshold) *
+						VertexAlpha(v.color, _VertexColor16, _VertexAlpha16, _VertexColorThreshold);
 
 	TRANSFER_SHADOW_CASTER(o)
 
@@ -125,6 +180,7 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 	           OUT.a        = saturate(tex2D(_MainTex , MainUV).a * _Color.a * _Alpha);
 	           OUT.a       *= lerp(1.0f , MonoColor(tex2D(_AlphaMask  , SubUV).rgb) , _AlphaMaskStrength);
+	           OUT.a       *= IN.alpha;
 	#endif
 
 	float  Alpha  = OUT.a;
@@ -144,6 +200,6 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 
 	SHADOW_CASTER_FRAGMENT(IN)
-	
+
 	return OUT;
 }

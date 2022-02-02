@@ -54,7 +54,7 @@ VOUT vert (VIN v) {
 	o.color   = (float3)1.0f;
 	if (_VertexColor) o.color = v.color;
 
-//-------------------------------------vertex alpha
+//-------------------------------------Vertex Alpha
 	o.alpha = VertexAlpha(v.color, _VertexColor01, _VertexAlpha01, _VertexColorThreshold) *
 						VertexAlpha(v.color, _VertexColor02, _VertexAlpha02, _VertexColorThreshold) *
 						VertexAlpha(v.color, _VertexColor03, _VertexAlpha03, _VertexColorThreshold) *
