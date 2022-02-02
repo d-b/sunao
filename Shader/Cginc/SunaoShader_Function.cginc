@@ -324,3 +324,12 @@ float CalcDither(float2 screenPos) {
 bool IsInMirror() {
 	return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
 }
+
+//-------------------------------------Apply rotation to UV
+float2 RotateUV(float2 uv, float rotation) {
+	float mid = 0.5;
+	return float2(
+		cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+		cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+	);
+}

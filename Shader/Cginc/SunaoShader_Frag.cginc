@@ -22,6 +22,7 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	       MainUV      += float2(_UVScrollX , _UVScrollY) * _Time.y;
 	float2 SubUV        = IN.uv;
 	if (_UVAnimOtherTex) SubUV = MainUV;
+	float2 NormalUV     = SubUV;
 
 	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 	       OUT.a        = saturate(UNITY_SAMPLE_TEX2D(_MainTex , MainUV).a * _Color.a * _Alpha);
@@ -31,8 +32,124 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	float3 Color        = UNITY_SAMPLE_TEX2D(_MainTex , MainUV).rgb;
 	       Color        = Color * _Color.rgb * _Bright * IN.color;
 
+	float4 ALColor      = float4(0.0f , 0.0f , 0.0f , 1.0f);
+
+//----Tangent map application
+	#if WHEN_OPT(PROP_TAN_ENABLE == 1)
+	OPT_IF(_TanEnable)
+		if (_TanMode == 0) {
+			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap, _MainTex, TRANSFORM_TEX(SubUV, _TanMap));
+			float3x3 TBN = transpose(float3x3(IN.tangent.xyz, cross(IN.tangent.xyz, IN.normal), IN.normal));
+			IN.tangent = float4(mul(TBN, float3(TanMap.rg, 0)), IN.tangent.w);
+			IN.bitan = cross(UnityObjectToWorldNormal(IN.normal) , UnityObjectToWorldDir(IN.tangent.xyz)) * IN.tangent.w * unity_WorldTransformParams.w;
+			NormalUV = RotateUV(NormalUV, TanMap.b * 2.0 * UNITY_PI);
+		}
+		else if (_TanMode == 1) {
+			float3 TanMap = UNITY_SAMPLE_TEX2D_SAMPLER(_TanMap, _MainTex, TRANSFORM_TEX(SubUV, _TanMap));
+			float4 rotation = float4(IN.normal * sin(TanMap.r * UNITY_PI), cos(TanMap.r * UNITY_PI));
+			IN.tangent = float4(QuatRotate(rotation, IN.tangent.xyz), IN.tangent.w);
+			IN.bitan = cross(UnityObjectToWorldNormal(IN.normal) , UnityObjectToWorldDir(IN.tangent.xyz)) * IN.tangent.w * unity_WorldTransformParams.w;
+			NormalUV = RotateUV(NormalUV, TanMap.g * 2.0 * UNITY_PI);
+		}
+	OPT_FI
+	#endif
+
+//----HSV adjustments
+	#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+	float3 hsvadj_masked = float3(0.0, 1.0, 1.0);
+	float3 hsvadj_unmasked = float3(_HSVShiftHue, _HSVShiftSat, _HSVShiftVal);
+	OPT_IF(_HSVShiftEnable)
+		float4 hsvshift_mask = UNITY_SAMPLE_TEX2D(_HSVShiftMask, TRANSFORM_TEX(SubUV, _HSVShiftMask));
+		hsvadj_masked.x = lerp(0.0f, _HSVShiftHue, hsvshift_mask.r);
+		hsvadj_masked.y = lerp(1.0f, _HSVShiftSat, hsvshift_mask.g);
+		hsvadj_masked.z = lerp(1.0f, _HSVShiftVal, hsvshift_mask.b);
+
+		if (_HSVShiftBaseMode == 1) Color.rgb = HSVAdjust(Color.rgb, hsvadj_masked);
+		if (_HSVShiftBaseMode == 2) Color.rgb = HSVAdjust(Color.rgb, hsvadj_unmasked);
+		if (_HSVShiftShadeMode == 1) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_masked);
+		if (_HSVShiftShadeMode == 2) _CustomShadeColor.rgb = HSVAdjust(_CustomShadeColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftSpecularMode == 1) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_masked);
+		if (_HSVShiftSpecularMode == 2) _ToonSpecColor.rgb = HSVAdjust(_ToonSpecColor.rgb, hsvadj_unmasked);
+		if (_HSVShiftRimMode == 1) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_masked);
+		if (_HSVShiftRimMode == 2) _RimLitColor.rgb = HSVAdjust(_RimLitColor.rgb, hsvadj_unmasked);
+	OPT_FI
+	#endif
+
+//----AudioLink
+	#if WHEN_OPT(PROP_AL_ENABLE == 1)
+	OPT_IF(_ALEnable)
+		if (AudioLinkIsAvailable()) {
+			#if WHEN_OPT(PROP_AL_CHANNEL < 4)
+			OPT_IF(_ALChannel < 4)
+				float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 Texture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+
+				float Mask = 0.0;
+				switch (_ALChannel) {
+					case 0: Mask = ALMask.r; break;
+					case 1: Mask = ALMask.g; break;
+					case 2: Mask = ALMask.b; break;
+					case 3: Mask = ALMask.a; break;
+				}
+
+				float Audio = AudioLinkData(int2(0, _ALChannel)).x;
+
+				float Bar = smoothstep((1 - Audio), (1 - Audio) + 0.01, Mask);
+				float Alpha = lerp(Bar, Mask, Texture.a);
+
+				ALColor.rgb = Texture.rgb * Alpha * Audio;
+			OPT_FI
+			#endif
+
+			#if WHEN_OPT(PROP_AL_CHANNEL == 4)
+			OPT_IF(_ALChannel == 4)
+				float4 ALMask = UNITY_SAMPLE_TEX2D(_ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 BassTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALBassTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 LowMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALLowMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 HighMidsTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALHighMidsTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+				float4 TrebleTexture = UNITY_SAMPLE_TEX2D_SAMPLER(_ALTrebleTexture, _ALMask, TRANSFORM_TEX(SubUV, _ALMask));
+
+				float AudioBass = AudioLinkData(ALPASS_AUDIOBASS).x;
+				float AudioLowMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
+				float AudioHighMids = AudioLinkData(ALPASS_AUDIOHIGHMIDS).x;
+				float AudioTreble = AudioLinkData(ALPASS_AUDIOTREBLE).x;
+
+				float BassBar = smoothstep((1 - AudioBass), (1 - AudioBass) + 0.01, ALMask.r);
+				float LowMidsBar = smoothstep((1 - AudioLowMids), (1 - AudioLowMids) + 0.01, ALMask.g);
+				float HighMidsBar = smoothstep((1 - AudioHighMids), (1 - AudioHighMids) + 0.01, ALMask.b);
+				float TrebleBar = smoothstep((1 - AudioTreble), (1 - AudioTreble) + 0.01, ALMask.a);
+
+				float BassAlpha = lerp(BassBar, ALMask.r, BassTexture.a);
+				float LowMidsAlpha = lerp(LowMidsBar, ALMask.g, LowMidsTexture.a);
+				float HighMidsAlpha = lerp(HighMidsBar, ALMask.b, HighMidsTexture.a);
+				float TrebleAlpha = lerp(TrebleBar, ALMask.a, TrebleTexture.a);
+
+				ALColor.rgb = BassTexture.rgb * BassAlpha * AudioBass
+										+ LowMidsTexture.rgb * LowMidsAlpha * AudioLowMids
+										+ HighMidsTexture.rgb * HighMidsAlpha * AudioHighMids
+										+ TrebleTexture.rgb * TrebleAlpha * AudioTreble;
+			OPT_FI
+			#endif
+
+			#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+			OPT_IF(_HSVShiftEnable)
+				if (_HSVShiftAudioLinkMode == 1) ALColor.rgb = HSVAdjust(ALColor.rgb, hsvadj_masked);
+				if (_HSVShiftAudioLinkMode == 2) ALColor.rgb = HSVAdjust(ALColor.rgb, hsvadj_unmasked);
+			OPT_FI
+			#endif
+
+			#if WHEN_OPT(PROP_AL_ALBEDO_ENABLE == 1)
+			OPT_IF(_ALAlbedoEnable)
+				Color.rgb = saturate(Color.rgb + ALColor.rgb * _ALAlbedoOpacity);
+			OPT_FI
+			#endif
+		}
+	OPT_FI
+	#endif
+
 //-------------------------------------サブテクスチャ
-	if (_SubTexEnable) {
+	#if WHEN_OPT(PROP_SUB_TEX_ENABLE == 1)
+	OPT_IF(_SubTexEnable)
 		float4 SubTex    = UNITY_SAMPLE_TEX2D_SAMPLER(_SubTex , _MainTex , MainUV);
 		       SubTex   *= _SubColor;
 		       SubTex.a *= _SubTexBlend;
@@ -40,16 +157,24 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		if (_SubTexBlendMode == 2) SubTex.rgb  = saturate(Color.rgb + SubTex.rgb);
 		if (_SubTexBlendMode == 3) SubTex.rgb  = saturate(Color.rgb - SubTex.rgb);
 
+		#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+		OPT_IF(_HSVShiftEnable)
+			if (_HSVShiftSubTexMode == 1) SubTex.rgb = HSVAdjust(SubTex.rgb, hsvadj_masked);
+			if (_HSVShiftSubTexMode == 2) SubTex.rgb = HSVAdjust(SubTex.rgb, hsvadj_unmasked);
+		OPT_FI
+		#endif
+
 		if (_SubTexCulling   == 1) SubTex.a   *=        Facing;
 		if (_SubTexCulling   == 2) SubTex.a   *= 1.0f - Facing;
 		       Color.rgb = lerp(Color.rgb , SubTex.rgb , SubTex.a);
 		       OUT.a     = saturate(OUT.a + SubTex.a);
-	}
+	OPT_FI
+	#endif
 
 //----デカール
 	float4 DecalColor   = float4(0.0f , 0.0f , 0.0f , 1.0f);
-
-	if (_DecalEnable) {
+	#if WHEN_OPT(PROP_DECAL_ENABLE == 1)
+	OPT_IF(_DecalEnable)
 
 		float2   DecalUV       = (float2)0.0f;
 		float2x2 DecalRot      = float2x2(IN.decal.z, -IN.decal.w, IN.decal.w, IN.decal.z);
@@ -82,6 +207,13 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 		if (_DecalMirror == 2) DecalColor.a = DecalColor.a * (1.0f - saturate(IN.tangent.w));
 		if (_DecalMirror == 3) DecalColor.a = DecalColor.a *         saturate(IN.tangent.w);
+
+		#if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+		OPT_IF(_HSVShiftEnable)
+			if (_HSVShiftDecalMode == 1) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_masked);
+			if (_HSVShiftDecalMode == 2) DecalColor.rgb = HSVAdjust(DecalColor.rgb, hsvadj_unmasked);
+		OPT_FI
+		#endif
 
 		#ifdef TRANSPARENT
 			if ((_DecalMode == 0) | (_DecalMode == 5)) {
@@ -118,13 +250,22 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			DecalColor.rgb = DecalColor.rgb * DecalColor.a;
 		}
 
-	}
+	OPT_FI
+	#endif
 
 //----オクルージョン
 	if (_OcclusionMode == 1) Color *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);
 
 //----Apply vertex alpha
 	OUT.a *= IN.alpha;
+
+// Mirror control
+	#if WHEN_OPT(PROP_MIRROR_CONTROL_ENABLE == 1)
+	OPT_IF(_MirrorControlEnable)
+		if (IsInMirror()) OUT.a *= _MirrorCopyAlpha;
+		else OUT.a *= _RealCopyAlpha;
+	OPT_FI
+	#endif
 
 //-------------------------------------カットアウト
 	#ifdef CUTOUT
@@ -155,6 +296,9 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 	       Normal       = lerp(-Normal , Normal , Facing);
 
+//-------------------------------------Bitangent
+	float3 Bitangent		= cross(Normal, tanW) * IN.tangent.w * unity_WorldTransformParams.w;
+
 //-------------------------------------シェーディング
 	float3 ShadeMask    = UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMask , _MainTex , SubUV).rgb * _Shade;
 	float3 LightBoost   = 1.0f + (UNITY_SAMPLE_TEX2D_SAMPLER(_LightMask , _MainTex , SubUV).rgb * (_LightBoost - 1.0f));
@@ -172,13 +316,15 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	#endif
 
 //----トゥーンシェーディング
-	if (_ToonEnable) {
+	#if WHEN_OPT(PROP_TOON_ENABLE == 1)
+	OPT_IF(_ToonEnable)
 		Diffuse   = ToonCalc(Diffuse , IN.toon);
 		#ifdef PASS_FB
 			SHDiffuse = ToonCalc(SHDiffuse , IN.toon);
 			VLDiffuse = ToonCalc(VLDiffuse , IN.toon);
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //----影の色
 	float3 ShadeColor   = saturate(Color * 3.0f - 1.5f) * _ShadeColor;
@@ -204,7 +350,8 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	#endif
 
 //----モノクロライティング
-	if (_MonochromeLit) {
+	#if WHEN_OPT(PROP_MONOCHROME_LIT == 1)
+	OPT_IF(_MonochromeLit)
 		LightBase  = MonoColor(LightBase);
 		#ifdef PASS_FB
 			VLight0     = MonoColor(VLight0);
@@ -213,7 +360,8 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			VLight3     = MonoColor(VLight3);
 			VLightBase  = MonoColor(VLightBase);
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //----ライト反映
 	float3 Lighting     = LightBase;
@@ -258,10 +406,24 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 //-------------------------------------エミッション
 	float3 Emission     = (float3)0.0f;
 
-	if (_EmissionEnable) {
+	#if WHEN_OPT(PROP_EMISSION_ENABLE == 1)
+	OPT_IF(_EmissionEnable)
 		       Emission    = _Emission * _EmissionColor.rgb;
 		       Emission   *= tex2D(_EmissionMap  , IN.euv.xy).rgb * tex2D(_EmissionMap  , IN.euv.xy).a * IN.eprm.x;
 		       Emission   *= tex2D(_EmissionMap2 , IN.euv.zw).rgb * tex2D(_EmissionMap2 , IN.euv.zw).a;
+
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
+			if (_HSVShiftEmissionMode == 1) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_masked);
+			if (_HSVShiftEmissionMode == 2) Emission.rgb = HSVAdjust(Emission.rgb, hsvadj_unmasked);
+		OPT_FI
+		#endif
+
+		#if WHEN_OPT(PROP_AL_ENABLE == 1 && PROP_AL_EMISSION_ENABLE == 1)
+		OPT_IF(_ALEnable && _ALEmissionEnable)
+			Emission.rgb += _Emission * ALColor.rgb * _ALEmissionIntensity;
+		OPT_FI
+		#endif
 
 		if (_EmissionLighting) {
 			#ifdef PASS_FB
@@ -274,18 +436,28 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		#ifdef PASS_FA
 			Emission *= LightPower;
 		#endif
-	}
+
+	OPT_FI
+	#endif
 
 //-------------------------------------視差エミッション
 	float3 Parallax     = (float3)0.0f;
 
-	if (_ParallaxEnable) {
+	#if WHEN_OPT(PROP_PARALLAX_ENABLE == 1)
+	OPT_IF(_ParallaxEnable)
 		float  Height      = (1.0f - MonoColor(UNITY_SAMPLE_TEX2D_SAMPLER(_ParallaxDepthMap , _MainTex , IN.pduv).rgb)) * _ParallaxDepth;
 		float2 ParallaxUV  = IN.peuv.xy;
 		       ParallaxUV -= normalize(IN.pview).xz * Height * _ParallaxMap_ST.xy;
 		       Parallax    = _ParallaxEmission * _ParallaxColor.rgb;
 		       Parallax   *= tex2D(_ParallaxMap  , ParallaxUV).rgb * tex2D(_ParallaxMap  , ParallaxUV).a * IN.peprm.x;
 		       Parallax   *= tex2D(_ParallaxMap2 , IN.peuv.zw).rgb * tex2D(_ParallaxMap2 , IN.peuv.zw).a;
+
+    #if WHEN_OPT(PROP_HSV_SHIFT_ENABLE == 1)
+    OPT_IF(_HSVShiftEnable)
+			if (_HSVShiftParallaxMode == 1) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_masked);
+			if (_HSVShiftParallaxMode == 2) Parallax.rgb = HSVAdjust(Parallax.rgb, hsvadj_unmasked);
+		OPT_FI
+		#endif
 
 		if (_ParallaxLighting) {
 			#ifdef PASS_FB
@@ -298,10 +470,14 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		#ifdef PASS_FA
 			Parallax *= LightPower;
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //-------------------------------------リフレクション
 	float  Smoothness   = 0.0f;
+	float3 ToonSpec      = (float3)0.0f;
+	float3 ToonSpecMask  = (float3)0.0f;
+	float3 ToonSpecColor = (float3)0.0f;
 	float3 SpecularMask = (float3)0.0f;
 	float3 ReflectMask  = (float3)0.0f;
 	float  MatCapSmooth = 0.0f;
@@ -310,7 +486,59 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	float3 Reflection   = (float3)0.0f;
 	float3 MatCapture   = (float3)0.0f;
 
-	if (_ReflectionEnable) {
+	#if WHEN_OPT(PROP_TOON_SPEC_ENABLE == 1)
+	OPT_IF(_ToonSpecEnable)
+		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
+		ToonSpecColor = lerp(_ToonSpecColor, Color, _ToonSpecMetallic);
+
+		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 0)
+		OPT_IF(_ToonSpecMode == 0)
+			float3 RLToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, IN.ldir, View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * LightBase;
+
+			#ifdef PASS_FB
+				float3 SHToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, IN.shdir, View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * IN.shmax;
+				float3 VL0ToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight0;
+				float3 VL1ToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight1;
+				float3 VL2ToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight2;
+				float3 VL3ToonSpec = ToonAnisoSpecularCalc(Normal, tanW, Bitangent, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), View, _ToonSpecRoughnessT, _ToonSpecRoughnessB) * VLight3;
+
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
+			#endif
+			#ifdef PASS_FA
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * ToonSpecColor;
+			#endif
+		OPT_FI
+		#endif
+
+		#if WHEN_OPT(PROP_TOON_SPEC_MODE == 1)
+		OPT_IF(_ToonSpecMode == 1)
+			float3 RLToonSpec = ToonViewOffSpecularCalc(Normal, IN.ldir, View, _ToonSpecSharpness, _ToonSpecOffset) * LightBase;
+
+			#ifdef PASS_FB
+				float3 SHToonSpec = ToonViewOffSpecularCalc(Normal, IN.shdir, View, _ToonSpecSharpness, _ToonSpecOffset) * IN.shmax;
+				float3 VL0ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.x, IN.vldirY.x, IN.vldirZ.x), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight0;
+				float3 VL1ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.y, IN.vldirY.y, IN.vldirZ.y), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight1;
+				float3 VL2ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.z, IN.vldirY.z, IN.vldirZ.z), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight2;
+				float3 VL3ToonSpec = ToonViewOffSpecularCalc(Normal, float3(IN.vldirX.w, IN.vldirY.w, IN.vldirZ.w), View, _ToonSpecSharpness, _ToonSpecOffset) * VLight3;
+
+				ToonSpec = (RLToonSpec + SHToonSpec + VL0ToonSpec + VL1ToonSpec + VL2ToonSpec + VL3ToonSpec) * _ToonSpecIntensity * ToonSpecColor;
+			#endif
+			#ifdef PASS_FA
+				ToonSpec = RLToonSpec * _ToonSpecIntensity * ToonSpecColor;
+			#endif
+		OPT_FI
+		#endif
+	OPT_FI
+	#endif
+
+	#if WHEN_OPT(PROP_TOON_SPEC_ENABLE == 1)
+	OPT_IF(_ToonSpecEnable)
+		ToonSpecMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonSpecMask, _MainTex, TRANSFORM_TEX(SubUV, _ToonSpecMask));
+	OPT_FI
+	#endif
+
+	#if WHEN_OPT(PROP_REFLECTION_ENABLE == 1)
+	OPT_IF(_ReflectionEnable)
 //----スペキュラ反射
 		       Smoothness   = tex2D(_MetallicGlossMap , SubUV).a * _GlossMapScale;
 		       SpecularMask = tex2D(_MetallicGlossMap , SubUV).rgb;
@@ -371,11 +599,14 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		if (_SpecularTexColor ) Specular   *= Color;
 		if (_MetallicTexColor ) Reflection *= Color;
 		if (_MatCapTexColor   ) MatCapture *= Color;
-	}
+
+	OPT_FI
+	#endif
 
 //-------------------------------------リムライティング
 	float3 RimLight     = (float3)0.0f;
-	if (_RimLitEnable) {
+	#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
+	OPT_IF(_RimLitEnable)
 		       RimLight  = RimLightCalc(Normal , View , _RimLit , _RimLitGradient);
 		       RimLight *= _RimLitColor.rgb * _RimLitColor.a * UNITY_SAMPLE_TEX2D_SAMPLER(_RimLitMask , _MainTex , SubUV).rgb;
 		if (_RimLitTexColor ) RimLight *= Color;
@@ -385,21 +616,25 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		#ifdef PASS_FA
 			RimLight *= Lighting;
 		#endif
-	}
+	OPT_FI
+	#endif
 
 //-------------------------------------最終カラー計算
 	       OUT.rgb      = Color * Lighting;
 	       OUT.rgb      = lerp(OUT.rgb , Color , _Unlit);
 	       OUT.rgb      = lerp(OUT.rgb , Reflection , _Metallic * ReflectMask);
+	       OUT.rgb     += ToonSpec * ToonSpecMask.r;
 	       OUT.rgb     += Specular;
 	       OUT.rgb     += MatCapture;
 
 //----リムライティング混合
-	if (_RimLitEnable) {
+	#if WHEN_OPT(PROP_RIM_LIT_ENABLE == 1)
+	OPT_IF(_RimLitEnable)
 		if (_RimLitMode == 0) OUT.rgb += RimLight;
 		if (_RimLitMode == 1) OUT.rgb *= RimLight;
 		if (_RimLitMode == 2) OUT.rgb  = saturate(OUT.rgb - RimLight);
-	}
+	OPT_FI
+	#endif
 
 //----デカールエミッション混合
 	if (_DecalEnable) {
@@ -411,7 +646,8 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	}
 
 //----エミッション混合
-	if (_EmissionEnable) {
+	#if WHEN_OPT(PROP_EMISSION_ENABLE == 1)
+	OPT_IF(_EmissionEnable)
 
 		float EmissionRev   = MonoColor(LightBase);
 		#ifdef PASS_FB
@@ -428,10 +664,12 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			OUT.rgb += (lerp(Color , Reflection , (_Metallic * ReflectMask)) + ((Specular + MatCapture) * SpecularMask)) * Emission;
 		}
 		if (_EmissionMode == 2) OUT.rgb  = saturate(OUT.rgb - Emission);
-	}
+	OPT_FI
+	#endif
 
 //----視差エミッション混合
-	if (_ParallaxEnable) {
+	#if WHEN_OPT(PROP_PARALLAX_ENABLE == 1)
+	OPT_IF(_ParallaxEnable)
 
 		float ParallaxRev   = MonoColor(LightBase);
 		#ifdef PASS_FB
@@ -448,7 +686,8 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			OUT.rgb += (lerp(Color , Reflection , (_Metallic * ReflectMask)) + ((Specular + MatCapture) * SpecularMask)) * Parallax;
 		}
 		if (_ParallaxMode == 2) OUT.rgb  = saturate(OUT.rgb - Parallax);
-	}
+	OPT_FI
+	#endif
 
 //----オクルージョンマスク
 	if (_OcclusionMode == 2) OUT.rgb *= lerp(1.0f , UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap , _MainTex , SubUV).rgb , _OcclusionStrength);

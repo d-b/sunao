@@ -9,6 +9,7 @@
 	#include "UnityCG.cginc"
 	#include "AutoLight.cginc"
 	#include "Lighting.cginc"
+	#include "AudioLink.cginc"
 	#include "SunaoShader_Macro.cginc"
 	#include "SunaoShader_Function.cginc"
 
@@ -63,6 +64,12 @@
 	uniform uint      _DecalAnimX;
 	uniform uint      _DecalAnimY;
 
+//----Tangents
+	uniform bool      _TanEnable;
+	uniform uint      _TanMode;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_TanMap);
+	uniform float4    _TanMap_ST;
+
 //----Shading & Lighting
 	UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadeMask);
 	uniform float     _Shade;
@@ -91,6 +98,7 @@
 	uniform float 		_HSVShiftSat;
 	uniform float 		_HSVShiftVal;
 	uniform uint 		  _HSVShiftBaseMode;
+	uniform uint 		  _HSVShiftSubTexMode;
 	uniform uint 		  _HSVShiftDecalMode;
 	uniform uint 		  _HSVShiftShadeMode;
 	uniform uint 		  _HSVShiftSpecularMode;
@@ -205,6 +213,19 @@
 	uniform bool      _ParallaxLighting;
 	uniform bool      _IgnoreTexAlphaPE;
 	uniform float     _ParallaxInTheDark;
+
+//----Toon Specular
+	uniform bool      _ToonSpecEnable;
+	uniform uint      _ToonSpecMode;
+	UNITY_DECLARE_TEX2D_NOSAMPLER(_ToonSpecMask);
+  uniform float4    _ToonSpecMask_ST;
+	uniform float4    _ToonSpecColor;
+	uniform float     _ToonSpecMetallic;
+	uniform float     _ToonSpecIntensity;
+  uniform float     _ToonSpecRoughnessT;
+	uniform float     _ToonSpecRoughnessB;
+  uniform float     _ToonSpecOffset;
+	uniform float     _ToonSpecSharpness;
 
 //----Reflection
 	uniform bool      _ReflectionEnable;

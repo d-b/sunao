@@ -48,6 +48,10 @@ namespace SunaoShader {
 		MaterialProperty UVAnimY;
 		MaterialProperty UVAnimOtherTex;
 
+		MaterialProperty TanEnable;
+		MaterialProperty TanMode;
+		MaterialProperty TanMap;
+
 		MaterialProperty DecalEnable;
 		MaterialProperty DecalTex;
 		MaterialProperty DecalColor;
@@ -93,6 +97,7 @@ namespace SunaoShader {
 		MaterialProperty HSVShiftSat;
 		MaterialProperty HSVShiftVal;
 		MaterialProperty HSVShiftBaseMode;
+		MaterialProperty HSVShiftSubTexMode;
 		MaterialProperty HSVShiftDecalMode;
 		MaterialProperty HSVShiftShadeMode;
 		MaterialProperty HSVShiftSpecularMode;
@@ -196,6 +201,17 @@ namespace SunaoShader {
 		MaterialProperty ParallaxLighting;
 		MaterialProperty IgnoreTexAlphaPE;
 		MaterialProperty ParallaxInTheDark;
+
+		MaterialProperty ToonSpecEnable;
+		MaterialProperty ToonSpecMode;
+		MaterialProperty ToonSpecMask;
+		MaterialProperty ToonSpecColor;
+		MaterialProperty ToonSpecMetallic;
+		MaterialProperty ToonSpecIntensity;
+		MaterialProperty ToonSpecRoughnessT;
+		MaterialProperty ToonSpecRoughnessB;
+		MaterialProperty ToonSpecOffset;
+		MaterialProperty ToonSpecSharpness;
 
 		MaterialProperty ReflectionEnable;
 		MaterialProperty MetallicGlossMap;
@@ -338,6 +354,10 @@ namespace SunaoShader {
 			UVAnimY           = FindProperty("_UVAnimY"           , Prop , false);
 			UVAnimOtherTex    = FindProperty("_UVAnimOtherTex"    , Prop , false);
 
+			TanEnable         = FindProperty("_TanEnable"         , Prop , false);
+			TanMode           = FindProperty("_TanMode"           , Prop , false);
+			TanMap            = FindProperty("_TanMap"            , Prop , false);
+
 			DecalEnable       = FindProperty("_DecalEnable"       , Prop , false);
 			DecalTex          = FindProperty("_DecalTex"          , Prop , false);
 			DecalColor        = FindProperty("_DecalColor"        , Prop , false);
@@ -385,6 +405,7 @@ namespace SunaoShader {
 			HSVShiftSat       = FindProperty("_HSVShiftSat"       , Prop , false);
 			HSVShiftVal       = FindProperty("_HSVShiftVal"       , Prop , false);
 			HSVShiftBaseMode = FindProperty("_HSVShiftBaseMode" , Prop , false);
+			HSVShiftSubTexMode = FindProperty("_HSVShiftSubTexMode" , Prop , false);
 			HSVShiftDecalMode = FindProperty("_HSVShiftDecalMode" , Prop , false);
 			HSVShiftShadeMode = FindProperty("_HSVShiftShadeMode" , Prop , false);
 			HSVShiftSpecularMode = FindProperty("_HSVShiftSpecularMode" , Prop , false);
@@ -488,6 +509,17 @@ namespace SunaoShader {
 			ParallaxLighting  = FindProperty("_ParallaxLighting"  , Prop , false);
 			IgnoreTexAlphaPE  = FindProperty("_IgnoreTexAlphaPE"  , Prop , false);
 			ParallaxInTheDark = FindProperty("_ParallaxInTheDark" , Prop , false);
+
+			ToonSpecEnable 		= FindProperty("_ToonSpecEnable"    , Prop , false);
+			ToonSpecMode  		= FindProperty("_ToonSpecMode"      , Prop , false);
+			ToonSpecMask      = FindProperty("_ToonSpecMask"      , Prop , false);
+			ToonSpecColor     = FindProperty("_ToonSpecColor"     , Prop , false);
+			ToonSpecMetallic  = FindProperty("_ToonSpecMetallic"  , Prop , false);
+			ToonSpecIntensity = FindProperty("_ToonSpecIntensity" , Prop , false);
+			ToonSpecRoughnessT = FindProperty("_ToonSpecRoughnessT", Prop, false);
+			ToonSpecRoughnessB = FindProperty("_ToonSpecRoughnessB", Prop, false);
+			ToonSpecOffset    = FindProperty("_ToonSpecOffset"    , Prop , false);
+			ToonSpecSharpness = FindProperty("_ToonSpecSharpness" , Prop , false);
 
 			ReflectionEnable  = FindProperty("_ReflectionEnable"  , Prop , false);
 			MetallicGlossMap  = FindProperty("_MetallicGlossMap"  , Prop , false);
@@ -740,6 +772,18 @@ namespace SunaoShader {
 
 				using (new EditorGUILayout.VerticalScope("box")) {
 
+					GUILayout.Label("Tangent Map", EditorStyles.boldLabel);
+
+					ME.ShaderProperty(TanEnable , new GUIContent("Enable Tangent Map"));
+					if (TanEnable.floatValue >= 0.5f) {
+						ME.ShaderProperty(TanMode, new GUIContent("Tangent Map Mode"));
+						ME.TexturePropertySingleLine (new GUIContent("Tangent Map") , TanMap);
+						ME.TextureScaleOffsetProperty(TanMap);
+					}
+				}
+
+				using (new EditorGUILayout.VerticalScope("box")) {
+
 					GUILayout.Label("Decal", EditorStyles.boldLabel);
 
 					ME.ShaderProperty(DecalEnable , new GUIContent("Enable Decal"));
@@ -887,6 +931,7 @@ namespace SunaoShader {
 					ME.ShaderProperty(HSVShiftSat, new GUIContent("Sat Shift"));
 					ME.ShaderProperty(HSVShiftVal, new GUIContent("Val Shift"));
 					ME.ShaderProperty(HSVShiftBaseMode, new GUIContent("Base Mode"));
+					ME.ShaderProperty(HSVShiftSubTexMode, new GUIContent("SubTex Mode"));
 					ME.ShaderProperty(HSVShiftDecalMode, new GUIContent("Decal Mode"));
 					ME.ShaderProperty(HSVShiftShadeMode, new GUIContent("Shade Mode"));
 					ME.ShaderProperty(HSVShiftSpecularMode, new GUIContent("Specular Mode"));
@@ -1092,6 +1137,32 @@ namespace SunaoShader {
 
 					EditorGUI.indentLevel --;
 
+				}
+			}
+
+
+			GUILayout.Label("Toon Specular", EditorStyles.boldLabel);
+
+			using (new EditorGUILayout.VerticalScope("box")) {
+
+				ME.ShaderProperty(ToonSpecEnable , new GUIContent("Enable Toon Specular"));
+
+				if (ToonSpecEnable.floatValue >= 0.5f) {
+					ME.ShaderProperty(ToonSpecMode, new GUIContent("Specular Mode"));
+					ME.TexturePropertySingleLine(new GUIContent("Specular Mask"), ToonSpecMask);
+					ME.TextureScaleOffsetProperty(ToonSpecMask);
+					ME.ShaderProperty(ToonSpecColor, new GUIContent("Specular Color"));
+					ME.ShaderProperty(ToonSpecMetallic, new GUIContent("Metallic"));
+					ME.ShaderProperty(ToonSpecIntensity, new GUIContent("Intensity"));
+
+					if (ToonSpecMode.floatValue >= 0.5f) {
+						ME.ShaderProperty(ToonSpecOffset, new GUIContent("Offset"));
+						ME.ShaderProperty(ToonSpecSharpness, new GUIContent("Sharpness"));
+					}
+					else {
+						ME.ShaderProperty(ToonSpecRoughnessT, new GUIContent("Roughness X"));
+						ME.ShaderProperty(ToonSpecRoughnessB, new GUIContent("Roughness Y"));
+					}
 				}
 			}
 

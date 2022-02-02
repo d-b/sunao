@@ -60,6 +60,12 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		[SToggle]
 		_UVAnimOtherTex    ("Animation Other Maps"      , int) = 1
 
+		[SToggle]
+		_TanEnable         ("Enable Tangent Map"        , int) = 0
+		[Enum(Tangent Map , 0 , Rotation Map , 1)]
+		_TanMode           ("Tangent Map Mode"          , int) = 0
+		_TanMap            ("Tangent Map"               , 2D) = "black" {}
+
 
 		[SToggle]
 		_DecalEnable       ("Enable Decal"              , int) = 0
@@ -127,6 +133,8 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		_HSVShiftVal	  	 ("Val Shift"                 , Range( 0.0,  3.0)) = 1.0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftBaseMode	("Base Mode"   								, int) = 1
+		[Enum(None , 0 , Mask , 1 , All , 2)]
+		_HSVShiftSubTexMode ("SubTex Mode"   						, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
 		_HSVShiftDecalMode ("Decal Mode"   							, int) = 0
 		[Enum(None , 0 , Mask , 1 , All , 2)]
@@ -269,6 +277,21 @@ Shader "Sunao Shader/[Stencil Outline]/Cutout" {
 		[SToggle]
 		_IgnoreTexAlphaPE  ("Ignore Texture Alpha"      , int) = 0
 		_ParallaxInTheDark ("Only in the Dark"          , Range(  0.0,  1.0)) = 0.0
+
+
+		[SToggle]
+		_ToonSpecEnable    ("Enable Toon Specular"      , int) = 0
+		[Enum(GGX, 0 , View Offset , 1)]
+		_ToonSpecMode      ("Specular Mode"             , int) = 0
+		_ToonSpecMask      ("Specular Mask"             , 2D) = "white" {}
+		[HDR]
+		_ToonSpecColor 		 ("Specular Color"            , Color) = (1,1,1)
+		_ToonSpecMetallic  ("Specular Metallic"         , Range( 0.0,  1.0)) = 0.0
+		_ToonSpecIntensity ("Specular Intensity"        , Range( 0.0,  10.0)) = 1.0
+		_ToonSpecRoughnessT ("Specular Roughness X"     , Range( 0,    1.0)) = 0.1
+		_ToonSpecRoughnessB ("Specular Roughness Y"     , Range( 0,    1.0)) = 0.02
+		_ToonSpecOffset    ("Specular Offset"           , Range(-10.0, 10.0)) = -2.0
+		_ToonSpecSharpness ("Specular Sharpness"        , Range( 0.0,  1000.0)) = 500.0
 
 
 		[SToggle]
