@@ -103,6 +103,7 @@ VOUT vert (VIN v) {
 
 	VOUT o;
 
+	UNITY_INITIALIZE_OUTPUT(VOUT , o);
 	UNITY_SETUP_INSTANCE_ID(v);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
@@ -110,8 +111,7 @@ VOUT vert (VIN v) {
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
 	if (_UVAnimOtherTex) {
-		float4 UVScr = float4(0.0f , 0.0f , 1.0f , 1.0f);
-
+		float4 UVScr  = float4(0.0f , 0.0f , 1.0f , 1.0f);
 		float4 UVAnim = float4(0.0f , 0.0f , 1.0f , 1.0f);
 
 		if (_UVAnimation > 0.0f) {
@@ -204,9 +204,6 @@ VOUT vert (VIN v) {
 
 float4 frag (VOUT IN) : COLOR {
 
-	UNITY_SETUP_INSTANCE_ID(IN);
-	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
-
 //-------------------------------------カラー計算
 	float4 OUT       = UNITY_SAMPLE_TEX2D_SAMPLER(_OutLineTexture , _MainTex , IN.uv);
 	       OUT.rgb  *= IN.color;
@@ -279,12 +276,13 @@ float4 frag (VOUT IN) : COLOR {
 
 //-------------------------------------BlendOpの代用
 	#ifdef PASS_OL_FA
+		float OutAlpha = saturate(MonoColor(OUT.rgb));
 		#ifndef TRANSPARENT
-	       OUT.a    = LightPower;
+	       OUT.a    = OutAlpha;
 		#endif
 		#ifdef TRANSPARENT
 	       OUT.rgb *= OUT.a;
-	       OUT.a    = LightPower * pow(OUT.a , 1.8f);
+	       OUT.a    = OutAlpha * pow(OUT.a , 1.8f);
 		#endif
 	#endif
 

@@ -1,5 +1,5 @@
 =----------------------------------------------------------------------------=
-                Sunao Shader    Ver 1.5.3
+                Sunao Shader    Ver 1.5.4
 
                         Copyright (c) 2022 揚茄子研究所
                                 Twitter : @SUNAO_VRC
@@ -46,7 +46,7 @@ Sunao Shaderは以下の機能を持っています。
 改変、再配布、アセットやモデルデータへの同梱（有償、無償問わず）等は
 MIT Licenseの範囲内で自由に行うことができます。
 
-詳しくは同梱のLICENSE及び http://suna.ooo/agenasulab/ss/LICENSE を参照して
+詳しくは同梱のLICENSE及び https://suna.ooo/agenasulab/ss/LICENSE を参照して
 ください。
 (日本語訳: https://ja.osdn.net/projects/opensource/wiki/licenses%2FMIT_license )
 

@@ -6,9 +6,6 @@
 
 float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
-	UNITY_SETUP_INSTANCE_ID(IN);
-	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
-
 //----ワールド座標
 	float3 WorldPos     = mul(unity_ObjectToWorld , IN.vertex).xyz;
 
@@ -164,8 +161,6 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		       VLDiffuse    = max((float4)0.0f , VLDiffuse * IN.vlcorr);
 	#endif
 
-	float  LightPower   = Diffuse;
-
 //----トゥーンシェーディング
 	if (_ToonEnable) {
 		Diffuse   = ToonCalc(Diffuse , IN.toon);
@@ -231,8 +226,6 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	#endif
 	#ifdef PASS_FA
 		       Lighting     = DiffColor * LightBoost;
-		       LightPower   = lerp(1.0f , LightPower , ShadeMask);
-		       LightPower  *= saturate(MonoColor(LightBase) * LightBoost);
 	#endif
 
 	if (_LightLimitter) {
@@ -246,6 +239,11 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		       VLightBase   = min( VLightBase , 2.5f);
 		       SHLightBase  = min(SHLightBase , 2.5f);
 	}
+
+	float  LightPower = 0.0f;
+	#ifdef PASS_FA
+		       LightPower   = saturate(Lighting);
+	#endif
 
 //-------------------------------------エミッション
 	float3 Emission     = (float3)0.0f;
@@ -262,12 +260,10 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			#ifdef PASS_FA
 				Emission   *= saturate(MonoColor(LightBase));
 			#endif
-		} else {
-			#ifdef PASS_FA
-				Emission   *= LightPower;
-			#endif
 		}
-
+		#ifdef PASS_FA
+			Emission *= LightPower;
+		#endif
 	}
 
 //-------------------------------------視差エミッション
@@ -288,11 +284,10 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 			#ifdef PASS_FA
 				Parallax   *= saturate(MonoColor(LightBase));
 			#endif
-		} else {
-			#ifdef PASS_FA
-				Parallax   *= LightPower;
-			#endif
 		}
+		#ifdef PASS_FA
+			Parallax *= LightPower;
+		#endif
 	}
 
 //-------------------------------------リフレクション
@@ -358,15 +353,14 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	       Reflection   = Reflection * SpecularMask * _GlossColor;
 	       MatCapture   = MatCapture * MatCapMask   * _MatCapColor;
 
+		#ifdef PASS_FA
+			Reflection *= LightPower;
+			MatCapture *= LightPower;
+		#endif
+
 		if (_SpecularTexColor ) Specular   *= Color;
 		if (_MetallicTexColor ) Reflection *= Color;
 		if (_MatCapTexColor   ) MatCapture *= Color;
-
-		#ifdef PASS_FA
-			if (_ReflectLit == 0) Reflection *= LightPower;
-			if (_MatCapLit  == 0) MatCapture *= LightPower;
-		#endif
-
 	}
 
 //-------------------------------------リムライティング
@@ -377,11 +371,10 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		if (_RimLitTexColor ) RimLight *= Color;
 		if (_RimLitLighthing) {
 		       RimLight *= saturate(LightBase + SHLightBase + VLightBase);
-		} else {
-			#ifdef PASS_FA
-				RimLight *= LightPower;
-			#endif
 		}
+		#ifdef PASS_FA
+			RimLight *= Lighting;
+		#endif
 	}
 
 //-------------------------------------最終カラー計算
@@ -401,9 +394,8 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 //----デカールエミッション混合
 	if (_DecalEnable) {
 		#ifdef PASS_FA
-			DecalColor.rgb *= LightPower;
+			if ((_DecalMode == 4) | (_DecalMode == 5)) DecalColor.rgb *= LightPower;
 		#endif
-
 		if (_DecalMode == 4) OUT.rgb += DecalColor.rgb * _DecalEmission;
 		if (_DecalMode == 5) OUT.rgb += DecalColor.rgb * _DecalEmission;
 	}
@@ -507,18 +499,17 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 //----BlendOpの代用
 	#ifdef PASS_FA
+		float OutAlpha = saturate(MonoColor(OUT.rgb));
 		#ifndef TRANSPARENT
-	       OUT.a    = LightPower;
+	       OUT.a    = OutAlpha;
 		#endif
 		#ifdef TRANSPARENT
 	       OUT.rgb *= OUT.a;
-	       OUT.a    = LightPower * pow(OUT.a , 1.8f);
+	       OUT.a    = OutAlpha * pow(OUT.a , 1.8f);
 		#endif
 	#endif
-
 //-------------------------------------フォグ
 	UNITY_APPLY_FOG(IN.fogCoord, OUT);
-
 
 	return OUT;
 }

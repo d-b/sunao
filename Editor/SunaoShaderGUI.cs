@@ -18,7 +18,7 @@ namespace SunaoShader {
 
 		int     Version_H         = 1;
 		int     Version_M         = 5;
-		int     Version_L         = 3;
+		int     Version_L         = 4;
 
 		MaterialProperty MainTex;
 		MaterialProperty Color;
@@ -437,13 +437,11 @@ namespace SunaoShader {
 			}
 
 
-			if (VersionC < VersionM) {
+			if (mat.GetInt("_VersionH") == 2) {
 				using (new EditorGUILayout.VerticalScope("box")) {
 					EditorGUILayout.HelpBox(
-						"このマテリアルは現在お使いのSunao Shaderよりも新しいバージョン(" + mat.GetInt("_VersionH") + "." + mat.GetInt("_VersionM") + "." + mat.GetInt("_VersionL") + ")で作られています。\n" +
-						"そのため一部表現が正しくなかったり設定値に互換がない可能性があります。\n" +
-						"新しいバージョンのSunao Shaderが公開されている場合はアップデートをおすすめします。\n" +
-						"現在お使いのSunao Shaderのバージョンは " + Version_H + "." + Version_M + "." + Version_L + " です。" ,
+						"このマテリアルは Sunao Shader 2 (" + mat.GetInt("_VersionH") + "." + mat.GetInt("_VersionM") + "." + mat.GetInt("_VersionL") + ")で作られています。\n" +
+						"そのため一部設定が正しく表現されない可能性があります。" ,
 						MessageType.Warning
 					);
 					if (GUILayout.Button("無視する")) {
@@ -451,6 +449,24 @@ namespace SunaoShader {
 						mat.SetInt("_VersionM" , Version_M);
 						mat.SetInt("_VersionL" , Version_L);
 						VersionM = VersionC;
+					}
+				}
+			} else {
+				if (VersionC < VersionM) {
+					using (new EditorGUILayout.VerticalScope("box")) {
+						EditorGUILayout.HelpBox(
+							"このマテリアルは現在お使いのSunao Shaderよりも新しいバージョン(" + mat.GetInt("_VersionH") + "." + mat.GetInt("_VersionM") + "." + mat.GetInt("_VersionL") + ")で作られています。\n" +
+							"そのため一部表現が正しくなかったり設定値に互換がない可能性があります。\n" +
+							"新しいバージョンのSunao Shaderが公開されている場合はアップデートをおすすめします。\n" +
+							"現在お使いのSunao Shaderのバージョンは " + Version_H + "." + Version_M + "." + Version_L + " です。" ,
+							MessageType.Warning
+						);
+						if (GUILayout.Button("無視する")) {
+							mat.SetInt("_VersionH" , Version_H);
+							mat.SetInt("_VersionM" , Version_M);
+							mat.SetInt("_VersionL" , Version_L);
+							VersionM = VersionC;
+						}
 					}
 				}
 			}

@@ -8,6 +8,7 @@ VOUT vert (VIN v) {
 
 	VOUT o;
 
+	UNITY_INITIALIZE_OUTPUT(VOUT , o);
 	UNITY_SETUP_INSTANCE_ID(v);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
@@ -18,6 +19,7 @@ VOUT vert (VIN v) {
 	o.vertex  = v.vertex;
 
 //-------------------------------------視線
+
 	#ifdef USING_STEREO_MATRICES
 		o.campos = (unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) * 0.5f;
 	#else

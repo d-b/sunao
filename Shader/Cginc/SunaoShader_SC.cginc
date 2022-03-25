@@ -28,22 +28,28 @@
 	uniform sampler2D _OutLineMask;
 	uniform float     _OutLineSize;
 	uniform bool      _OutLineFixScale;
+	uniform uint      _Culling;
 
 //-------------------------------------頂点シェーダ入力構造体
 
 struct VIN {
-	float4 vertex  : POSITION;
-	float2 uv      : TEXCOORD0;
-	float3 normal  : NORMAL;
+	float4 vertex      : POSITION;
+	float2 uv          : TEXCOORD0;
+	float3 normal      : NORMAL;
+
+	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 //-------------------------------------頂点シェーダ出力構造体
 
 struct VOUT {
-	float2 uv      : TEXCOORD0;
-	float4 uvanm   : TEXCOORD1;
+	float2 uv          : TEXCOORD0;
+	float4 uvanm       : TEXCOORD1;
+	float  vadd        : VERTEXADD;
 
 	V2F_SHADOW_CASTER;
+
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 //-------------------------------------頂点シェーダ
@@ -51,6 +57,23 @@ struct VOUT {
 VOUT vert (VIN v) {
 
 	VOUT o;
+
+	UNITY_INITIALIZE_OUTPUT(VOUT , o);
+	UNITY_SETUP_INSTANCE_ID(v);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+//----視線
+	float3 CamPos;
+	#ifdef USING_STEREO_MATRICES
+		CamPos = (unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) * 0.5f;
+	#else
+		CamPos = _WorldSpaceCameraPos;
+	#endif
+
+	float3 View   = CamPos - mul(unity_ObjectToWorld , v.vertex).xyz;
+
+//----面の裏表
+	float  Facing = saturate(saturate(1.0f - dot(v.normal , View)) * 10.0f - 0.5f);
 
 //-------------------------------------UV
 	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
@@ -68,11 +91,13 @@ VOUT vert (VIN v) {
 	}
 
 //-------------------------------------頂点座標計算
+	o.vadd = 0.0f;
 	if (_OutLineEnable) {
-		float3 VertexAdd;
-		VertexAdd     = v.normal * GetScale(_OutLineSize , _OutLineFixScale);
-		VertexAdd    *= MonoColor(tex2Dlod(_OutLineMask , float4(o.uv , 0.0f , 0.0f)).rgb);
-		v.vertex.xyz += VertexAdd;
+		float  OutlineScale  = GetScale(_OutLineSize , _OutLineFixScale);
+		       OutlineScale *= MonoColor(tex2Dlod(_OutLineMask , float4(o.uv , 0.0f , 0.0f)).rgb);
+		       OutlineScale *= Facing;
+		       v.vertex.xyz += v.normal * OutlineScale;
+		       o.vadd        = saturate(OutlineScale * 10000.0f);
 	}
 
 
@@ -84,9 +109,13 @@ VOUT vert (VIN v) {
 
 //-------------------------------------フラグメントシェーダ
 
-float4 frag (VOUT IN) : COLOR {
+float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
-	float4 OUT          = (float4)1.0f;
+//----面の裏表
+	float  Facing = (float)IsFrontFace;
+
+//-------------------------------------メイン
+	float4 OUT    = (float4)1.0f;
 
 	#if defined(TRANSPARENT) || defined(CUTOUT)
 		float2 MainUV       = (IN.uv + IN.uvanm.xy) * IN.uvanm.zw;
@@ -98,13 +127,21 @@ float4 frag (VOUT IN) : COLOR {
 	           OUT.a       *= lerp(1.0f , MonoColor(tex2D(_AlphaMask  , SubUV).rgb) , _AlphaMaskStrength);
 	#endif
 
+	float  Alpha  = OUT.a;
+
+	if (_Culling == 2) Alpha *= saturate(IN.vadd +         Facing );
+	if (_Culling == 1) Alpha *= saturate(IN.vadd + (1.0f - Facing));
+
 	#ifdef TRANSPARENT
-		clip(OUT.a - 0.3);
+		Alpha -= 0.3f;
 	#endif
 
 	#ifdef CUTOUT
-		clip(OUT.a - _Cutout);
+		Alpha -= _Cutout;
 	#endif
+
+	clip(Alpha - 0.0001f);
+
 
 	SHADOW_CASTER_FRAGMENT(IN)
 	

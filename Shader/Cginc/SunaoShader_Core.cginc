@@ -242,10 +242,11 @@ struct VOUT {
 		                float4 vlatn   : LIGHT6;
 	#endif
 
-	UNITY_FOG_COORDS(1)
 	#ifdef PASS_FA
-		UNITY_LIGHTING_COORDS(2 , 3)
+		UNITY_LIGHTING_COORDS(1 , 2)
 	#endif
+
+	UNITY_FOG_COORDS(3)
 	
 	UNITY_VERTEX_OUTPUT_STEREO
 };
