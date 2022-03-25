@@ -83,6 +83,7 @@ struct VOUT {
 	float2 uv          : TEXCOORD0;
 	float4 uvanm       : TEXCOORD1;
 	float  vadd        : VERTEXADD;
+	float4 scrpos      : TEXCOORD2;
 	float  alpha       : TEXCOORD3;
 
 	V2F_SHADOW_CASTER;
@@ -100,6 +101,10 @@ VOUT vert (VIN v) {
 	UNITY_SETUP_INSTANCE_ID(v);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+//-------------------------------------頂点座標変換
+	o.pos = UnityObjectToClipPos(v.vertex);
+	o.scrpos = ComputeScreenPos(o.pos);
+
 //----視線
 	float3 CamPos;
 	#ifdef USING_STEREO_MATRICES
@@ -108,16 +113,16 @@ VOUT vert (VIN v) {
 		CamPos = _WorldSpaceCameraPos;
 	#endif
 
-	float3 View   = CamPos - mul(unity_ObjectToWorld , v.vertex).xyz;
+	float3 View = CamPos - mul(unity_ObjectToWorld , v.vertex).xyz;
 
 //----面の裏表
-	float  Facing = saturate(saturate(1.0f - dot(v.normal , View)) * 10.0f - 0.5f);
+	float Facing = saturate(saturate(1.0f - dot(v.normal , View)) * 10.0f - 0.5f);
 
 //-------------------------------------UV
-	o.uv      = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
+	o.uv = (v.uv * _MainTex_ST.xy) + _MainTex_ST.zw;
 
 //-------------------------------------UVアニメーション
-	o.uvanm   = float4(0.0f , 0.0f , 1.0f , 1.0f);
+	o.uvanm = float4(0.0f , 0.0f , 1.0f , 1.0f);
 
 	if (_UVAnimation > 0.0f) {
 		o.uvanm.zw  = 1.0f / float2(_UVAnimX , _UVAnimY);
@@ -167,12 +172,12 @@ VOUT vert (VIN v) {
 float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 
 //----面の裏表
-	float  Facing = (float)IsFrontFace;
+	float Facing = (float)IsFrontFace;
 
 //-------------------------------------メイン
-	float4 OUT    = (float4)1.0f;
+	float4 OUT = (float4)1.0f;
 
-	#if defined(TRANSPARENT) || defined(CUTOUT)
+	#if defined(TRANSPARENT) || defined(CUTOUT) || defined(ALPHA_TO_COVERAGE)
 		float2 MainUV       = (IN.uv + IN.uvanm.xy) * IN.uvanm.zw;
 		       MainUV      += float2(_UVScrollX , _UVScrollY) * _Time.y;
 		float2 SubUV        = IN.uv;
@@ -183,7 +188,7 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 	           OUT.a       *= IN.alpha;
 	#endif
 
-	float  Alpha  = OUT.a;
+	float Alpha = OUT.a;
 
 	if (_Culling == 2) Alpha *= saturate(IN.vadd +         Facing );
 	if (_Culling == 1) Alpha *= saturate(IN.vadd + (1.0f - Facing));
@@ -196,8 +201,13 @@ float4 frag (VOUT IN , bool IsFrontFace : SV_IsFrontFace) : COLOR {
 		Alpha -= _Cutout;
 	#endif
 
-	clip(Alpha - 0.0001f);
+	#ifdef ALPHA_TO_COVERAGE
+		float2 screenUV = CalcScreenUV(IN.scrpos);
+		float dither = CalcDither(screenUV.xy);
+		Alpha -= (dither * (1.0 - OUT.a) * 0.15) + 0.5f;
+	#endif
 
+	clip(Alpha - 0.0001f);
 
 	SHADOW_CASTER_FRAGMENT(IN)
 
