@@ -83,7 +83,7 @@ struct VOUT {
 	float2 uv          : TEXCOORD0;
 	float4 uvanm       : TEXCOORD1;
 	float  vadd        : VERTEXADD;
-	float  alpha       : TEXCOORD3;	
+	float  alpha       : TEXCOORD3;
 
 	V2F_SHADOW_CASTER;
 

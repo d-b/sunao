@@ -343,7 +343,7 @@ struct VOUT {
 	#endif
 
 	UNITY_FOG_COORDS(3)
-	
+
 	UNITY_VERTEX_OUTPUT_STEREO
 };
 
