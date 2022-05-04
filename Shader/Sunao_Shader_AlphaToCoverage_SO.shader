@@ -1,5 +1,5 @@
 ﻿//--------------------------------------------------------------
-//              Sunao Shader    Ver 1.5.3
+//              Sunao Shader    Ver 1.5.4
 //
 //                      Copyright (c) 2022 揚茄子研究所
 //                              Twitter : @SUNAO_VRC
@@ -16,7 +16,7 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 
 		[HideInInspector] _VersionH        ("Version H"         , int) = 1
 		[HideInInspector] _VersionM        ("Version M"         , int) = 5
-		[HideInInspector] _VersionL        ("Version L"         , int) = 3
+		[HideInInspector] _VersionL        ("Version L"         , int) = 4
 
 		[SToggle]
 		_OptimizerEnable   ("Enable Optimizer"  				, int) = 0
@@ -475,7 +475,7 @@ Shader "Sunao Shader/[Stencil Outline]/AlphaToCoverage" {
 			Tags { "LightMode"  = "ForwardAdd" }
 
 			Cull [_Culling]
-			Blend One One
+			Blend One OneMinusSrcAlpha , Zero One
 			ZWrite Off
 
 			CGPROGRAM
